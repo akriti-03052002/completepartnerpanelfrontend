@@ -1,0 +1,25 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+dist-ssr/
+
+# local environment — set VITE_API_URL in Vercel's project settings
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel/
+
+# logs
+*.log
+npm-debug.log*
+
+# editors / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.local
