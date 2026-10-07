@@ -43,6 +43,7 @@ export default function ResellerBilling() {
   }, []);
   const [historyInvoice, setHistoryInvoice] = useState(null);
   const [billView, setBillView] = useState("current");
+  const [showAllDetails, setShowAllDetails] = useState(false);
   const [breakdownFor, setBreakdownFor] = useState(null);
   const [breakdownLoading, setBreakdownLoading] = useState(false);
 
@@ -53,6 +54,8 @@ export default function ResellerBilling() {
     try {
       const res = await api.get(`/partner/reseller/invoices/${invoiceId}`);
       setBreakdownFor(res.data.data);
+    } catch (err) {
+      setError(err.response?.data?.message || "Could not open bill details. Please try again.");
     } finally {
       setBreakdownLoading(false);
     }
@@ -191,11 +194,11 @@ export default function ResellerBilling() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Billing & Payments</h1>
-        <p className="text-sm text-slate-500 mt-1">These are license invoices you pay to SPOTX, not commissions paid to you.</p>
+        <p className="text-sm text-slate-500 mt-1">Review your licence bills, check due dates and pay SPOTX here.</p>
       </div>
 
-      {error && <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
-      {info && <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">{info}</div>}
+      {error && <div role="alert" className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
+      {info && <div role="status" className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">{info}</div>}
       {!loading && !invoicesError && <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm space-y-1"><p>Outstanding: <strong>{rupees(outstanding.reduce((sum, invoice) => sum + invoice.total, 0))}</strong> across {outstanding.length} invoices.</p><p>Overdue: <strong>{rupees(overdue.reduce((sum, invoice) => sum + invoice.total, 0))}</strong> across {overdue.length} invoices. {overdue.length > 0 && "Open a pending invoice below to pay online or contact SPOTX about offline payment."}</p></div>}
 
       <Card>
@@ -203,6 +206,7 @@ export default function ResellerBilling() {
           <h2 className="font-semibold text-slate-900">Your licence bills</h2>
           <p className="text-sm text-slate-500 mt-1">All purchases in one table. Upcoming bills appear seven days before their bill date.</p>
           <p className="text-xs text-slate-500 mt-2">Pending: an unpaid invoice. Overdue: its due date has passed. Upcoming: a bill expected within seven days; payment becomes available when its invoice is raised and online payment is enabled.</p>
+          <label className="mt-3 flex min-h-11 items-center gap-2 text-sm text-slate-600"><input type="checkbox" checked={showAllDetails} onChange={event => setShowAllDetails(event.target.checked)} className="h-4 w-4" />Show tax, billing period and payment references</label>
           <Select label="Show bills" value={billView} onChange={(event) => setBillView(event.target.value)} className="mt-4 sm:w-64">
             <option value="current">Pending</option>
             <option value="upcoming">Upcoming</option>
@@ -251,7 +255,7 @@ export default function ResellerBilling() {
                   </div>
                 ) : "\u2014"
               }
-            ]}
+            ].filter(column => showAllDetails || ["order", "invoice", "status", "total", "due", "actions"].includes(column.key))}
           />
         )}
       </Card>

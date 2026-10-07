@@ -34,6 +34,15 @@ const COMMISSION_TYPE_OPTIONS = [
   { value: "recurring_fixed", label: "Recurring — fixed amount on every payment" }
 ];
 
+const STATUS_HELP = {
+  draft: "Profile is still being completed.",
+  pending_verification: "Required verification is not yet complete.",
+  under_review: "Submitted information is being reviewed.",
+  active: "Account is enabled. Other verification and role requirements still apply.",
+  suspended: "Access is temporarily blocked until the account is restored.",
+  rejected: "Application was declined. Provide a clear reason so the partner knows what to correct.",
+  inactive: "Account access is disabled. Existing records are retained."
+};
 const STATUS_OPTIONS = ["draft", "pending_verification", "under_review", "active", "suspended", "rejected", "inactive"];
 
 function PartnerStatusControl({ selectedStatus, onChange, onApply, busy, error, success, canEdit }) {
@@ -47,6 +56,7 @@ function PartnerStatusControl({ selectedStatus, onChange, onApply, busy, error, 
         </Select>
         {canEdit && <Button onClick={onApply} loading={busy}>Save status</Button>}
       </div>
+      <p className="mt-3 text-sm text-slate-600">{STATUS_HELP[selectedStatus]}</p>
       {error && <p role="alert" className="text-sm text-red-600 mt-3">{error}</p>}
       {success && <p role="status" className="text-sm text-emerald-700 mt-3">{success}</p>}
     </Card>
@@ -256,17 +266,17 @@ export default function AdminPartnerDetail() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
             {partner.legalEntity.businessName || <span className="text-slate-400 italic">Incomplete profile</span>}
           </h1>
           <p className="text-sm text-slate-400">{partner.partnerCode} · {partner.primaryContact.email}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Badge tone="neutral">{partner.partnerType}</Badge>
-          <Badge status={partner.status} />
-          <Badge status={partner.verification.overallStatus} />
+          <span className="text-xs text-slate-500">Account: <Badge status={partner.status} /></span>
+          <span className="text-xs text-slate-500">Verification: <Badge status={partner.verification.overallStatus} /></span>
         </div>
       </div>
 
@@ -294,7 +304,7 @@ export default function AdminPartnerDetail() {
           </NavLink>
         ))}
       </nav>
-      <details className="hidden sm:block rounded-xl border border-slate-200 bg-white p-3" open={["payout", "team", "activity"].includes(tab)}><summary className="cursor-pointer text-sm font-semibold">More: payment settings, team and activity</summary><div className="flex flex-wrap gap-3 mt-3">{sections.filter(s => ["payout", "team", "activity"].includes(s.key)).map(s => <NavLink key={s.key} to={partnerSectionPath(id, s.key)} className="text-sm font-medium text-brand-red hover:underline">{s.label}</NavLink>)}</div></details>
+      <details className="hidden sm:block rounded-xl border border-slate-200 bg-white p-3" open={["payout", "team", "activity"].includes(tab)}><summary className="cursor-pointer text-sm font-semibold">More profile options</summary><div className="flex flex-wrap gap-3 mt-3">{sections.filter(s => ["payout", "team", "activity"].includes(s.key)).map(s => <NavLink key={s.key} to={partnerSectionPath(id, s.key)} className="text-sm font-medium text-brand-red hover:underline">{s.label}</NavLink>)}</div></details>
 
       <PartnerProfileSummary partner={partner} documents={documents} requiredDocumentTypes={requiredDocumentTypes} bankAccount={bankAccount} summary={data.summary} compact={tab !== "overview"} />
 
@@ -427,7 +437,7 @@ export default function AdminPartnerDetail() {
       {tab === "kyc" && (
       <>
       <div>
-        <h2 className="font-semibold text-slate-900 mb-3">KYC Documents</h2>
+        <h2 className="font-semibold text-slate-900 mb-3">Identity documents</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {DOCUMENT_TYPES.map((type) => {
             const doc = latestByType(type.value);
