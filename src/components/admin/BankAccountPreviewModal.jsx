@@ -13,6 +13,8 @@ export default function BankAccountPreviewModal({ account, onClose, onVerify, on
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [retry, setRetry] = useState(0);
+  const [decision, setDecision] = useState(null);
+  const [reason, setReason] = useState("");
   const panelRef = useDialogFocus(onClose, busy);
 
   useEffect(() => {
@@ -31,35 +33,28 @@ export default function BankAccountPreviewModal({ account, onClose, onVerify, on
   const razorpayCheck = account.razorpayCheck;
   const razorpayPassed = razorpayCheck?.paymentStatus === "captured" && razorpayCheck?.nameMatchStatus === "matched";
 
-  const handleVerify = async () => {
-    let overrideReason;
-    if (!razorpayPassed) {
-      overrideReason = window.prompt(
-        "The Razorpay bank check hasn't passed (payment not captured, or the name doesn't match). Enter a reason to verify anyway:"
-      );
-      if (!overrideReason?.trim()) return;
-    }
-    setBusy(true);
-    try {
-      await onVerify(account._id || account.id, overrideReason);
-      onClose();
-    } catch (err) {
-      setError(err.response?.data?.message || "Could not save this decision. Please try again.");
-    } finally {
-      setBusy(false);
-    }
+  const startDecision = (value) => {
+    setError("");
+    setReason("");
+    setDecision(value);
   };
 
-  const handleReject = async () => {
-    const reason = window.prompt("Reason for rejecting this bank account?");
-    if (reason === null) return;
-    if (!reason.trim()) { setError("Enter a reason so the partner knows what to correct."); return; }
+  const saveDecision = async (event) => {
+    event.preventDefault();
+    if (busy || !details || !decision) return;
+    const needsReason = decision === "reject" || !razorpayPassed;
+    if (needsReason && !reason.trim()) {
+      setError(decision === "reject" ? "Explain what the partner needs to correct." : "Explain why you are approving without a passed bank check.");
+      return;
+    }
+    setError("");
     setBusy(true);
     try {
-      await onReject(account._id || account.id, reason);
+      if (decision === "reject") await onReject(account._id || account.id, reason.trim());
+      else await onVerify(account._id || account.id, razorpayPassed ? undefined : reason.trim());
       onClose();
     } catch (err) {
-      setError(err.response?.data?.message || "Could not save this decision. Please try again.");
+      setError(err.response?.data?.message || "Could not save this decision. Your reason is kept so you can try again.");
     } finally {
       setBusy(false);
     }
@@ -126,10 +121,20 @@ export default function BankAccountPreviewModal({ account, onClose, onVerify, on
           )}
         </div>
 
-        {account.verification?.status === "pending" && (onVerify || onReject) && (
+        {decision && <form onSubmit={saveDecision} className="overflow-y-auto border-t border-slate-200 bg-slate-50 p-5 space-y-3">
+          <h2 className="font-semibold text-slate-900">{decision === "reject" ? "Request a correction" : "Confirm bank approval"}</h2>
+          <p className="text-sm text-slate-600">{decision === "reject" ? "Tell the partner exactly what to correct before submitting again." : razorpayPassed ? "Confirm that the account details match the partner. This approves the bank account; it does not send a payment." : "The automated bank check has not passed. Explain the checks you completed before approving these details."}</p>
+          {(decision === "reject" || !razorpayPassed) && <label className="block text-sm font-medium text-slate-700">{decision === "reject" ? "Correction reason" : "Approval override reason"}<textarea autoFocus required value={reason} onChange={event => setReason(event.target.value)} disabled={busy} rows={3} maxLength={1000} className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-3" placeholder={decision === "reject" ? "For example: the account holder name does not match your profile. Please upload matching bank proof." : "Describe how you checked the account details."} /></label>}
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button type="button" variant="outline" disabled={busy} onClick={() => { setDecision(null); setError(""); }}>Back to details</Button>
+            <Button type="submit" variant={decision === "reject" ? "danger" : "primary"} loading={busy}>{decision === "reject" ? "Confirm rejection" : "Confirm approval"}</Button>
+          </div>
+        </form>}
+
+        {!decision && account.verification?.status === "pending" && (onVerify || onReject) && (
           <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-slate-100 shrink-0">
-            {onReject && <Button variant="danger" onClick={handleReject} loading={busy}>Reject bank details</Button>}
-            {onVerify && <Button onClick={handleVerify} disabled={!details} loading={busy}>Approve bank details</Button>}
+            {onReject && <Button variant="danger" onClick={() => startDecision("reject")} loading={busy}>Reject bank details</Button>}
+            {onVerify && <Button onClick={() => startDecision("approve")} disabled={!details} loading={busy}>Approve bank details</Button>}
           </div>
         )}
       </div>
