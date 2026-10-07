@@ -5,7 +5,7 @@ import Button from "../ui/Button";
 
 // Lets an admin actually look at the uploaded file before deciding —
 // verify/reject used to be a blind call off just the filename.
-export default function DocumentPreviewModal({ doc, onClose, onVerify, onReject }) {
+export default function DocumentPreviewModal({ doc, onClose, onVerify, onReject, client = adminApi, downloadPath }) {
   const [fileUrl, setFileUrl] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -14,7 +14,7 @@ export default function DocumentPreviewModal({ doc, onClose, onVerify, onReject 
     let objectUrl;
     let cancelled = false;
 
-    adminApi.get(`/admin/documents/${doc._id}/download`, { responseType: "blob" })
+    client.get(downloadPath || `/admin/documents/${doc._id}/download`, { responseType: "blob" })
       .then((res) => {
         if (cancelled) return;
         objectUrl = window.URL.createObjectURL(res.data);
@@ -26,7 +26,7 @@ export default function DocumentPreviewModal({ doc, onClose, onVerify, onReject 
       cancelled = true;
       if (objectUrl) window.URL.revokeObjectURL(objectUrl);
     };
-  }, [doc._id]);
+  }, [doc._id, client, downloadPath]);
 
   const isImage = doc.file.mimeType?.startsWith("image/");
   const isPdf = doc.file.mimeType === "application/pdf";
