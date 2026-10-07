@@ -1,3 +1,4 @@
+import Pagination from "../../components/ui/Pagination";
 import { useEffect, useState } from "react";
 import adminApi from "../../services/adminApi";
 import Card from "../../components/ui/Card";
@@ -22,6 +23,8 @@ const actionClass = (tone) => `text-xs font-semibold hover:underline ${
 }`;
 
 export default function AdminLeads() {
+  const [page, setPage] = useState(1);
+  const [paging, setPaging] = useState({ total: 0, pages: 0 });
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
@@ -32,11 +35,11 @@ export default function AdminLeads() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const load = () => adminApi.get("/admin/leads", { params: { status: filter || undefined } })
-    .then((res) => { setLeads(res.data.data); setPricePerScreen(res.data.pricePerScreen || 0); setPlanPrices(res.data.planPrices || { basic: 0, premium: 0 }); })
+  const load = () => adminApi.get("/admin/leads", { params: { status: filter || undefined, page } })
+    .then((res) => { setPaging(res.data.pagination); setLeads(res.data.data); setPricePerScreen(res.data.pricePerScreen || 0); setPlanPrices(res.data.planPrices || { basic: 0, premium: 0 }); })
     .finally(() => setLoading(false));
 
-  useEffect(() => { load(); }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load().catch((err) => setError(err.response?.data?.message || "Could not load leads.")); }, [filter, page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Kept live, so a lead a partner just submitted appears on its own.
   // Paused while the "mark won" dialog is open.
@@ -116,7 +119,7 @@ export default function AdminLeads() {
         {FILTERS.map((f) => (
           <button
             key={f.key}
-            onClick={() => { setLoading(true); setFilter(f.key); }}
+            onClick={() => { setLoading(true); setPage(1); setFilter(f.key); }}
             className={`px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition ${
               filter === f.key ? "border-brand-red text-brand-red" : "border-transparent text-slate-500 hover:text-slate-900"
             }`}
@@ -161,6 +164,7 @@ export default function AdminLeads() {
         </div>
       )}
 
+      {error && !winTarget && <p role="alert" className="text-red-600">{error}</p>}
       <Card>
         {loading ? (
           <p className="text-slate-400 text-sm p-6">Loading...</p>
@@ -209,6 +213,7 @@ export default function AdminLeads() {
             ]}
           />
         )}
+        <Pagination page={page} {...paging} onChange={(next) => { setLoading(true); setPage(next); }} />
       </Card>
     </div>
   );

@@ -1,3 +1,4 @@
+import Pagination from "../../components/ui/Pagination";
 import { useEffect, useState } from "react";
 import { ExternalLink, Share2 } from "lucide-react";
 import adminApi from "../../services/adminApi";
@@ -38,6 +39,9 @@ const POST_TABS = [
 // influencer's tab instead: the same queues, narrowed to that influencer,
 // without the page heading.
 export default function AdminSocialMedia({ view = "accounts", partnerId = "" }) {
+  const [page, setPage] = useState(1);
+  const [paging, setPaging] = useState({ total: 0, pages: 0 });
+  const [counts, setCounts] = useState({});
   const [accounts, setAccounts] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [postTab, setPostTab] = useState("pending");
@@ -54,13 +58,15 @@ export default function AdminSocialMedia({ view = "accounts", partnerId = "" }) 
 
   const fetchReviews = async () => {
     const [accountResponse, submissionResponse] = await Promise.all([
-      adminApi.get("/admin/social-media/accounts"),
-      adminApi.get("/admin/social-media/posts", { params: partnerId ? { partnerId } : {} })
+      view === "accounts" ? adminApi.get("/admin/social-media/accounts") : Promise.resolve({ data: { data: [] } }),
+      view === "posts" ? adminApi.get("/admin/social-media/posts", { params: { partnerId: partnerId || undefined, status: postTab, page } }) : Promise.resolve({ data: { data: [], pagination: { total: 0, pages: 0 }, counts: {} } })
     ]);
     return {
       accounts: accountResponse.data.data
         .filter((account) => !partnerId || String(account.partnerId) === String(partnerId))
         .filter(needsAction),
+      paging: submissionResponse.data.pagination,
+      counts: submissionResponse.data.counts,
       submissions: submissionResponse.data.data
     };
   };
@@ -69,6 +75,8 @@ export default function AdminSocialMedia({ view = "accounts", partnerId = "" }) 
     const result = await fetchReviews();
     setAccounts(result.accounts);
     setSubmissions(result.submissions);
+    setPaging(result.paging);
+    setCounts(result.counts);
   };
 
   // Each social account has its own price (reach differs per platform).
@@ -101,11 +109,13 @@ export default function AdminSocialMedia({ view = "accounts", partnerId = "" }) 
         if (!active) return;
         setAccounts(result.accounts);
         setSubmissions(result.submissions);
+    setPaging(result.paging);
+    setCounts(result.counts);
       })
       .catch((loadError) => { if (active) setError(loadError.response?.data?.message || "Couldn't load social media reviews."); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [partnerId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [partnerId, view, postTab, page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The reason is shown to the influencer, so rejecting needs one. Instead of a
   // dead button, flag the box and put the cursor in it.
@@ -248,13 +258,13 @@ export default function AdminSocialMedia({ view = "accounts", partnerId = "" }) 
       <Card>
         <div className="px-5 pt-4 border-b border-slate-100 flex items-center gap-1">
           {POST_TABS.map((tab) => {
-            const count = submissions.filter((s) => s.status === tab.key).length;
+            const count = counts[tab.key] || 0;
             const active = postTab === tab.key;
             return (
               <button
                 key={tab.key}
                 type="button"
-                onClick={() => setPostTab(tab.key)}
+                onClick={() => { setLoading(true); setPage(1); setPostTab(tab.key); }}
                 className={`px-3 py-2.5 -mb-px border-b-2 text-sm font-semibold transition flex items-center gap-2 ${active ? "border-brand-black text-slate-900" : "border-transparent text-slate-500 hover:text-slate-800"}`}
               >
                 {tab.label}
@@ -316,6 +326,8 @@ export default function AdminSocialMedia({ view = "accounts", partnerId = "" }) 
             ))}
           </div>
         )}
+        <p className="px-4 text-xs text-slate-400">Search and filters apply to this page of results.</p>
+        <Pagination page={page} {...paging} onChange={(next) => { setLoading(true); setPage(next); }} />
       </Card>
       )}
     </div>

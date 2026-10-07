@@ -1,3 +1,4 @@
+import Pagination from "../../ui/Pagination";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import adminApi from "../../../services/adminApi";
@@ -76,13 +77,15 @@ const buildList = (kind, partnerType) => {
 
 export default function PartnerRecords({ partnerId, partnerType, kind }) {
   const list = buildList(kind, partnerType);
+  const [page, setPage] = useState(1);
+  const [paging, setPaging] = useState(null);
   const [rows, setRows] = useState(null);
 
   useEffect(() => {
-    adminApi.get(list.url, { params: { partnerId } })
-      .then((res) => setRows(res.data.data))
+    adminApi.get(list.url, { params: { partnerId, page } })
+      .then((res) => { setRows(res.data.data); setPaging(res.data.pagination || null); })
       .catch(() => setRows([]));
-  }, [partnerId, kind]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [partnerId, kind, page]); // eslint-disable-line react-hooks/exhaustive-deps
   // (remounted per tab via key in AdminPartnerDetail, so rows start as null)
 
   return (
@@ -91,6 +94,7 @@ export default function PartnerRecords({ partnerId, partnerType, kind }) {
         {rows === null
           ? <p className="text-slate-400 text-sm p-6">Loading...</p>
           : <Table empty={list.empty} rows={rows} columns={list.columns} />}
+        {paging && <Pagination page={page} {...paging} onChange={setPage} />}
       </Card>
       <div className="flex justify-end">
         <Link to={list.manageAt} className="text-sm font-semibold text-brand-red hover:underline">{list.manageLabel} →</Link>

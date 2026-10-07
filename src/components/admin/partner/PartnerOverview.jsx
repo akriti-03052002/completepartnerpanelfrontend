@@ -24,11 +24,11 @@ function Tile({ label, value, note, to }) {
 // matching admin page shows, narrowed to this partner.
 const loaders = {
   influencer: (id) => Promise.all([
-    adminApi.get("/admin/social-media/posts", { params: { partnerId: id } }).then((res) => res.data.data),
+    adminApi.get("/admin/social-media/posts", { params: { partnerId: id, limit: 1 } }).then((res) => res.data.counts),
     adminApi.get("/admin/commissions", { params: { partnerId: id } }).then((res) => res.data.data)
   ]).then(([posts, earnings]) => ({ posts, earnings })),
   affiliate: (id) => Promise.all([
-    adminApi.get("/admin/leads", { params: { partnerId: id } }).then((res) => res.data.data),
+    adminApi.get("/admin/leads", { params: { partnerId: id, limit: 1 } }).then((res) => res.data.summary),
     adminApi.get("/admin/commissions", { params: { partnerId: id } }).then((res) => res.data.data)
   ]).then(([leads, earnings]) => ({ leads, earnings })),
   vendor: (id) => Promise.all([
@@ -77,19 +77,19 @@ export default function PartnerOverview({ partner, documents, requiredDocumentTy
   if (data && type === "influencer") {
     const accounts = partner.socialAccounts || [];
     typeTiles = [
-      { label: "Posts / reels waiting for approval", value: count(data.posts.filter((p) => p.status === "pending").length), to: partnerSectionPath(id, "posts") },
-      { label: "Approved", value: count(data.posts.filter((p) => p.status === "approved").length), to: partnerSectionPath(id, "posts") },
-      { label: "Rejected", value: count(data.posts.filter((p) => p.status === "rejected").length), to: partnerSectionPath(id, "posts") },
+      { label: "Posts / reels waiting for approval", value: count(data.posts.pending), to: partnerSectionPath(id, "posts") },
+      { label: "Approved", value: count(data.posts.approved), to: partnerSectionPath(id, "posts") },
+      { label: "Rejected", value: count(data.posts.rejected), to: partnerSectionPath(id, "posts") },
       { label: "Social accounts", value: count(accounts.length), note: `${count(accounts.filter((a) => a.reviewStatus === "verified").length)} verified · ${count(accounts.filter((a) => a.reviewStatus === "pending").length)} waiting`, to: partnerSectionPath(id, "accounts") }
     ];
   }
   if (data && type === "affiliate") {
-    const won = data.leads.filter((l) => l.status === "won");
+    const won = data.leads.won || { count: 0, value: 0 };
     typeTiles = [
-      { label: "Leads", value: count(data.leads.length), to: partnerSectionPath(id, "leads") },
-      { label: "Open leads", value: count(data.leads.filter((l) => ["new", "contacted"].includes(l.status)).length), to: partnerSectionPath(id, "leads") },
-      { label: "Won deals", value: count(won.length), to: partnerSectionPath(id, "leads") },
-      { label: "Value of won deals", value: money(sum(won, (l) => l.closure?.dealValue)) }
+      { label: "Leads", value: count(Object.values(data.leads).reduce((total, row) => total + row.count, 0)), to: partnerSectionPath(id, "leads") },
+      { label: "Open leads", value: count((data.leads.new?.count || 0) + (data.leads.contacted?.count || 0)), to: partnerSectionPath(id, "leads") },
+      { label: "Won deals", value: count(won.count), to: partnerSectionPath(id, "leads") },
+      { label: "Value of won deals", value: money(won.value) }
     ];
   }
   if (data && type === "vendor") {
