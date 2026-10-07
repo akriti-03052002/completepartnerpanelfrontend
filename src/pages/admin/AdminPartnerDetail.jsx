@@ -1,3 +1,5 @@
+import PartnerCustomers from "../../components/admin/partner/PartnerCustomers";
+import PartnerProfileSummary from "../../components/admin/partner/PartnerProfileSummary";
 import { useEffect, useState } from "react";
 import { NavLink, Navigate, useOutletContext, useParams } from "react-router-dom";
 import adminApi from "../../services/adminApi";
@@ -261,14 +263,17 @@ export default function AdminPartnerDetail() {
         ))}
       </nav>
 
+      <PartnerProfileSummary partner={partner} documents={documents} requiredDocumentTypes={requiredDocumentTypes} bankAccount={bankAccount} summary={data.summary} compact={tab !== "overview"} />
+
       {tab === "overview" && (
-        <PartnerOverview partner={partner} documents={documents} requiredDocumentTypes={requiredDocumentTypes} bankAccount={bankAccount} team={team} />
+        <PartnerOverview partner={partner} summary={data.summary} />
       )}
 
       {/* This influencer's own review queues — the same screens as the
           Influencer menu, narrowed to them. */}
-      {tab === "posts" && <AdminSocialMedia view="posts" partnerId={partner._id} />}
-      {tab === "accounts" && <AdminSocialMedia view="accounts" partnerId={partner._id} />}
+      {tab === "customers" && <PartnerCustomers key={partner._id} partnerId={partner._id} />}
+      {tab === "posts" && <AdminSocialMedia view="posts" partnerId={partner._id} onReviewsUpdated={load} />}
+      {tab === "accounts" && <AdminSocialMedia view="accounts" partnerId={partner._id} onReviewsUpdated={load} />}
 
       {tab === "details" && (
       <>

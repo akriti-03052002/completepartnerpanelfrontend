@@ -38,7 +38,7 @@ const POST_TABS = [
 // "posts" shows post/reel review. Given a `partnerId` it is one
 // influencer's tab instead: the same queues, narrowed to that influencer,
 // without the page heading.
-export default function AdminSocialMedia({ view = "accounts", partnerId = "" }) {
+export default function AdminSocialMedia({ view = "accounts", partnerId = "", onReviewsUpdated }) {
   const [page, setPage] = useState(1);
   const [paging, setPaging] = useState({ total: 0, pages: 0 });
   const [counts, setCounts] = useState({});
@@ -95,6 +95,7 @@ export default function AdminSocialMedia({ view = "accounts", partnerId = "" }) 
       });
       setMessage(`${account.username || account.accountId} (${formatPlatform(account.platform)}): ${response.data.message}`);
       await load();
+      onReviewsUpdated?.();
     } catch (saveError) {
       setError(saveError.response?.data?.message || "Couldn't update payment rates.");
     } finally {
@@ -138,6 +139,7 @@ export default function AdminSocialMedia({ view = "accounts", partnerId = "" }) 
       });
       setMessage(`Account ${decision}.`);
       await load();
+      onReviewsUpdated?.();
     } catch (reviewError) {
       setError(reviewError.response?.data?.message || "Couldn't review this account.");
     } finally {
@@ -158,6 +160,7 @@ export default function AdminSocialMedia({ view = "accounts", partnerId = "" }) 
       });
       setMessage(`Submission ${decision}.`);
       await load();
+      onReviewsUpdated?.();
     } catch (reviewError) {
       setError(reviewError.response?.data?.message || "Couldn't review this submission.");
     } finally {

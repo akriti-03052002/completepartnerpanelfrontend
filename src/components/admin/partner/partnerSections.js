@@ -22,6 +22,7 @@ const PARTNER_SECTIONS = [
   { key: "details", label: () => "Details", icon: UserCircle, partnerTypes: ALL_TYPES },
   { key: "posts", label: () => "Post / Reel Approval", icon: Clapperboard, partnerTypes: ["influencer"] },
   { key: "accounts", label: () => "Account Approval", icon: Share2, partnerTypes: ["influencer"] },
+  { key: "customers", label: () => "Customers", icon: Users, partnerTypes: ["vendor", "reseller"] },
   { key: "leads", label: () => "Leads", icon: Users, partnerTypes: ["affiliate"] },
   { key: "rewards", label: (type) => EARNINGS_LABEL[type] || "Earnings", icon: Trophy, partnerTypes: EARNING_TYPES },
   { key: "settlements", label: () => "Settlements", icon: Landmark, partnerTypes: EARNING_TYPES },
