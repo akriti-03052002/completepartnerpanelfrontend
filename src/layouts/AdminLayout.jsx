@@ -17,6 +17,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAdminAuth();
+  const [menuSearch, setMenuSearch] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Only one menu's sub-menu is open at a time, and only one partner type
@@ -51,6 +52,14 @@ export default function AdminLayout() {
     closeMobile();
   };
 
+  const visibleNav = ADMIN_NAV.filter(item => user?.role === "super_admin" || (item.key === "kyc" ? user?.role === "kyc_reviewer" : ["commission", "licence", "settlement", "config"].includes(item.key) ? user?.role === "finance" : true));
+  const flatten = (items, parents = []) => items.flatMap(item => [
+    { ...item, context: parents.join(" / ") },
+    ...flatten(item.children || [], [...parents, item.label])
+  ]);
+  const query = menuSearch.trim().toLowerCase();
+  const matches = flatten(visibleNav).filter(item => `${item.label} ${item.context}`.toLowerCase().includes(query));
+
   return (
     // Exactly one screen tall: the sidebar menu and the page content each
     // scroll on their own, so a long menu is always reachable.
@@ -69,7 +78,7 @@ export default function AdminLayout() {
             <Logo size="sm" dark />
             <span className="ml-3 border-l border-white/15 pl-3">
               <span className="block text-sm font-semibold text-white">Control Center</span>
-              <span className="block text-[10px] uppercase tracking-[0.18em] text-white/45">Unified Admin</span>
+              <span className="block text-[10px] uppercase tracking-[0.18em] text-white/45">SPOTX Admin</span>
             </span>
           </div>
           <button aria-label="Close admin navigation" className="lg:hidden text-white/60 hover:text-white" onClick={closeMobile}>
@@ -81,8 +90,10 @@ export default function AdminLayout() {
             goes all the way down to Log out. When the menu is short, Log
             out still sits at the bottom. */}
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col">
+          <div className="px-3 pt-4"><label htmlFor="admin-menu-search" className="block text-xs font-medium text-white/75 mb-2">Find an admin page</label><input id="admin-menu-search" type="search" value={menuSearch} onChange={event => setMenuSearch(event.target.value)} placeholder="Partners, payments, approvals..." className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white placeholder:text-white/60" />{query && <button type="button" onClick={() => setMenuSearch("")} className="mt-2 text-xs text-white underline">Show full menu</button>}</div>
           <nav aria-label="Admin navigation" className="grow shrink-0 px-3 py-4 space-y-1">
-            {ADMIN_NAV.filter((item) => user?.role === "super_admin" || (item.key === "kyc" ? user?.role === "kyc_reviewer" : ["commission", "licence", "settlement", "config"].includes(item.key) ? user?.role === "finance" : true)).map((item) => {
+            {query && (matches.length ? matches.map((item, index) => <NavLink key={`${item.to}-${index}`} to={item.to} onClick={() => { setMenuSearch(""); setCollapsed(null); closeMobile(); }} className={rowClass(isCurrent(item.to, location))}><span><span className="block">{item.label}</span>{item.context && <span className="block text-xs opacity-70">{item.context}</span>}</span></NavLink>) : <p role="status" className="p-3 text-sm text-white/75">No matching pages. Try partner or payment.</p>)}
+            {(!query ? visibleNav : []).map((item) => {
               if (!item.children) {
                 return (
                   <NavLink key={item.key} to={item.to} onClick={() => { setCollapsed(null); closeMobile(); }} className={() => rowClass(isCurrent(item.to, location))}>
@@ -168,7 +179,7 @@ export default function AdminLayout() {
             <AdminNotificationBell />
             <div className="text-right">
               <p className="text-sm font-medium text-slate-900">{user?.name}</p>
-              <p className="text-xs text-slate-400 capitalize">{user?.role?.replace(/_/g, " ")}</p>
+              <p className="text-xs text-slate-500">{user?.role === "super_admin" ? "SPOTX Admin · Full access" : user?.role?.replace(/_/g, " ")}</p>
             </div>
           </div>
         </header>

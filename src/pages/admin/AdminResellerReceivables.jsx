@@ -1,3 +1,4 @@
+import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import InvoiceDownload from "../../components/ui/InvoiceDownload";
 import PaymentHistory from "../../components/ui/PaymentHistory";
@@ -21,6 +22,8 @@ const DURATIONS = [
 const money = (value) => `₹${(value || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
 
 export default function AdminResellerReceivables({ partnerId, status, duration, search }) {
+  const { user } = useAdminAuth();
+  const canFinance = ["super_admin", "finance"].includes(user?.role);
   const fetching = useRef(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [currentTime, setCurrentTime] = useState(() => Date.now());
@@ -70,7 +73,8 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
     const invoiceStatuses = ["pending", "overdue", "paid", "failed"];
 
     return invoices.filter((invoice) => {
-      if (status !== "all" && (!invoiceStatuses.includes(status) || (invoice.paymentStatus !== "paid" && new Date(invoice.dueDate).getTime() < currentTime ? "overdue" : invoice.paymentStatus) !== status)) return false;
+      if (status === "due_week" && (invoice.paymentStatus === "paid" || new Date(invoice.dueDate).getTime() < currentTime || new Date(invoice.dueDate).getTime() > currentTime + 7 * 24 * 60 * 60 * 1000)) return false;
+      if (status !== "all" && status !== "due_week" && (!invoiceStatuses.includes(status) || (invoice.paymentStatus !== "paid" && new Date(invoice.dueDate).getTime() < currentTime ? "overdue" : invoice.paymentStatus) !== status)) return false;
       if (cutoff && new Date(invoice.createdAt).getTime() < cutoff) return false;
       if (query && ![
         invoice.invoiceNumber,
@@ -135,20 +139,20 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
   return (
     <>
       {historyInvoice && <PaymentHistory invoice={historyInvoice} onClose={() => setHistoryInvoice(null)} />}
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">{loading ? "Loading overdue invoices..." : !lastUpdated ? "Overdue totals unavailable." : <><p>Pending payment: <strong>{money(outstandingTotal)}</strong> across {unpaidInvoices.length} bills.</p><p>Due in the next 7 days: <strong>{money(dueThisWeekTotal)}</strong> across {dueThisWeek.length} bills.</p><p>Overdue: {money(overdueTotal)} across {overdueInvoices.length} invoices.</p></>} <button type="button" disabled={checkingReminders} onClick={checkReminders} className="font-semibold underline disabled:opacity-50">{checkingReminders ? "Checking..." : "Check payment reminders"}</button><p className="text-xs text-slate-500 mt-1">{lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}. Overview includes all issued bills for the selected partner(s); table filters apply below. ` : ""}{error ? "Refresh failed; displayed totals may be out of date." : "Updates every 15 seconds while this tab is open."}</p></div>
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">{loading ? "Loading overdue invoices..." : !lastUpdated ? "Overdue totals unavailable." : <><p>Pending payment: <strong>{money(outstandingTotal)}</strong> across {unpaidInvoices.length} bills.</p><p>Due in the next 7 days: <strong>{money(dueThisWeekTotal)}</strong> across {dueThisWeek.length} bills.</p><p>Overdue: {money(overdueTotal)} across {overdueInvoices.length} invoices.</p></>} {canFinance && <button type="button" disabled={checkingReminders} onClick={checkReminders} className="font-semibold underline disabled:opacity-50">{checkingReminders ? "Checking..." : "Check payment reminders"}</button>}<p className="text-xs text-slate-500 mt-1">{lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}. Overview includes all issued bills for the selected partner(s); table filters apply below. ` : ""}{error ? "Refresh failed; displayed totals may be out of date." : "Updates every 15 seconds while this tab is open."}</p></div>
       <Card>
         <div className="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">Reseller Receivables</h2>
+            <h2 className="text-lg font-semibold text-slate-900">Reseller bills</h2>
             <p className="text-sm text-slate-500 mt-1">Money Resellers owe SPOTX for purchased licenses; this is incoming payment, not a partner payout.</p>
           </div>
           <div className="flex gap-6 text-sm">
             <div>
-              <p className="text-slate-500">Outstanding</p>
+              <p className="text-slate-500">Awaiting payment</p>
               <p className="font-semibold text-slate-900">{money(outstandingTotal)}</p>
             </div>
             <div>
-              <p className="text-slate-500">Received</p>
+              <p className="text-slate-500">Paid to SPOTX</p>
               <p className="font-semibold text-emerald-700">{money(receivedTotal)}</p>
             </div>
           </div>
@@ -219,7 +223,7 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
                       {invoice.partnerId?._id && (
                         <Link to={`/admin/partners/${invoice.partnerId._id}`} className="text-xs font-semibold text-brand-red hover:underline">Partner</Link>
                       )}
-                      {invoice.partnerId && invoice.paymentStatus !== "paid" && invoice.paymentMode !== "online" && (
+                      {canFinance && invoice.partnerId && invoice.paymentStatus !== "paid" && invoice.paymentMode !== "online" && (
                         <button
                           type="button"
                           disabled={switchingInvoiceId === invoice._id}
@@ -229,7 +233,7 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
                           Switch Online
                         </button>
                       )}
-                      {invoice.partnerId && invoice.paymentStatus !== "paid" && (
+                      {canFinance && invoice.partnerId && invoice.paymentStatus !== "paid" && (
                         <button
                           type="button"
                           onClick={() => { setVerifyingInvoiceId(invoice._id); setOfflineError(""); }}

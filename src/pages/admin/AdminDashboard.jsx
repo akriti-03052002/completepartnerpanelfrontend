@@ -1,7 +1,7 @@
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowDownLeft, ArrowUpRight, RefreshCw } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, RefreshCw, Users, ShieldCheck, Landmark, Wallet, Receipt, ArrowRight } from "lucide-react";
 import adminApi from "../../services/adminApi";
 import Card from "../../components/ui/Card";
 import PartnerTypeBarChart from "../../components/admin/PartnerTypeBarChart";
@@ -71,9 +71,10 @@ export default function AdminDashboard() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState(null);
 
   const fetchDashboard = () => adminApi.get("/admin/stats/dashboard")
-    .then((res) => { setData(res.data.data); setError(""); })
+    .then((res) => { setData(res.data.data); setUpdatedAt(new Date()); setError(""); })
     .catch((err) => setError(err.response?.data?.message || "Couldn't load the dashboard."));
 
   const load = () => {
@@ -88,6 +89,19 @@ export default function AdminDashboard() {
   if (!data) return <div role="alert" className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error} <button onClick={load} className="underline font-semibold">Try again</button></div>;
 
   const { overview, reseller, vendor, affiliate, payouts, partners } = data;
+
+  const tasks = [
+    { label: "Find a partner", to: "/admin/partners", icon: Users, note: "Search profiles, check progress and update account details." },
+    ...(canReview ? [
+      { label: "Review identity documents", to: "/admin/documents", icon: ShieldCheck, note: "Preview submitted documents and approve or request corrections." },
+      { label: "Review bank details", to: "/admin/bank", icon: Landmark, note: "Check bank accounts before partner payments." }
+    ] : []),
+    ...(canFinance ? [
+      { label: "Review partner earnings", to: "/admin/commissions", icon: Wallet, note: "Check commissions, referral rewards and content payments." },
+      { label: "Manage payments to partners", to: "/admin/settlements", icon: ArrowUpRight, note: "Review settlements and track payments to partners." },
+      { label: "Check reseller bills", to: "/admin/licence-payments", icon: Receipt, note: "See bills due this week, overdue payments and paid invoices." }
+    ] : [])
+  ];
 
   const incomeRows = [
     {
@@ -142,19 +156,35 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
+        <div><h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1><p className="mt-1 text-sm text-slate-500">Manage partners, approvals and payments from one place.</p></div>
         <button
           type="button"
           onClick={load}
           disabled={refreshing}
-          className="flex items-center gap-2 text-xs text-slate-500 hover:text-slate-700 disabled:opacity-60"
+          aria-label="Refresh dashboard"
+          aria-busy={refreshing}
+          className="flex min-h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-60"
         >
           <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
-          Live · updated {new Date(data.generatedAt).toLocaleTimeString()}
+          {refreshing ? "Refreshing..." : `Refresh - updated ${updatedAt?.toLocaleTimeString() || "just now"}`}
         </button>
       </div>
 
       {error && <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
+
+      <section aria-labelledby="admin-tasks-heading">
+        <h2 id="admin-tasks-heading" className="font-semibold text-lg text-slate-900">Choose a task</h2>
+        <p className="mt-1 mb-4 text-sm text-slate-500">Open a partner profile to see their approval checklist, or go straight to a review below.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {tasks.map(({ label, to, icon: Icon, note }) => (
+            <Link key={to} to={to} className="group flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-slate-400 hover:shadow-sm">
+              <span className="rounded-xl bg-slate-100 p-2.5 text-slate-700"><Icon size={20} aria-hidden="true" /></span>
+              <span className="min-w-0 flex-1"><span className="block font-semibold text-sm text-slate-900">{label}</span><span className="mt-1 block text-xs leading-5 text-slate-500">{note}</span></span>
+              <ArrowRight size={16} aria-hidden="true" className="mt-3 shrink-0 text-slate-400 group-hover:text-slate-900" />
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {/* ---------- Business overview ---------- */}
       <section aria-labelledby="overview-heading">
@@ -176,15 +206,6 @@ export default function AdminDashboard() {
         </Card>
       </section>
 
-      <Card className="p-5 space-y-3">
-        <h2 className="font-semibold text-lg">Choose a task</h2>
-        <p className="text-sm text-slate-500">Start with the work you need to review. Open a partner profile to see their approval checklist.</p>
-        <div className="flex flex-wrap gap-3">
-          <Link to="/admin/partners" className="rounded-lg border px-4 py-2 text-sm font-semibold">Find a partner</Link>
-          {canReview && <><Link to="/admin/documents" className="rounded-lg border px-4 py-2 text-sm font-semibold">Review identity documents</Link><Link to="/admin/bank" className="rounded-lg border px-4 py-2 text-sm font-semibold">Review bank details</Link></>}
-          {canFinance && <><Link to="/admin/commissions" className="rounded-lg border px-4 py-2 text-sm font-semibold">Review partner earnings</Link><Link to="/admin/settlements" className="rounded-lg border px-4 py-2 text-sm font-semibold">Manage payments to partners</Link></>}
-        </div>
-      </Card>
       {/* ---------- The two bar graphs ---------- */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6" aria-label="Payments in and commission out">
         <Card className="p-6">
