@@ -40,18 +40,6 @@ const STATS = [
   { icon: Radio, value: "24/7", label: "Network monitoring" }
 ];
 
-// Real, seeded numbers — Vendor only (see backend/seed/seedTiers.js).
-// Every other partner type has its own commercial structure instead of
-// a commission-rate ladder (Reseller: pricing plan + billing cycle;
-// Affiliate/Influencer/Referral: flat or one-time fees) — see
-// PARTNER_TYPES / the "Which kind of partner are you?" section instead.
-const TIERS = [
-  { name: "Registered", requirement: "New / low-volume", rate: "10%", perks: ["Partner pricing", "Sales kit"] },
-  { name: "Certified", requirement: "1,000+ screens", rate: "15%", perks: ["Training", "Demo account", "Lead sharing"] },
-  { name: "Gold", requirement: "5,000+ screens", rate: "20%", perks: ["Dedicated support", "Co-marketing"] },
-  { name: "Strategic", requirement: "15,000+ screens", rate: "25%+", perks: ["White-label", "Territory rights"] }
-];
-
 const PARTNER_TYPES = [
   {
     name: "Vendor",
@@ -60,8 +48,8 @@ const PARTNER_TYPES = [
     blurb: "Install and manage screens for your own customers.",
     details: [
       "You install and manage SPOTX screens for your own end customers.",
-      "SPOTX pays you a recurring commission every month, for as long as each screen stays active.",
-      "You start at the Registered tier — your commission rate climbs automatically (10% → 25%+) as your active screen count grows, no renegotiating.",
+      "SPOTX pays commission according to the terms assigned to your partnership.",
+      "SPOTX assigns commission terms individually for your partnership.",
       "You track every commission from pending to paid, and every settlement, right in your dashboard."
     ]
   },
@@ -226,26 +214,7 @@ export default function Landing() {
                 ))}
               </ul>
 
-              {activeType.name === "Vendor" && (
-                <div className="mt-6 pt-5 border-t border-slate-100">
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Your tier ladder</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {TIERS.map((tier, i) => (
-                      <div
-                        key={tier.name}
-                        className={`rounded-xl border p-4 ${i === TIERS.length - 1 ? "border-brand-black bg-brand-black text-white" : "border-slate-200 bg-white"}`}
-                      >
-                        <div className={`text-[10px] font-semibold uppercase tracking-wide mb-1.5 ${i === TIERS.length - 1 ? "text-brand-yellow" : "text-brand-red"}`}>
-                          Tier {i + 1}
-                        </div>
-                        <p className="font-heading font-bold text-sm mb-0.5">{tier.name}</p>
-                        <p className={`text-[11px] mb-2 ${i === TIERS.length - 1 ? "text-slate-300" : "text-slate-500"}`}>{tier.requirement}</p>
-                        <p className="font-heading text-xl font-extrabold">{tier.rate}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+
             </div>
 
             <div className="px-6 py-4 border-t border-slate-100 shrink-0">

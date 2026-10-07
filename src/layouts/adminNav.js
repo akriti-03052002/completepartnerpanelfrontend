@@ -111,7 +111,7 @@ export const ADMIN_NAV = [
   },
   { key: "kyc", label: "KYC Review", icon: FileCheck, to: "/admin/documents" },
   { key: "bank", label: "Bank Review", icon: Landmark, to: "/admin/bank" },
-  { key: "config", label: "Commission & Pricing", icon: SlidersHorizontal, to: "/admin/config" }
+  { key: "config", label: "Screen Pricing", icon: SlidersHorizontal, to: "/admin/config" }
 ];
 
 const typeIn = (search) => new URLSearchParams(search).get("partnerType") || "";
