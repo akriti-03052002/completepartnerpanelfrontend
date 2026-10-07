@@ -1,3 +1,4 @@
+import BusinessOverview from "../../components/partner/BusinessOverview";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Target, Users, Handshake, Wallet, TrendingUp, AlertCircle, UserCog } from "lucide-react";
@@ -88,6 +89,8 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <BusinessOverview type={partnerType} summary={data.businessOverview} />
 
       {partnerStatus === "rejected" && partnerRejectionReason && (
         <div className="flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl p-3.5">

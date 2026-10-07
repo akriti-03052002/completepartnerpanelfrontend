@@ -1,3 +1,4 @@
+import BusinessOverview from "../../../components/partner/BusinessOverview";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Building2, PackageSearch, Receipt } from "lucide-react";
@@ -11,6 +12,8 @@ import Button from "../../../components/ui/Button";
 // "Purchased" figure is called out explicitly as the billed quantity
 //.
 export default function ResellerDashboard() {
+  const [business, setBusiness] = useState(null);
+  const [loadError, setLoadError] = useState("");
   const [inventory, setInventory] = useState(null);
   const [customers, setCustomers] = useState([]);
   const [invoices, setInvoices] = useState([]);
@@ -18,10 +21,11 @@ export default function ResellerDashboard() {
 
   useEffect(() => {
     Promise.all([
+      api.get("/partner/dashboard").then((res) => setBusiness(res.data.data.businessOverview)),
       api.get("/partner/reseller/inventory").then((res) => setInventory(res.data.data)),
       api.get("/partner/reseller/customers").then((res) => setCustomers(res.data.data)),
       api.get("/partner/reseller/invoices").then((res) => setInvoices(res.data.data))
-    ]).finally(() => setLoading(false));
+    ]).catch(() => setLoadError("Some dashboard figures could not be loaded. Please refresh to try again.")).finally(() => setLoading(false));
   }, []);
 
   if (loading) return <p className="text-slate-400 text-sm p-6">Loading...</p>;
@@ -35,6 +39,8 @@ export default function ResellerDashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-900">Reseller Dashboard</h1>
+      {loadError && <p role="alert" className="text-red-600">{loadError}</p>}
+      {business && <BusinessOverview type="reseller" summary={business} />}
       <Card className="p-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-semibold">{currentInvoice ? "Review your outstanding payment" : available === 0 ? "Check your screen licences" : "Manage your customers"}</h2><p className="text-sm text-slate-500 mt-1">{currentInvoice ? "Open billing to check the amount, due date and payment status." : available === 0 ? "Review your licences and request more when you need them." : `${available} licences are available for customer allocation.`}</p></div><Link to={currentInvoice ? "/partner/reseller/billing" : available === 0 ? "/partner/reseller/inventory" : "/partner/reseller/customers"} className="rounded-lg bg-brand-red text-white px-4 py-2 text-sm font-semibold">{currentInvoice ? "Open billing" : available === 0 ? "View licences" : "Open customers"}</Link></Card>
 
       <Card className="p-6">
