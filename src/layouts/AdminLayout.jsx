@@ -81,7 +81,7 @@ export default function AdminLayout() {
             out still sits at the bottom. */}
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col">
           <nav aria-label="Admin navigation" className="grow shrink-0 px-3 py-4 space-y-1">
-            {ADMIN_NAV.map((item) => {
+            {ADMIN_NAV.filter((item) => user?.role === "super_admin" || (item.key === "kyc" ? user?.role === "kyc_reviewer" : ["commission", "licence", "settlement", "config"].includes(item.key) ? user?.role === "finance" : true)).map((item) => {
               if (!item.children) {
                 return (
                   <NavLink key={item.key} to={item.to} onClick={() => { setCollapsed(null); closeMobile(); }} className={() => rowClass(isCurrent(item.to, location))}>

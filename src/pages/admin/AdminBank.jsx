@@ -10,7 +10,7 @@ export default function AdminBank() {
   const [revealed, setRevealed] = useState({});
   const [error, setError] = useState("");
 
-  const load = () => adminApi.get("/admin/bank/pending").then((res) => setAccounts(res.data.data)).finally(() => setLoading(false));
+  const load = () => adminApi.get("/admin/bank/pending").then((res) => { setAccounts(res.data.data); setError(""); }).catch(() => setError("Could not load bank details. Please try again.")).finally(() => setLoading(false));
 
   useEffect(() => { load(); }, []);
 

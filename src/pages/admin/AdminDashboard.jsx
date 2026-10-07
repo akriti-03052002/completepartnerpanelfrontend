@@ -171,7 +171,7 @@ export default function AdminDashboard() {
             />
           </div>
           <p className="text-sm text-slate-500 mt-6 pt-4 border-t border-slate-100">
-            Total coming in: <span className="font-semibold text-slate-900">{money(overview.totalRevenue)}</span>
+            Combined recorded business value: <span className="font-semibold text-slate-900">{money(overview.totalRevenue)}</span>
           </p>
         </Card>
       </section>
