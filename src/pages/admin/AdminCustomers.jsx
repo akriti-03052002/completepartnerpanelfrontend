@@ -30,6 +30,7 @@ export default function AdminCustomers() {
   const [status, setStatus] = useSessionState("status", "");
   const [vendorId, setVendorId] = useSessionState("vendorId", "");
   const [markPaidId, setMarkPaidId] = useState(null);
+  const [paymentReference, setPaymentReference] = useState("");
   const [revenue, setRevenue] = useState("");
   const [screenCount, setScreenCount] = useState("");
   const [plan, setPlan] = useState("basic");
@@ -59,6 +60,7 @@ export default function AdminCustomers() {
   const startMarkPaid = (id) => {
     setMarkPaidId(id);
     setError("");
+    setPaymentReference("");
     setRevenue("");
     setScreenCount("");
     setPlan("basic");
@@ -66,11 +68,13 @@ export default function AdminCustomers() {
   };
 
   const submitMarkPaid = async (id) => {
+    if (!paymentReference.trim()) { setError("Enter the transaction reference or cash receipt number."); return; }
     if (!window.confirm(`Record INR ${Number(revenue).toLocaleString("en-IN")} as received? This activates the customer subscription and processes vendor commission. Confirm only after receiving payment.`)) return;
     setError("");
     setBusyId(id);
     try {
       await adminApi.patch(`/admin/customers/${id}/mark-paid`, {
+        paymentReference: paymentReference.trim(),
         revenue: Number(revenue) || 0,
         screenCount: screenCount === "" ? undefined : Number(screenCount),
         plan,
@@ -191,6 +195,7 @@ export default function AdminCustomers() {
                         {DURATIONS.map((d) => <option key={d.months} value={d.months}>{d.label}</option>)}
                       </Select>
                       <Input placeholder="Revenue ₹" type="number" value={revenue} onChange={(e) => setRevenue(e.target.value)} className="w-24" />
+                      <Input aria-label="Payment reference or cash receipt number" placeholder="UTR / receipt number" maxLength={128} value={paymentReference} onChange={e => setPaymentReference(e.target.value)} className="w-48" />
                       <Input placeholder="Screens" type="number" value={screenCount} onChange={(e) => setScreenCount(e.target.value)} className="w-20" />
                       <button onClick={() => submitMarkPaid(c._id)} disabled={busyId === c._id} className="text-xs font-semibold text-emerald-600 hover:underline disabled:opacity-50">Save</button>
                       <button onClick={() => setMarkPaidId(null)} className="text-xs text-slate-400 hover:underline">Cancel</button>
