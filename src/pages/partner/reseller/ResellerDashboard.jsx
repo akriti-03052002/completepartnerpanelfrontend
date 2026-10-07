@@ -14,6 +14,7 @@ import Button from "../../../components/ui/Button";
 //.
 export default function ResellerDashboard() {
   const { hasPermission } = usePartnerAuth();
+  const [retry, setRetry] = useState(0);
   const [business, setBusiness] = useState(null);
   const [loadError, setLoadError] = useState("");
   const [inventory, setInventory] = useState(null);
@@ -21,14 +22,18 @@ export default function ResellerDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
     Promise.all([
-      api.get("/partner/dashboard").then((res) => setBusiness(res.data.data.businessOverview)),
-      hasPermission("reseller:inventory:view") ? api.get("/partner/reseller/inventory").then((res) => setInventory(res.data.data)) : Promise.resolve(),
-      hasPermission("reseller:billing:view") ? api.get("/partner/reseller/invoices").then((res) => setInvoices(res.data.data)) : Promise.resolve()
-    ]).catch(() => setLoadError("Some dashboard figures could not be loaded. Please refresh to try again.")).finally(() => setLoading(false));
-  }, [hasPermission]);
+      api.get("/partner/dashboard").then((res) => active && setBusiness(res.data.data.businessOverview)),
+      hasPermission("reseller:inventory:view") ? api.get("/partner/reseller/inventory").then((res) => active && setInventory(res.data.data)) : Promise.resolve(),
+      hasPermission("reseller:billing:view") ? api.get("/partner/reseller/invoices").then((res) => active && setInvoices(res.data.data)) : Promise.resolve()
+    ]).then(() => { if (active) setLoadError(""); }).catch(() => { if (active) setLoadError("Could not load your dashboard figures. Please try again."); }).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [hasPermission, retry]);
 
   if (loading) return <p className="text-slate-400 text-sm p-6">Loading...</p>;
+
+  if (loadError) return <div role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{loadError} <button type="button" onClick={() => { setLoading(true); setRetry(value => value + 1); }} className="font-semibold underline">Try again</button></div>;
 
   const available = Math.max(0, (inventory?.totalPurchasedLicenses || 0) - (inventory?.totalAllocatedLicenses || 0));
   const currentInvoice = invoices.find((i) => i.paymentStatus !== "paid");

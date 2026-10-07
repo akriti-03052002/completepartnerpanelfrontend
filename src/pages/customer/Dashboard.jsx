@@ -31,22 +31,30 @@ export default function Dashboard() {
   const [subscriptionData, setSubscriptionData] = useState(null);
   const [screens, setScreens] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
+    let active = true;
     Promise.all([
       customerApi.get("/customer/profile"),
       customerApi.get("/customer/subscription"),
       customerApi.get("/customer/screens")
     ])
       .then(([profileRes, subscriptionRes, screensRes]) => {
+        if (!active) return;
+        setError("");
         setCustomer(profileRes.data.data.customer);
         setSubscriptionData(subscriptionRes.data.data);
         setScreens(screensRes.data.data);
       })
-      .finally(() => setLoading(false));
-  }, []);
+      .catch(() => { if (active) setError("Could not load your dashboard. Please try again."); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [retry]);
 
   if (loading) return <p className="text-slate-400 text-sm">Loading dashboard...</p>;
+  if (error) return <div role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error} <button type="button" onClick={() => { setLoading(true); setRetry(value => value + 1); }} className="font-semibold underline">Try again</button></div>;
   if (!customer || !subscriptionData) return null;
 
   const { trial, trialExpired } = customer;

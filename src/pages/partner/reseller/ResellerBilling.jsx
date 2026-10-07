@@ -236,7 +236,7 @@ export default function ResellerBilling() {
               {
                 key: "actions", header: "Actions", render: (i) => i.invoice ? (
                   <div className="flex flex-col items-start gap-2">
-                    <InvoiceDownload client={api} path={`/partner/reseller/invoices/${i.invoice._id}/download`} filename={`${i.invoice.invoiceNumber || "invoice"}.pdf`} />
+                    {i.invoice.paymentStatus === "paid" && <InvoiceDownload client={api} path={`/partner/reseller/invoices/${i.invoice._id}/download`} filename={`${i.invoice.invoiceNumber || "invoice"}.pdf`} />}
                     <button type="button" onClick={() => setHistoryInvoice(i.invoice)} className="text-xs font-semibold text-brand-red hover:underline">Payment history</button>
                     <button type="button" disabled={breakdownLoading} onClick={() => openInvoiceBreakdown(i.invoice._id)} className="text-xs font-semibold text-brand-red hover:underline disabled:opacity-50">View details</button>
                     {canPay && i.status !== "paid" && (i.invoice.canPayNow ? (

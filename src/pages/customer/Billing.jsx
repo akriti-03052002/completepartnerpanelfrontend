@@ -48,7 +48,7 @@ export default function Billing() {
                 <tr key={invoice._id}>
                   <td className="px-5 py-3">{invoice.issuedAt ? new Date(invoice.issuedAt).toLocaleDateString() : new Date(invoice.createdAt).toLocaleDateString()}</td>
                   <td className="px-5 py-3 font-medium">{invoice.currency} {invoice.amount.toLocaleString()}</td>
-                  <td className="px-5 py-3"><Badge status={invoice.status} /></td><td className="px-5 py-3"><InvoiceDownload client={customerApi} path={`/customer/invoices/${invoice._id}/download`} /></td>
+                  <td className="px-5 py-3"><Badge status={invoice.status} /></td><td className="px-5 py-3">{invoice.status === "paid" ? <InvoiceDownload client={customerApi} path={`/customer/invoices/${invoice._id}/download`} /> : <span className="text-xs text-slate-500">Available after payment</span>}</td>
                 </tr>
               ))}
             </tbody>

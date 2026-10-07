@@ -83,10 +83,16 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
     });
   }, [duration, invoices, search, status, currentTime]);
 
-  const outstandingTotal = filtered
+  const outstandingTotal = invoices
     .filter((invoice) => invoice.paymentStatus !== "paid")
     .reduce((sum, invoice) => sum + (invoice.total || 0), 0);
-  const overdueInvoices = filtered.filter((invoice) => invoice.paymentStatus !== "paid" && new Date(invoice.dueDate).getTime() < currentTime);
+  const overdueInvoices = invoices.filter((invoice) => invoice.paymentStatus !== "paid" && new Date(invoice.dueDate).getTime() < currentTime);
+  const unpaidInvoices = invoices.filter(invoice => invoice.paymentStatus !== "paid");
+  const dueThisWeek = unpaidInvoices.filter(invoice => {
+    const due = new Date(invoice.dueDate).getTime();
+    return due >= currentTime && due <= currentTime + 7 * 24 * 60 * 60 * 1000;
+  });
+  const dueThisWeekTotal = dueThisWeek.reduce((sum, invoice) => sum + (invoice.total || 0), 0);
   const overdueTotal = overdueInvoices.reduce((sum, invoice) => sum + invoice.total, 0);
   const [checkingReminders, setCheckingReminders] = useState(false);
   const checkReminders = async () => {
@@ -95,7 +101,7 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
     catch { setError("Could not check reminders."); }
     finally { setCheckingReminders(false); }
   };
-  const receivedTotal = filtered
+  const receivedTotal = invoices
     .filter((invoice) => invoice.paymentStatus === "paid")
     .reduce((sum, invoice) => sum + (invoice.total || 0), 0);
   const unlinkedCount = filtered.filter((invoice) => !invoice.partnerId).length;
@@ -129,7 +135,7 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
   return (
     <>
       {historyInvoice && <PaymentHistory invoice={historyInvoice} onClose={() => setHistoryInvoice(null)} />}
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">{loading ? "Loading overdue invoices..." : !lastUpdated ? "Overdue totals unavailable." : <>Overdue: {money(overdueTotal)} across {overdueInvoices.length} invoices.</>} <button type="button" disabled={checkingReminders} onClick={checkReminders} className="font-semibold underline disabled:opacity-50">{checkingReminders ? "Checking..." : "Check payment reminders"}</button><p className="text-xs text-slate-500 mt-1">{lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}. Totals match your current filters. ` : ""}{error ? "Refresh failed; displayed totals may be out of date." : "Updates every 15 seconds while this tab is open."}</p></div>
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">{loading ? "Loading overdue invoices..." : !lastUpdated ? "Overdue totals unavailable." : <><p>Pending payment: <strong>{money(outstandingTotal)}</strong> across {unpaidInvoices.length} bills.</p><p>Due in the next 7 days: <strong>{money(dueThisWeekTotal)}</strong> across {dueThisWeek.length} bills.</p><p>Overdue: {money(overdueTotal)} across {overdueInvoices.length} invoices.</p></>} <button type="button" disabled={checkingReminders} onClick={checkReminders} className="font-semibold underline disabled:opacity-50">{checkingReminders ? "Checking..." : "Check payment reminders"}</button><p className="text-xs text-slate-500 mt-1">{lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}. Overview includes all issued bills for the selected partner(s); table filters apply below. ` : ""}{error ? "Refresh failed; displayed totals may be out of date." : "Updates every 15 seconds while this tab is open."}</p></div>
       <Card>
         <div className="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -209,7 +215,7 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
                   header: "",
                   render: (invoice) => (
                     <div className="flex items-center gap-3">
-                      <InvoiceDownload client={adminApi} path={`/admin/reseller/invoices/${invoice._id}/download`} filename={`${invoice.invoiceNumber || "invoice"}.pdf`} />
+                      {invoice.paymentStatus === "paid" && <InvoiceDownload client={adminApi} path={`/admin/reseller/invoices/${invoice._id}/download`} filename={`${invoice.invoiceNumber || "invoice"}.pdf`} />}
                       {invoice.partnerId?._id && (
                         <Link to={`/admin/partners/${invoice.partnerId._id}`} className="text-xs font-semibold text-brand-red hover:underline">Partner</Link>
                       )}

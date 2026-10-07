@@ -1,3 +1,4 @@
+import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -10,17 +11,19 @@ import PromptModal from "../../components/ui/PromptModal";
 import { InvoiceAmount } from "../../components/ui/FinancialAmount";
 
 export default function AdminResellerDashboard() {
+  const { user } = useAdminAuth();
+  const canFinance = ["super_admin", "finance"].includes(user?.role);
   const queryClient = useQueryClient();
 
-  const { data: summary = null, isLoading: summaryLoading } = useQuery({
+  const { data: summary = null, isLoading: summaryLoading, error: summaryError } = useQuery({
     queryKey: ["admin", "reseller", "dashboard"],
     queryFn: () => adminApi.get("/admin/reseller/dashboard").then((res) => res.data.data)
   });
-  const { data: partners = [], isLoading: partnersLoading } = useQuery({
+  const { data: partners = [], isLoading: partnersLoading, error: partnersError } = useQuery({
     queryKey: ["admin", "partners", { partnerType: "reseller" }],
     queryFn: () => adminApi.get("/admin/partners", { params: { partnerType: "reseller" } }).then((res) => res.data.data || [])
   });
-  const { data: requestedOrders = [], isLoading: requestedOrdersLoading } = useQuery({
+  const { data: requestedOrders = [], isLoading: requestedOrdersLoading, error: ordersError } = useQuery({
     queryKey: ["admin", "reseller", "license-orders", { status: "requested" }],
     queryFn: () =>
       adminApi.get("/admin/reseller/license-orders", { params: { status: "requested" } }).then((res) => res.data.data || [])
@@ -89,6 +92,7 @@ export default function AdminResellerDashboard() {
     }
   };
 
+  if (summaryError || partnersError || ordersError) return <div role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">Could not load reseller data. <button type="button" onClick={load} className="font-semibold underline">Try again</button></div>;
   if (loading) return <p className="text-slate-400 text-sm p-6">Loading...</p>;
 
   return (
@@ -96,8 +100,8 @@ export default function AdminResellerDashboard() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-2xl font-bold text-slate-900">Reseller Licences &amp; Billing</h1>
         <div className="flex gap-2">
-          <Button variant="outline" loading={checking} onClick={checkNotifications}>Check Notifications</Button>
-          <Button loading={running} onClick={runBilling}>Run Reseller Billing Now</Button>
+          {canFinance && <Button variant="outline" loading={checking} onClick={checkNotifications}>Check Notifications</Button>}
+          {canFinance && <Button loading={running} onClick={runBilling}>Run Reseller Billing Now</Button>}
         </div>
       </div>
 
@@ -133,7 +137,7 @@ export default function AdminResellerDashboard() {
               {
                 key: "actions",
                 header: "",
-                render: (o) => (
+                render: (o) => canFinance && (
                   <div className="flex items-center gap-3">
                     <button onClick={() => acceptOrder(o)} className="text-xs font-semibold text-emerald-600 hover:underline">Accept</button>
                     <button onClick={() => setRejectingOrderId(o._id)} className="text-xs font-semibold text-brand-red hover:underline">Reject</button>
