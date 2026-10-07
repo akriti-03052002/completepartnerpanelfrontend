@@ -1,6 +1,12 @@
+import Badge from "./Badge";
+import { useDialogFocus } from "../../hooks/useDialogFocus";
+
 export default function PaymentHistory({ invoice, onClose }) {
-  return <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4"><div role="dialog" aria-modal="true" aria-label="Payment history" className="bg-white rounded-2xl max-w-lg w-full p-5 max-h-[80vh] overflow-y-auto">
-    <div className="flex justify-between gap-4"><h2 className="font-semibold">Payment history - {invoice.invoiceNumber}</h2><button type="button" onClick={onClose} aria-label="Close payment history">Close</button></div>
+  const panelRef = useDialogFocus(onClose);
+  return <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4"><div ref={panelRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Payment history" className="bg-white rounded-2xl max-w-lg w-full p-5 max-h-[80vh] overflow-y-auto">
+    <div className="flex justify-between gap-4"><h2 className="font-semibold">Payment history - {invoice.invoiceNumber}</h2><button type="button" onClick={onClose} aria-label="Close payment history" className="min-h-11 rounded-lg px-3 text-sm font-semibold text-slate-700 hover:bg-slate-100">Close</button></div>
+    <p className="mt-3 text-sm text-slate-600">Current payment status: <Badge status={invoice.paymentStatus} /></p>
+    <p className="mt-2 text-sm text-slate-500">This history records payment updates. Use the current status to check whether the bill is paid.</p>
     <p className="mt-2 text-sm text-slate-600">Invoice total: ₹{Number(invoice.total || 0).toLocaleString("en-IN")}</p>
     {invoice.paymentHistory?.length ? <ol className="mt-4 space-y-4">{invoice.paymentHistory.map((event, index) => <li key={event._id || index} className="border-b border-slate-100 pb-3 text-sm"><p className="font-medium capitalize">{event.action.replace(/_/g, " ")} · {event.method}</p><p>{event.reference || "No reference"}</p><p className="text-slate-500">{event.recordedAt ? new Date(event.recordedAt).toLocaleString("en-IN") : "Date unavailable"} · {event.recordedBy?.name || (event.recordedBy ? `Admin ${event.recordedBy._id || event.recordedBy}` : "System / online payment")}</p></li>)}</ol> : <div className="mt-4 text-sm text-slate-500 space-y-2"><p>Available older payment details. A full event history was not recorded.</p><p>Reference: {invoice.offlinePayment?.transactionId || invoice.razorpay?.paymentId || "Unavailable"}</p><p>Method: {invoice.offlinePayment?.method || invoice.razorpay?.method || invoice.paymentMode || "Unavailable"}</p><p>Paid on: {invoice.paidAt ? new Date(invoice.paidAt).toLocaleString("en-IN") : "Unavailable"}</p><p>Recorded by: {invoice.offlinePayment?.verifiedBy?.name || invoice.offlinePayment?.verifiedBy || invoice.setBy || "Unavailable"}</p></div>}
   </div></div>;

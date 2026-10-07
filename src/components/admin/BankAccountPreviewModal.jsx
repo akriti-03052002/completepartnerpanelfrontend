@@ -1,3 +1,4 @@
+import { useDialogFocus } from "../../hooks/useDialogFocus";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import adminApi from "../../services/adminApi";
@@ -11,19 +12,21 @@ export default function BankAccountPreviewModal({ account, onClose, onVerify, on
   const [details, setDetails] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const panelRef = useDialogFocus(onClose, busy);
 
   useEffect(() => {
     let cancelled = false;
 
     adminApi.get(`/admin/bank/${account.id || account._id}/reveal`)
-      .then((res) => { if (!cancelled) setDetails(res.data.data); })
+      .then((res) => { if (!cancelled) { setDetails(res.data.data); setError(""); } })
       .catch((err) => {
         if (cancelled) return;
         setError(err.response?.data?.message || "Couldn't load bank details.");
       });
 
     return () => { cancelled = true; };
-  }, [account]);
+  }, [account, retry]);
 
   const razorpayCheck = account.razorpayCheck;
   const razorpayPassed = razorpayCheck?.paymentStatus === "captured" && razorpayCheck?.nameMatchStatus === "matched";
@@ -40,6 +43,8 @@ export default function BankAccountPreviewModal({ account, onClose, onVerify, on
     try {
       await onVerify(account._id || account.id, overrideReason);
       onClose();
+    } catch (err) {
+      setError(err.response?.data?.message || "Could not save this decision. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -48,27 +53,30 @@ export default function BankAccountPreviewModal({ account, onClose, onVerify, on
   const handleReject = async () => {
     const reason = window.prompt("Reason for rejecting this bank account?");
     if (reason === null) return;
+    if (!reason.trim()) { setError("Enter a reason so the partner knows what to correct."); return; }
     setBusy(true);
     try {
       await onReject(account._id || account.id, reason);
       onClose();
+    } catch (err) {
+      setError(err.response?.data?.message || "Could not save this decision. Please try again.");
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => { if (!busy) onClose(); }}>
+      <div ref={panelRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Bank account details" className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 shrink-0">
           <p className="text-sm font-semibold text-slate-900">Bank Account Details</p>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-brand-black" aria-label="Close">
+          <button type="button" disabled={busy} onClick={onClose} className="text-slate-400 hover:text-brand-black" aria-label="Close">
             <X size={20} />
           </button>
         </div>
 
         <div className="flex-1 min-h-0 overflow-auto p-5">
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <div role="alert" className="text-sm text-red-600"><p>{error}</p>{!details && <Button variant="outline" onClick={() => { setError(""); setRetry(value => value + 1); }}>Try again</Button>}</div>}
           {!error && !details && <p className="text-sm text-slate-400">Loading...</p>}
           {details && (
             <dl className="space-y-3">
@@ -120,8 +128,8 @@ export default function BankAccountPreviewModal({ account, onClose, onVerify, on
 
         {account.verification?.status === "pending" && (onVerify || onReject) && (
           <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-slate-100 shrink-0">
-            <Button variant="danger" onClick={handleReject} loading={busy}>Reject</Button>
-            <Button onClick={handleVerify} loading={busy}>Verify</Button>
+            {onReject && <Button variant="danger" onClick={handleReject} loading={busy}>Reject bank details</Button>}
+            {onVerify && <Button onClick={handleVerify} disabled={!details} loading={busy}>Approve bank details</Button>}
           </div>
         )}
       </div>
