@@ -19,8 +19,8 @@ const PARTNER_TYPE_MENUS = [
     prefixes: ["/admin/overview/influencer", "/admin/social-media", "/admin/agreement"],
     children: [
       { to: "/admin/overview/influencer", label: "Overview" },
-      { to: "/admin/social-media/posts", label: "Post / Reel Approval" },
-      { to: "/admin/social-media/accounts", label: "Account Approval" },
+      { to: "/admin/social-media/posts", label: "Review Posts & Reels" },
+      { to: "/admin/social-media/accounts", label: "Review Social Accounts" },
       { to: "/admin/partners?partnerType=influencer", label: "Influencers" },
       { to: "/admin/agreement", label: "Influencer Agreement" }
     ]
@@ -88,16 +88,16 @@ export const ADMIN_NAV = [
   },
   {
     key: "commission",
-    label: "Commission",
+    label: "Partner Earnings",
     icon: Wallet,
     to: "/admin/commissions",
     prefixes: ["/admin/commissions"],
     children: [
-      { to: "/admin/commissions", label: "All Commission" },
+      { to: "/admin/commissions", label: "All Partner Earnings" },
       ...EARNING_TYPES.map(({ type, label }) => ({ to: `/admin/commissions?partnerType=${type}`, label }))
     ]
   },
-  { key: "licence", label: "Licence Payments", icon: Receipt, to: "/admin/licence-payments" },
+  { key: "licence", label: "Reseller Bills", icon: Receipt, to: "/admin/licence-payments" },
   {
     key: "settlement",
     label: "Partner Payments",
