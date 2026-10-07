@@ -6,10 +6,11 @@ import DocumentPreviewModal from "../../components/admin/DocumentPreviewModal";
 
 export default function AdminDocuments() {
   const [documents, setDocuments] = useState([]);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [previewDoc, setPreviewDoc] = useState(null);
 
-  const load = () => adminApi.get("/admin/documents/pending").then((res) => setDocuments(res.data.data)).finally(() => setLoading(false));
+  const load = () => adminApi.get("/admin/documents/pending").then((res) => { setDocuments(res.data.data); setError(""); }).catch(() => setError("Could not load documents. Please try again.")).finally(() => setLoading(false));
 
   useEffect(() => { load(); }, []);
 
@@ -20,8 +21,10 @@ export default function AdminDocuments() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">KYC Review Queue</h1>
+      <h1 className="text-2xl font-bold text-slate-900">Identity Documents to Review</h1>
 
+      <p className="text-sm text-slate-500">Open each document, check that it belongs to the partner, then approve it or explain what needs correcting.</p>
+      {error && <div role="alert" className="text-sm text-red-700">{error} <button onClick={load} className="font-semibold underline">Try again</button></div>}
       <Card>
         {loading ? (
           <p className="text-slate-400 text-sm p-6">Loading...</p>
@@ -38,7 +41,7 @@ export default function AdminDocuments() {
                 key: "actions",
                 header: "",
                 render: (d) => (
-                  <button onClick={() => setPreviewDoc(d)} className="text-xs font-semibold text-brand-red hover:underline">Preview</button>
+                  <button onClick={() => setPreviewDoc(d)} className="text-xs font-semibold text-brand-red hover:underline">Review document</button>
                 )
               }
             ]}

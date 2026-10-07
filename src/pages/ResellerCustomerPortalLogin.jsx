@@ -10,6 +10,7 @@ export default function CustomerPortalLogin() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [linkMessage, setLinkMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,6 +36,7 @@ export default function CustomerPortalLogin() {
 
         {error && <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
 
+        {linkMessage && <p role="status" className="mb-4 text-sm text-green-700">{linkMessage}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
@@ -63,6 +65,13 @@ export default function CustomerPortalLogin() {
             {submitting ? "Logging in..." : "Log In"}
           </button>
         </form>
+        <button type="button" disabled={submitting} className="mt-4 text-sm font-semibold underline" onClick={async () => {
+          setError(""); setLinkMessage(""); setSubmitting(true);
+          try { const res = await customerPortalApi.post("/public/reseller-customers/forgot-password", { email }); setLinkMessage(res.data.message); }
+          catch (err) { setError(err.response?.data?.message || "Could not send the email link."); }
+          finally { setSubmitting(false); }
+        }}>Forgot password or need a verification link?</button>
+        <p className="text-xs text-slate-500 mt-2">Enter your email above, then request a new link.</p>
 
         <p className="text-xs text-slate-400 text-center mt-6">
           Don't have an account? <Link to="/reseller/customer/register" className="font-medium text-brand-red hover:underline">Register here</Link>

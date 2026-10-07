@@ -1,3 +1,4 @@
+import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowDownLeft, ArrowUpRight, RefreshCw } from "lucide-react";
@@ -63,6 +64,10 @@ function CountTile({ label, value, to, note }) {
 // payments, leads, commissions, partners) — nothing is stored or hardcoded.
 // It refreshes on its own.
 export default function AdminDashboard() {
+  const { user } = useAdminAuth();
+  const role = user?.role;
+  const canReview = ["super_admin", "kyc_reviewer"].includes(role);
+  const canFinance = ["super_admin", "finance"].includes(role);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -80,7 +85,7 @@ export default function AdminDashboard() {
   useAutoRefresh(fetchDashboard, 30000);
 
   if (!data && !error) return <p className="text-slate-400 text-sm">Loading...</p>;
-  if (!data) return <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>;
+  if (!data) return <div role="alert" className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error} <button onClick={load} className="underline font-semibold">Try again</button></div>;
 
   const { overview, reseller, vendor, affiliate, payouts, partners } = data;
 
@@ -171,6 +176,15 @@ export default function AdminDashboard() {
         </Card>
       </section>
 
+      <Card className="p-5 space-y-3">
+        <h2 className="font-semibold text-lg">Choose a task</h2>
+        <p className="text-sm text-slate-500">Start with the work you need to review. Open a partner profile to see their approval checklist.</p>
+        <div className="flex flex-wrap gap-3">
+          <Link to="/admin/partners" className="rounded-lg border px-4 py-2 text-sm font-semibold">Find a partner</Link>
+          {canReview && <><Link to="/admin/documents" className="rounded-lg border px-4 py-2 text-sm font-semibold">Review identity documents</Link><Link to="/admin/bank" className="rounded-lg border px-4 py-2 text-sm font-semibold">Review bank details</Link></>}
+          {canFinance && <><Link to="/admin/commissions" className="rounded-lg border px-4 py-2 text-sm font-semibold">Review partner earnings</Link><Link to="/admin/settlements" className="rounded-lg border px-4 py-2 text-sm font-semibold">Manage payments to partners</Link></>}
+        </div>
+      </Card>
       {/* ---------- The two bar graphs ---------- */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6" aria-label="Payments in and commission out">
         <Card className="p-6">
@@ -179,8 +193,8 @@ export default function AdminDashboard() {
             <span className="text-xs font-semibold uppercase tracking-wide">Money coming in</span>
           </div>
           <PartnerTypeBarChart
-            title="Payments we are getting"
-            subtitle="By partner type. Hover or tap a bar for the details."
+            title="Recorded Business by Partner Type"
+            subtitle="Affiliate figures are won-deal value, not cash received. Hover or tap for details."
             rows={incomeRows}
             emptyText="No payments received yet."
           />
@@ -202,7 +216,7 @@ export default function AdminDashboard() {
 
       {/* ---------- Business gain ---------- */}
       <section aria-labelledby="gain-heading">
-        <h2 id="gain-heading" className="font-semibold text-slate-900 mb-3">Business Gain</h2>
+        <h2 id="gain-heading" className="font-semibold text-slate-900 mb-3">Business by Partner Type</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <TypeBlock
             type="reseller"
@@ -243,7 +257,7 @@ export default function AdminDashboard() {
       {/* ---------- Business paid ---------- */}
       <section aria-labelledby="paid-heading">
         <div className="flex items-baseline justify-between gap-3 mb-3">
-          <h2 id="paid-heading" className="font-semibold text-slate-900">Business Paid</h2>
+          <h2 id="paid-heading" className="font-semibold text-slate-900">Payments to Partners</h2>
           <Link to="/admin/settlements" className="text-xs font-semibold text-brand-red hover:underline">Settlements</Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -287,8 +301,8 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mt-4">
           <CountTile label="Active" value={partners.active} to="/admin/partners?status=active" note="All types" />
           <CountTile label="Verified" value={partners.verified} to="/admin/partners?verificationStatus=verified" note="KYC and bank verified" />
-          <CountTile label="KYC pending" value={partners.kycPending} to="/admin/documents" note="Documents not all verified" />
-          <CountTile label="Bank details pending" value={partners.bankPending} to="/admin/bank" note="No verified bank account" />
+          <CountTile label="Identity checks incomplete" value={partners.kycPending} to="/admin/documents" note="Documents not all verified" />
+          <CountTile label="Bank checks incomplete" value={partners.bankPending} to="/admin/bank" note="No verified bank account" />
           <CountTile label="Rejected" value={partners.rejected} to="/admin/partners?status=rejected" />
           <CountTile label="Suspended" value={partners.suspended} to="/admin/partners?status=suspended" />
         </div>
