@@ -1,3 +1,4 @@
+import Pagination from "../../components/ui/Pagination";
 import { useEffect, useState } from "react";
 import { Plus, Copy, Check, Loader2 } from "lucide-react";
 import api from "../../services/api";
@@ -44,6 +45,8 @@ const subscriptionBadge = (customer) => {
 };
 
 export default function Customers() {
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState(null);
   const [partner, setPartner] = useState(null);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,11 +58,11 @@ export default function Customers() {
   const load = () => {
     Promise.all([
       api.get("/partner/profile").then((res) => setPartner(res.data.data.partner)),
-      api.get("/partner/customers").then((res) => setCustomers(res.data.data))
+      api.get("/partner/customers", { params: { page, limit: 50 } }).then((res) => { setCustomers(res.data.data); setPagination(res.data.pagination); })
     ]).finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -347,6 +350,7 @@ export default function Customers() {
             ]}
           />
         )}
+        {!loading && pagination && <><p className="px-4 text-xs text-slate-500">Search and filters apply to this page of customers.</p><Pagination {...pagination} onChange={(value) => { setLoading(true); setPage(value); }} /></>}
       </Card>
     </div>
   );

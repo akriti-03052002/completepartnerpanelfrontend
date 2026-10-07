@@ -28,7 +28,7 @@ export default function CustomerVerifyAndSetPassword() {
     setSubmitting(true);
     try {
       const res = await api.post("/public/reseller-customers/verify", { token, password });
-      localStorage.setItem("customerPortalToken", res.data.data.token);
+      localStorage.setItem("customerPortalToken", res.data.data.token || "cookie");
       navigate("/reseller/customer/dashboard", { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong verifying your email.");

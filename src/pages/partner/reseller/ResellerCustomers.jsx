@@ -1,3 +1,4 @@
+import Pagination from "../../../components/ui/Pagination";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -19,13 +20,15 @@ import { useListFilter } from "../../../hooks/useListFilter";
 const EMPTY_CUSTOMER_FORM = { companyName: "", name: "", email: "", phone: "", screens: "" };
 
 export default function ResellerCustomers() {
+  const [page, setPage] = useState(1);
   const { partner } = usePartnerAuth();
   const queryClient = useQueryClient();
 
-  const { data: customers = [], isLoading: customersLoading } = useQuery({
-    queryKey: ["reseller", "customers"],
-    queryFn: () => api.get("/partner/reseller/customers").then((res) => res.data.data)
+  const { data: customerResponse, isLoading: customersLoading } = useQuery({
+    queryKey: ["reseller", "customers", page],
+    queryFn: () => api.get("/partner/reseller/customers", { params: { page, limit: 50 } }).then((res) => res.data)
   });
+  const customers = customerResponse?.data || [];
   const customerList = useListFilter(customers, [{ label: "Status", value: (c) => c.status }]);
   const visibleCustomers = customerList.visible;
   const { data: allocations = [], isLoading: allocationsLoading } = useQuery({
@@ -253,6 +256,8 @@ export default function ResellerCustomers() {
           </div>
         )}
       </Card>
+
+      {!loading && customerResponse?.pagination && <><p className="text-xs text-slate-500">Search and filters apply to this page of customers.</p><Pagination {...customerResponse.pagination} onChange={setPage} /></>}
 
       {insufficientPopup && (
         <InsufficientLicensesModal

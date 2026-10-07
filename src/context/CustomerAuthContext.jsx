@@ -1,3 +1,4 @@
+import { endSession } from "../services/session";
 import { createContext, useContext, useState, useCallback } from "react";
 
 const CustomerAuthContext = createContext(null);
@@ -15,12 +16,13 @@ export function CustomerAuthProvider({ children }) {
   const [customer, setCustomer] = useState(() => readStored("customer"));
 
   const setSession = useCallback((data) => {
-    localStorage.setItem("customerToken", data.token);
+    localStorage.setItem("customerToken", data.token || "cookie");
     localStorage.setItem("customer", JSON.stringify(data.customer));
     setCustomer(data.customer);
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await endSession("customer");
     localStorage.removeItem("customerToken");
     localStorage.removeItem("customer");
     setCustomer(null);

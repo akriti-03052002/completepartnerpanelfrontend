@@ -1,3 +1,4 @@
+import { endSession } from "../services/session";
 import { createContext, useContext, useState, useCallback } from "react";
 
 const AdminAuthContext = createContext(null);
@@ -15,12 +16,13 @@ export function AdminAuthProvider({ children }) {
   const [user, setUser] = useState(() => readStored("adminUser"));
 
   const setSession = useCallback((data) => {
-    localStorage.setItem("adminToken", data.token);
+    localStorage.setItem("adminToken", data.token || "cookie");
     localStorage.setItem("adminUser", JSON.stringify(data.user));
     setUser(data.user);
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await endSession("admin");
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminUser");
     setUser(null);

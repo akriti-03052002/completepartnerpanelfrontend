@@ -31,8 +31,8 @@ export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(null);
   const openTop = collapsed === currentTop ? null : currentTop;
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    try { await logout(); } catch (error) { window.alert(error.message); return; }
     navigate("/admin/login", { replace: true });
   };
 

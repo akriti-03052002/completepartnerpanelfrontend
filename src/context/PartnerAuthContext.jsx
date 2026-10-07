@@ -1,3 +1,4 @@
+import { endSession } from "../services/session";
 import { createContext, useContext, useState, useCallback } from "react";
 
 const PartnerAuthContext = createContext(null);
@@ -16,14 +17,15 @@ export function PartnerAuthProvider({ children }) {
   const [user, setUser] = useState(() => readStored("partnerUser"));
 
   const setSession = useCallback((data) => {
-    localStorage.setItem("partnerToken", data.token);
+    localStorage.setItem("partnerToken", data.token || "cookie");
     localStorage.setItem("partner", JSON.stringify(data.partner));
     localStorage.setItem("partnerUser", JSON.stringify(data.user));
     setPartner(data.partner);
     setUser(data.user);
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await endSession("partner");
     localStorage.removeItem("partnerToken");
     localStorage.removeItem("partner");
     localStorage.removeItem("partnerUser");

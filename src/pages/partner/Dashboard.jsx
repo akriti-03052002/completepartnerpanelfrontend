@@ -14,6 +14,8 @@ export default function Dashboard() {
   const partnerType = partner?.partnerType?.trim().toLowerCase();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
 
   // Reseller is billed on purchased licenses, not commission/subscription
   // stats — /partner/dashboard below is shaped for the commission-earning
@@ -26,12 +28,17 @@ export default function Dashboard() {
     // `loading`/`data` are ever read, so there's nothing to fetch or
     // reset here for that case.
     if (isReseller) return;
-    api.get("/partner/dashboard").then((res) => setData(res.data.data)).finally(() => setLoading(false));
-  }, [isReseller]);
+    let active = true;
+    api.get("/partner/dashboard").then((res) => { if (active) { setData(res.data.data); setError(""); } })
+      .catch(() => { if (active) setError("Could not load your dashboard. Please try again."); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [isReseller, retry, partner?.id, partner?._id]);
 
   if (isReseller) return <ResellerDashboard />;
 
   if (loading) return <p className="text-slate-400 text-sm">Loading dashboard...</p>;
+  if (error) return <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error} <button onClick={() => { setLoading(true); setRetry(v => v + 1); }} className="font-semibold underline">Try again</button></div>;
   if (!data) return null;
 
   const { partnerStatus, partnerRejectionReason, kycStatus, bankStatus, profileComplete, recentActivity, commissionTrend } = data;

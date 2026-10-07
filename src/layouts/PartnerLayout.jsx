@@ -71,8 +71,8 @@ export default function PartnerLayout() {
     return () => window.removeEventListener("focus", onFocus);
   }, []);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    try { await logout(); } catch (error) { window.alert(error.message); return; }
     navigate("/partner/login", { replace: true });
   };
 

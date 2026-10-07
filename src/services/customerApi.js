@@ -1,3 +1,4 @@
+import { API_BASE } from "./session";
 import { mutationFeedback } from "./mutationFeedback";
 import axios from "axios";
 
@@ -6,16 +7,18 @@ import axios from "axios";
 const customerApi = axios.create({
   // Same API address as the partner and admin clients — a hardcoded
   // ":5000" here only ever worked on a developer's own machine.
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  baseURL: API_BASE,
+  withCredentials: true,
   headers: {
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
+    "X-Session-Mode": "cookie"
   }
 });
 
 customerApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("customerToken");
 
-  if (token) {
+  if (token && token !== "cookie") {
     config.headers.Authorization = `Bearer ${token}`;
   }
 

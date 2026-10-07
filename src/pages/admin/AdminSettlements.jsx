@@ -1,3 +1,4 @@
+import Pagination from "../../components/ui/Pagination";
 import { useSessionState } from "../../hooks/useSessionState";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -58,6 +59,10 @@ const timeAgo = (date) => {
 };
 
 export default function AdminSettlements() {
+  const [page, setPage] = useSessionState("page", 1);
+  const [pagination, setPagination] = useState(null);
+  const [summary, setSummary] = useState(null);
+  const todayStart = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
   const [settlements, setSettlements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastFetchedAt, setLastFetchedAt] = useState(null);
@@ -69,7 +74,7 @@ export default function AdminSettlements() {
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedType = searchParams.get("partnerType") || "";
   const partnerTypeFilter = PARTNER_TYPES.includes(requestedType) ? requestedType : "";
-  const setPartnerTypeFilter = (type) => setSearchParams(type ? { partnerType: type } : {});
+  const setPartnerTypeFilter = (type) => { setPage(1); setSearchParams(type ? { partnerType: type } : {}); };
   const [partnerFilterId, setPartnerFilterId] = useState("");
   const [filterPartners, setFilterPartners] = useState([]);
   const [loadError, setLoadError] = useState("");
@@ -90,16 +95,16 @@ export default function AdminSettlements() {
     setLoadError("");
     return adminApi.get("/admin/settlements", {
       params: {
-        partnerType: partnerTypeFilter || undefined,
+        page, limit: 50, todayStart, partnerType: partnerTypeFilter || undefined,
         partnerId: partnerFilterId || undefined
       }
     })
-      .then((res) => { setSettlements(res.data.data); setLastFetchedAt(new Date()); })
+      .then((res) => { setSettlements(res.data.data); setPagination(res.data.pagination); setSummary(res.data.summary || null); setLastFetchedAt(new Date()); })
       .catch((err) => setLoadError(err.response?.data?.message || "Couldn't load settlements."))
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, [partnerTypeFilter, partnerFilterId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, [partnerTypeFilter, partnerFilterId, page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Live data: the list (and the open settlement's detail, bill and
   // history) reloads quietly every few seconds and whenever this tab is
@@ -109,9 +114,9 @@ export default function AdminSettlements() {
   useAutoRefresh(() => {
     if (payModal || reasonModal) return;
     adminApi.get("/admin/settlements", {
-      params: { partnerType: partnerTypeFilter || undefined, partnerId: partnerFilterId || undefined }
+      params: { page, limit: 50, todayStart, partnerType: partnerTypeFilter || undefined, partnerId: partnerFilterId || undefined }
     })
-      .then((res) => { setSettlements(res.data.data); setLastFetchedAt(new Date()); setLoadError(""); })
+      .then((res) => { setSettlements(res.data.data); setPagination(res.data.pagination); setSummary(res.data.summary || null); setLastFetchedAt(new Date()); setLoadError(""); })
       .catch(() => {});
     if (activeId) {
       adminApi.get(`/admin/settlements/${activeId}`).then((res) => setDetail(res.data.data)).catch(() => {});
@@ -152,10 +157,12 @@ export default function AdminSettlements() {
     }
   };
 
-  const previousPayout = useMemo(
+  const previousPagePayout = useMemo(
     () => [...settlements].filter((s) => s.partnerId && s.status === "paid").sort((a, b) => new Date(b.payment?.paidAt || 0) - new Date(a.payment?.paidAt || 0))[0],
     [settlements]
   );
+
+  const previousPayout = summary ? summary.previousPayout : previousPagePayout;
 
   const todaysPayoutTotal = useMemo(
     () => settlements.filter((s) => s.partnerId && isToday(s.payment?.paidAt)).reduce((sum, s) => sum + (s.amount?.net || 0), 0),
@@ -343,18 +350,18 @@ export default function AdminSettlements() {
             icon={History}
             iconTone="bg-emerald-50 text-emerald-600"
             label="Today's Payouts"
-            primary={money(todaysPayoutTotal)}
+            primary={money(summary?.today ?? todaysPayoutTotal)}
           />
           <OverviewItem
             icon={Info}
             iconTone="bg-amber-50 text-amber-600"
             label="Ready to Pay"
-            primary={`${pendingApproval.count} settlement${pendingApproval.count === 1 ? "" : "s"}`}
-            secondary={money(pendingApproval.amount)}
+            primary={`${summary?.pendingCount ?? pendingApproval.count} payments`}
+            secondary={money(summary?.pendingAmount ?? pendingApproval.amount)}
           />
           <div className="pt-4 lg:pt-0 lg:pl-6">
             <p className="text-sm text-slate-500 underline decoration-slate-300 underline-offset-4">Payouts Owed to Partners</p>
-            <p className="text-3xl font-bold text-slate-900 mt-2">{money(totalOwed)}</p>
+            <p className="text-3xl font-bold text-slate-900 mt-2">{money(summary?.totalOwed ?? totalOwed)}</p>
           </div>
         </div>
       </Card>}
@@ -373,7 +380,7 @@ export default function AdminSettlements() {
               <option value="">All partner types</option>
               {PARTNER_TYPES.map((type) => <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>)}
             </Select>
-            <Select value={partnerFilterId} onChange={(e) => { setPartnerFilterId(e.target.value); setStatusFilter("all"); }} className="w-56">
+            <Select value={partnerFilterId} onChange={(e) => { setPage(1); setPartnerFilterId(e.target.value); setStatusFilter("all"); }} className="w-56">
               <option value="">All partners</option>
               {filterPartners.map((p) => (
                 <option key={p._id} value={p._id}>{p.legalEntity?.businessName || p.partnerCode} ({p.partnerCode})</option>
@@ -515,7 +522,8 @@ export default function AdminSettlements() {
             />
             </div>
           )}
-        </Card>}
+          {!loading && pagination && <><p className="px-4 text-xs text-slate-500">List search and filters apply to this page. Summary amounts include all matching partners.</p><Pagination {...pagination} onChange={setPage} /></>}
+      </Card>}
       </div>
 
       {activeId && (

@@ -1,3 +1,4 @@
+import Pagination from "../../components/ui/Pagination";
 import { useSessionState } from "../../hooks/useSessionState";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -21,6 +22,8 @@ const earningLabel = (partnerType) => ({
 }[partnerType] || "Commission");
 
 export default function AdminCommissions() {
+  const [page, setPage] = useSessionState("page", 1);
+  const [pagination, setPagination] = useState(null);
   const [commissions, setCommissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useSessionState("status", "");
@@ -28,18 +31,18 @@ export default function AdminCommissions() {
   // has none; Influencer / Affiliate / Vendor each put theirs in the address.
   const [searchParams, setSearchParams] = useSearchParams();
   const partnerType = searchParams.get("partnerType") || "";
-  const setPartnerType = (type) => setSearchParams(type ? { partnerType: type } : {});
+  const setPartnerType = (type) => { setPage(1); setSearchParams(type ? { partnerType: type } : {}); };
   const [loadError, setLoadError] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let active = true;
     adminApi.get("/admin/commissions", {
-      params: { status: status || undefined, partnerType: partnerType || undefined }
+      params: { page, limit: 50, status: status || undefined, partnerType: partnerType || undefined }
     })
       .then((res) => {
         if (!active) return;
-        setCommissions(res.data.data);
+        setCommissions(res.data.data); setPagination(res.data.pagination || null);
         setLoadError("");
       })
       .catch((err) => {
@@ -49,15 +52,15 @@ export default function AdminCommissions() {
         if (active) setLoading(false);
       });
     return () => { active = false; };
-  }, [status, partnerType, reloadKey]);
+  }, [status, partnerType, reloadKey, page]);
 
   // Kept live, so a commission created by a payment or approval elsewhere
   // appears on its own.
   useAutoRefresh(() => {
     adminApi.get("/admin/commissions", {
-      params: { status: status || undefined, partnerType: partnerType || undefined }
+      params: { page, limit: 50, status: status || undefined, partnerType: partnerType || undefined }
     })
-      .then((res) => { setCommissions(res.data.data); setLoadError(""); })
+      .then((res) => { setCommissions(res.data.data); setPagination(res.data.pagination || null); setLoadError(""); })
       .catch(() => {});
   });
 
@@ -103,7 +106,7 @@ export default function AdminCommissions() {
               <option key={type || "all"} value={type}>{type ? type[0].toUpperCase() + type.slice(1) : "All partner types"}</option>
             ))}
           </Select>
-          <Select value={status} onChange={(e) => setStatus(e.target.value)} className="w-48">
+          <Select value={status} onChange={(e) => { setPage(1); setStatus(e.target.value); }} className="w-48">
             {STATUSES.map((s) => <option key={s || "all"} value={s}>{s ? s.replace(/_/g, " ") : "All statuses"}</option>)}
           </Select>
         </div>
@@ -153,6 +156,7 @@ export default function AdminCommissions() {
                 }
               ]}
             />
+            {pagination && <Pagination {...pagination} onChange={(value) => { setLoading(true); setPage(value); }} />}
           </div>
         )}
       </Card>

@@ -18,7 +18,7 @@ export default function CustomerPortalLogin() {
     setSubmitting(true);
     try {
       const res = await customerPortalApi.post("/public/reseller-customers/login", { email, password });
-      localStorage.setItem("customerPortalToken", res.data.data.token);
+      localStorage.setItem("customerPortalToken", res.data.data.token || "cookie");
       navigate("/reseller/customer/dashboard", { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Invalid email or password.");

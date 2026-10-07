@@ -1,3 +1,4 @@
+import { endSession } from "./services/session";
 import PageGuide from "./components/ui/PageGuide";
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, Link, useLocation } from "react-router-dom";
@@ -147,7 +148,8 @@ function ResellerCustomerProtectedRoute({ children }) {
 }
 
 function ResellerCustomerPortalLayout() {
-  const logout = () => {
+  const logout = async () => {
+    try { await endSession("portal"); } catch (error) { window.alert(error.message); return; }
     localStorage.removeItem("customerPortalToken");
     queryClient.clear();
     window.location.assign("/reseller/customer/login");

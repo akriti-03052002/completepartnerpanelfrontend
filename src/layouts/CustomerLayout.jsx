@@ -18,8 +18,8 @@ export default function CustomerLayout() {
   const { customer, logout } = useCustomerAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    try { await logout(); } catch (error) { window.alert(error.message); return; }
     navigate("/customer/login", { replace: true });
   };
 
