@@ -36,7 +36,7 @@ export default function ResellerDashboard() {
   if (loadError) return <div role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{loadError} <button type="button" onClick={() => { setLoading(true); setRetry(value => value + 1); }} className="font-semibold underline">Try again</button></div>;
 
   const available = Math.max(0, (inventory?.totalPurchasedLicenses || 0) - (inventory?.totalAllocatedLicenses || 0));
-  const currentInvoice = invoices.find((i) => i.paymentStatus !== "paid");
+  const currentInvoice = invoices.filter(i => i.paymentStatus !== "paid").sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0];
   const lastPaid = invoices.find((i) => i.paymentStatus === "paid");
 
   return (
@@ -44,7 +44,7 @@ export default function ResellerDashboard() {
       <h1 className="text-2xl font-bold text-slate-900">Reseller Dashboard</h1>
       {loadError && <p role="alert" className="text-red-600">{loadError}</p>}
       {business && <BusinessOverview type="reseller" summary={business} />}
-      <Card className="p-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-semibold">{currentInvoice ? "Review your outstanding payment" : available === 0 ? "Check your screen licences" : "Manage your customers"}</h2><p className="text-sm text-slate-500 mt-1">{currentInvoice ? "Open billing to check the amount, due date and payment status." : available === 0 ? "Review your licences and request more when you need them." : `${available} licences are available for customer allocation.`}</p></div>{hasPermission(currentInvoice ? "reseller:billing:view" : available === 0 ? "reseller:inventory:view" : "reseller:customers:manage") && <Link to={currentInvoice ? "/partner/reseller/billing" : available === 0 ? "/partner/reseller/inventory" : "/partner/reseller/customers"} className="rounded-lg bg-brand-red text-white px-4 py-2 text-sm font-semibold">{currentInvoice ? "Open billing" : available === 0 ? "View licences" : "Open customers"}</Link>}</Card>
+      <Card className="p-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-semibold">{currentInvoice ? "Review your outstanding payment" : available === 0 ? "Check your screen licences" : "Manage your customers"}</h2><p className="text-sm text-slate-500 mt-1">{currentInvoice ? `Your next unpaid bill is due ${new Date(currentInvoice.dueDate).toLocaleDateString("en-IN")}. Open billing to review or pay it.` : available === 0 ? "Review your licences and request more when you need them." : `${available} licences are available for customer allocation.`}</p></div>{hasPermission(currentInvoice ? "reseller:billing:view" : available === 0 ? "reseller:inventory:view" : "reseller:customers:manage") && <Link to={currentInvoice ? "/partner/reseller/billing" : available === 0 ? "/partner/reseller/inventory" : "/partner/reseller/customers"} className="rounded-lg bg-brand-red text-white px-4 py-2 text-sm font-semibold">{currentInvoice ? "Open billing" : available === 0 ? "View licences" : "Open customers"}</Link>}</Card>
 
         {hasPermission("reseller:billing:view") && <Card className="p-6">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Billing</p>
@@ -68,11 +68,11 @@ export default function ResellerDashboard() {
         </Card>}
 
       <Card className="p-6">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Other actions</p>
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">What would you like to do?</p>
         <div className="flex flex-wrap gap-3">
-          {hasPermission("reseller:license:purchase") && <Link to="/partner/reseller/buy"><Button><span className="flex items-center gap-2"><ShoppingCart size={16} /> Request Screen Licences</span></Button></Link>}
-          {hasPermission("reseller:customers:manage") && (currentInvoice || available === 0) && <Link to="/partner/reseller/customers"><Button variant="outline"><span className="flex items-center gap-2"><Building2 size={16} /> Manage Customers</span></Button></Link>}
-          {hasPermission("reseller:inventory:view") && (currentInvoice || available > 0) && <Link to="/partner/reseller/inventory"><Button variant="outline"><span className="flex items-center gap-2"><PackageSearch size={16} /> View Screen Licences</span></Button></Link>}
+          {hasPermission("reseller:license:purchase") && <Link to="/partner/reseller/buy"><Button><span className="flex items-center gap-2"><ShoppingCart size={16} /> Request more licences</span></Button></Link>}
+          {hasPermission("reseller:customers:manage") && (currentInvoice || available === 0) && <Link to="/partner/reseller/customers"><Button variant="outline"><span className="flex items-center gap-2"><Building2 size={16} /> Assign licences to customers</span></Button></Link>}
+          {hasPermission("reseller:inventory:view") && (currentInvoice || available > 0) && <Link to="/partner/reseller/inventory"><Button variant="outline"><span className="flex items-center gap-2"><PackageSearch size={16} /> Check available licences</span></Button></Link>}
           {hasPermission("reseller:billing:view") && !currentInvoice && <Link to="/partner/reseller/billing"><Button variant="outline"><span className="flex items-center gap-2"><Receipt size={16} /> View Billing</span></Button></Link>}
         </div>
       </Card>

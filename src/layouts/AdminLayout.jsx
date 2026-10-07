@@ -1,3 +1,4 @@
+import PageLocation from "../components/ui/PageLocation";
 import PageGuide from "../components/ui/PageGuide";
 import { useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -158,6 +159,7 @@ export default function AdminLayout() {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 min-h-0">
+        <a href="#admin-main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-3 focus:text-brand-red">Skip to page content</a>
         <header className="h-16 shrink-0 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6">
           <button aria-label="Open admin navigation" className="lg:hidden text-slate-500 hover:text-brand-black" onClick={() => setSidebarOpen(true)}>
             <Menu size={22} />
@@ -171,7 +173,8 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <main id="admin-main" tabIndex={-1} className="flex-1 overflow-y-auto p-4 sm:p-6 outline-none">
+          <PageLocation />
           <PageGuide />
           <Outlet context={{ setViewedPartnerType }} />
         </main>

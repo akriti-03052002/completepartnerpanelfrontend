@@ -1,7 +1,8 @@
+import PageLocation from "./components/ui/PageLocation";
 import { endSession } from "./services/session";
 import PageGuide from "./components/ui/PageGuide";
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Navigate, Outlet, Link, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet, NavLink, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { PartnerAuthProvider, usePartnerAuth } from "./context/PartnerAuthContext";
@@ -159,14 +160,14 @@ function ResellerCustomerPortalLayout() {
     <div className="min-h-screen bg-light-grey">
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <nav className="flex items-center gap-5 text-sm font-medium">
-            <Link to="/reseller/customer/dashboard" className="text-slate-700 hover:text-brand-red">Account</Link>
-            <Link to="/reseller/customer/screens" className="text-slate-700 hover:text-brand-red">Screens</Link>
+          <nav aria-label="Customer account navigation" className="flex items-center gap-5 text-sm font-medium">
+            <NavLink to="/reseller/customer/dashboard" className={({ isActive }) => isActive ? "text-brand-red font-semibold underline underline-offset-4" : "text-slate-700 hover:text-brand-red"}>Account</NavLink>
+            <NavLink to="/reseller/customer/screens" className={({ isActive }) => isActive ? "text-brand-red font-semibold underline underline-offset-4" : "text-slate-700 hover:text-brand-red"}>Screens</NavLink>
           </nav>
           <button type="button" onClick={logout} className="text-sm text-slate-500 hover:text-slate-900">Log out</button>
         </div>
       </header>
-      <main className="max-w-5xl mx-auto p-4 sm:p-6"><PageGuide /><Outlet /></main>
+      <main className="max-w-5xl mx-auto p-4 sm:p-6"><PageLocation /><PageGuide /><Outlet /></main>
     </div>
   );
 }

@@ -8,11 +8,14 @@ const VARIANTS = {
 export default function Button({ variant = "primary", loading = false, className = "", children, disabled, ...props }) {
   return (
     <button
-      className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed ${VARIANTS[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 min-h-11 px-4 py-2.5 rounded-xl font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed ${VARIANTS[variant]} ${className}`}
+      aria-busy={loading || undefined}
       disabled={loading || disabled}
       {...props}
     >
-      {loading ? "Please wait..." : children}
+      {loading && <span aria-hidden="true" className="h-4 w-4 rounded-full border-2 border-current border-r-transparent animate-spin shrink-0" />}
+      {children}
+      {loading && <span className="sr-only">In progress</span>}
     </button>
   );
 }

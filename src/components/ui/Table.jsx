@@ -17,13 +17,13 @@ export default function Table({ columns, rows, empty = "Nothing to show yet.", s
   return (
     <div>
       {searchable && <ListToolbar toolbar={toolbar} placeholder={searchPlaceholder} className="p-3 border-b border-slate-100" />}
-      {cardColumns && <div className="sm:hidden divide-y divide-slate-100">{hasRows ? visibleRows.map((row, index) => <div key={row._id || index} className="p-4 space-y-3">{columns.filter((column) => cardColumns.includes(column.key)).map((column) => <div key={column.key} className="flex items-start justify-between gap-4 text-sm"><span className="text-slate-500 shrink-0">{column.header}</span><div className="text-right min-w-0 break-words flex-1">{column.render ? column.render(row) : row[column.key]}</div></div>)}</div>) : <div className="p-6 text-sm text-slate-400">{searchable && toolbar.active ? "Nothing matches your search or filters." : <>{empty}{emptyAction && <div className="mt-3">{emptyAction}</div>}</>}</div>}</div>}
+      {cardColumns && <div className="sm:hidden divide-y divide-slate-100">{hasRows ? visibleRows.map((row, index) => <div key={row._id || index} className="p-4 space-y-3">{columns.filter((column) => cardColumns.includes(column.key)).map((column) => <div key={column.key} className="flex items-start justify-between gap-4 text-sm"><span className="text-slate-500 shrink-0">{column.header}</span><div className="text-right min-w-0 break-words flex-1">{column.render ? column.render(row) : row[column.key]}</div></div>)}</div>) : <div className="p-6 text-sm text-slate-400">{searchable && toolbar.active ? <><p>Nothing matches your search or filters.</p><button type="button" onClick={toolbar.onClear} className="mt-3 text-brand-red font-semibold hover:underline">Reset search and filters</button></> : <>{empty}{emptyAction && <div className="mt-3">{emptyAction}</div>}</>}</div>}</div>}
       <div className={`overflow-x-auto ${cardColumns ? "hidden sm:block" : ""}`}>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-200 text-left text-slate-500">
               {columns.map((col) => (
-                <th key={col.key} className="py-3 px-4 font-medium whitespace-nowrap">{col.header}</th>
+                <th scope="col" key={col.key} className="py-3 px-4 font-medium whitespace-nowrap">{col.header}</th>
               ))}
             </tr>
           </thead>
@@ -41,7 +41,7 @@ export default function Table({ columns, rows, empty = "Nothing to show yet.", s
             ) : (
               <tr>
                 <td colSpan={columns.length} className="text-center py-16 text-slate-400 text-sm">
-                  {searchable && toolbar.active ? "Nothing matches your search or filters." : <>{empty}{emptyAction && <div className="mt-3">{emptyAction}</div>}</>}
+                  {searchable && toolbar.active ? <><p>Nothing matches your search or filters.</p><button type="button" onClick={toolbar.onClear} className="mt-3 text-brand-red font-semibold hover:underline">Reset search and filters</button></> : <>{empty}{emptyAction && <div className="mt-3">{emptyAction}</div>}</>}
                 </td>
               </tr>
             )}

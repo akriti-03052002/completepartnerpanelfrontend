@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import adminApi from "../../services/adminApi";
 import Button from "../ui/Button";
@@ -6,9 +6,26 @@ import Button from "../ui/Button";
 // Lets an admin actually look at the uploaded file before deciding —
 // verify/reject used to be a blind call off just the filename.
 export default function DocumentPreviewModal({ doc, onClose, onVerify, onReject, client = adminApi, downloadPath }) {
+  const panel = useRef(null);
+  const [retry, setRetry] = useState(0);
   const [fileUrl, setFileUrl] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const previous = document.activeElement;
+    panel.current?.querySelector('button[aria-label="Close"]')?.focus();
+    const keyboard = event => {
+      if (event.key === "Escape" && !busy) { event.preventDefault(); onClose(); }
+      if (event.key !== "Tab") return;
+      const elements = [...panel.current.querySelectorAll('button:not(:disabled), a[href], iframe, [tabindex="0"]')];
+      const first = elements[0], last = elements[elements.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener("keydown", keyboard);
+    return () => { document.removeEventListener("keydown", keyboard); previous?.focus(); };
+  }, [onClose, busy]);
 
   useEffect(() => {
     let objectUrl;
@@ -19,6 +36,7 @@ export default function DocumentPreviewModal({ doc, onClose, onVerify, onReject,
         if (cancelled) return;
         objectUrl = window.URL.createObjectURL(res.data);
         setFileUrl(objectUrl);
+        setError("");
       })
       .catch(() => { if (!cancelled) setError("Couldn't load a preview of this file."); });
 
@@ -26,7 +44,7 @@ export default function DocumentPreviewModal({ doc, onClose, onVerify, onReject,
       cancelled = true;
       if (objectUrl) window.URL.revokeObjectURL(objectUrl);
     };
-  }, [doc._id, client, downloadPath]);
+  }, [doc._id, client, downloadPath, retry]);
 
   const isImage = doc.file.mimeType?.startsWith("image/");
   const isPdf = doc.file.mimeType === "application/pdf";
@@ -36,6 +54,8 @@ export default function DocumentPreviewModal({ doc, onClose, onVerify, onReject,
     try {
       await onVerify(doc._id);
       onClose();
+    } catch (error) {
+      setError(error.response?.data?.message || "Could not save the review. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -48,6 +68,8 @@ export default function DocumentPreviewModal({ doc, onClose, onVerify, onReject,
     try {
       await onReject(doc._id, reason);
       onClose();
+    } catch (error) {
+      setError(error.response?.data?.message || "Could not save the review. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -55,7 +77,7 @@ export default function DocumentPreviewModal({ doc, onClose, onVerify, onReject,
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-      <div role="dialog" aria-modal="true" aria-label="Document preview" className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+      <div ref={panel} role="dialog" aria-modal="true" aria-label="Document preview" className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 shrink-0">
           <div>
             <p className="text-sm font-semibold text-slate-900 capitalize">{doc.documentType.replace(/_/g, " ")}</p>
@@ -67,7 +89,7 @@ export default function DocumentPreviewModal({ doc, onClose, onVerify, onReject,
         </div>
 
         <div className="flex-1 min-h-0 overflow-auto bg-slate-50 flex items-center justify-center p-4">
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <div role="alert" className="text-sm text-red-600">{error} {!fileUrl && <button type="button" onClick={() => setRetry(value => value + 1)} className="ml-2 font-semibold underline">Retry preview</button>}</div>}
           {!error && !fileUrl && <p className="text-sm text-slate-400">Loading preview...</p>}
           {fileUrl && isImage && (
             <img src={fileUrl} alt={doc.file.originalName} className="max-w-full max-h-[60vh] object-contain rounded-lg" />

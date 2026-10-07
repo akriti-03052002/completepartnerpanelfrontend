@@ -23,8 +23,8 @@ export default function ListToolbar({ toolbar, placeholder = "Search", className
       ))}
       {toolbar.active && (
         <div className="flex items-center gap-3 sm:ml-auto">
-          <span className="text-xs text-slate-400 shrink-0">{toolbar.shown} of {toolbar.total}</span>
-          <button type="button" onClick={toolbar.onClear} className="text-xs font-semibold text-brand-red hover:underline shrink-0">Clear</button>
+          <span className="text-xs text-slate-400 shrink-0">{toolbar.shown} of {toolbar.total} results</span>
+          <button type="button" onClick={toolbar.onClear} className="text-xs font-semibold text-brand-red hover:underline shrink-0">Reset filters</button>
         </div>
       )}
     </div>
