@@ -1,7 +1,7 @@
 import PartnerCustomers from "../../components/admin/partner/PartnerCustomers";
 import PartnerProfileSummary from "../../components/admin/partner/PartnerProfileSummary";
 import { useEffect, useState } from "react";
-import { NavLink, Navigate, useOutletContext, useParams } from "react-router-dom";
+import { NavLink, Navigate, useNavigate, useOutletContext, useParams } from "react-router-dom";
 import adminApi from "../../services/adminApi";
 import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
@@ -59,6 +59,7 @@ const actorLabel = (type) => ({ spotx_user: "SPOTX", partner_user: "Partner" }[t
 // (/admin/partners/:id/:section); which tabs exist depends on the partner's
 // type — see partnerSections.js.
 export default function AdminPartnerDetail() {
+  const navigate = useNavigate();
   const { id, section: sectionParam } = useParams();
   const [data, setData] = useState(null);
   const activityList = useListFilter(data?.activity, [
@@ -246,13 +247,14 @@ export default function AdminPartnerDetail() {
         </div>
       )}
 
-      <nav className="flex gap-1 overflow-x-auto border-b border-slate-200" aria-label="Partner sections">
+      <label className="block sm:hidden text-sm font-medium">Profile section<select aria-label="Profile section" value={tab} onChange={(event) => navigate(partnerSectionPath(id, event.target.value))} className="mt-2 w-full rounded-xl border border-slate-200 bg-white p-3">{sections.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}</select></label>
+      <nav className="hidden sm:flex flex-wrap gap-1 border-b border-slate-200" aria-label="Partner sections">
         {sections.map((s) => (
           <NavLink
             key={s.key}
             to={partnerSectionPath(id, s.key)}
             end
-            className={({ isActive }) => `inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold whitespace-nowrap border-b-2 -mb-px transition ${
+            className={({ isActive }) => `inline-flex items-center gap-2 px-3 py-2.5 text-sm font-semibold whitespace-nowrap border-b-2 -mb-px transition ${
               isActive ? "border-brand-red text-slate-900" : "border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300"
             }`}
           >

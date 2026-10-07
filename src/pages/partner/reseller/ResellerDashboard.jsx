@@ -35,10 +35,11 @@ export default function ResellerDashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-900">Reseller Dashboard</h1>
+      <Card className="p-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-semibold">{currentInvoice ? "Review your outstanding payment" : available === 0 ? "Check your screen licences" : "Manage your customers"}</h2><p className="text-sm text-slate-500 mt-1">{currentInvoice ? "Open billing to check the amount, due date and payment status." : available === 0 ? "Review your licences and request more when you need them." : `${available} licences are available for customer allocation.`}</p></div><Link to={currentInvoice ? "/partner/reseller/billing" : available === 0 ? "/partner/reseller/inventory" : "/partner/reseller/customers"} className="rounded-lg bg-brand-red text-white px-4 py-2 text-sm font-semibold">{currentInvoice ? "Open billing" : available === 0 ? "View licences" : "Open customers"}</Link></Card>
 
       <Card className="p-6">
         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">
-          License Inventory <span className="normal-case font-normal text-slate-400">— Purchased is what SPOTX bills you on</span>
+          Screen licences <span className="normal-case font-normal text-slate-400">— Purchased is what SPOTX bills you on</span>
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           <Stat label="Purchased" value={inventory?.totalPurchasedLicenses || 0} highlight />

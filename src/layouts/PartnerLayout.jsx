@@ -21,7 +21,7 @@ const NAV_ITEMS = [
   { to: "/partner/post-reel", label: "Post / Reel", icon: Clapperboard, permission: "profile:view", partnerTypes: ["influencer"] },
   { to: "/partner/commissions", label: "Content Earnings", icon: Wallet, permission: "commissions:view", partnerTypes: ["influencer"], locked: true },
   { to: "/partner/commissions", label: "Customer Commissions", icon: Wallet, permission: "commissions:view", partnerTypes: ["vendor"], locked: true },
-  { to: "/partner/settlements", label: "Settlements", icon: Landmark, permission: "settlements:view", partnerTypes: ["influencer", "affiliate", "vendor"], locked: true },
+  { to: "/partner/settlements", label: "Payments to You", icon: Landmark, permission: "settlements:view", partnerTypes: ["influencer", "affiliate", "vendor"], locked: true },
 
   { to: "/partner/deals", label: "Deals", icon: Briefcase, permission: "referrals:view", partnerTypes: ["affiliate"], locked: true },
   { to: "/partner/commissions", label: "Referral Rewards", icon: Wallet, permission: "commissions:view", partnerTypes: ["affiliate"], locked: true },
@@ -35,7 +35,7 @@ const NAV_ITEMS = [
   { to: "/partner/customers", label: "Customers", icon: Building2, permission: "customers:view", partnerTypes: ["vendor"], locked: true },
 
   { to: "/partner/team", label: "Team", icon: UserCog, permission: "team:view", partnerTypes: ["affiliate", "vendor", "reseller"], locked: true },
-  { to: "/partner/documents", label: "Documents", icon: FileText, permission: "documents:view", partnerTypes: ALL_PARTNER_TYPES },
+  { to: "/partner/documents", label: "Identity Documents", icon: FileText, permission: "documents:view", partnerTypes: ALL_PARTNER_TYPES },
   { to: "/partner/bank", label: "Bank Account", icon: Landmark, permission: "bank:view", partnerTypes: ALL_PARTNER_TYPES },
   { to: "/partner/notifications", label: "Notifications", icon: Bell, permission: "notifications:view", partnerTypes: ALL_PARTNER_TYPES },
   { to: "/partner/profile", label: "Profile", icon: UserCircle, permission: "profile:view", partnerTypes: ALL_PARTNER_TYPES }

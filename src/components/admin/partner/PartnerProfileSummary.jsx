@@ -37,6 +37,12 @@ export default function PartnerProfileSummary({ partner, documents = [], require
   if (type === "reseller" && summary.orders?.requested?.count) checks.push({ title: "Licence orders", done: false, note: `${summary.orders.requested.count} awaiting approval`, to: path("details") });
   if (summary.earnings?.pending?.count) checks.push({ title: "Earnings approval", done: false, note: `${summary.earnings.pending.count} pending`, to: path("rewards") });
   if (summary.pendingCommissionPayments) checks.push({ title: "Commission recovery", done: false, note: `${summary.pendingCommissionPayments} paid payments awaiting commission`, to: path("details") });
+  const pending = checks.filter((check) => !check.done);
+  const next = pending[0];
+  if (compact) return <Card className="p-4 flex flex-wrap items-center justify-between gap-3">
+    <div><p className="text-sm font-semibold">{next ? `Next: ${next.title}` : "Verification checklist complete"}</p><p className="text-xs text-slate-500 mt-1">{next ? next.note : "No outstanding items in this checklist."} {pending.length > 0 ? `(${pending.length} items need attention)` : ""}</p></div>
+    <Link to={next?.to || path("overview")} className="text-sm font-semibold text-brand-red">{next ? "Open next step" : "View overview"}</Link>
+  </Card>;
   const earned = amount(Object.fromEntries(Object.entries(summary.earnings || {}).filter(([status]) => status !== "cancelled")));
   const paid = summary.earnings?.settled?.amount || 0;
   let business = 0, successes, note;
@@ -64,7 +70,9 @@ export default function PartnerProfileSummary({ partner, documents = [], require
     <Card className="p-5">
       <div className="flex flex-wrap justify-between gap-3"><h2 className="font-semibold">Verification and approvals</h2><Badge status={partner.verification?.overallStatus || "not_submitted"} /></div>
       <p className="text-sm text-slate-500 mt-1">{checks.filter((c) => !c.done).length} items need attention. Account: {label(partner.status)}.</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mt-4">{checks.map((c) => <Link key={c.title} to={c.to} className={`rounded-xl border p-3 ${c.done ? "border-emerald-100 bg-emerald-50" : "border-amber-100 bg-amber-50"}`}><p className="text-sm font-medium">{c.done ? "\u2713" : "\u25CB"} {c.title}</p><p className="text-xs text-slate-600 mt-1">{c.note}</p></Link>)}</div>
+      {next && <div className="mt-4 p-4 rounded-xl bg-slate-50 flex flex-wrap items-center justify-between gap-3"><div><p className="font-semibold text-sm">Start here: {next.title}</p><p className="text-sm text-slate-500 mt-1">{next.note}</p></div><Link to={next.to} className="px-4 py-2 rounded-lg bg-brand-red text-white text-sm font-semibold">Open next step</Link></div>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mt-4">{pending.map((c) => <Link key={c.title} to={c.to} className={`rounded-xl border p-3 ${c.done ? "border-emerald-100 bg-emerald-50" : "border-amber-100 bg-amber-50"}`}><p className="text-sm font-medium">{c.done ? "\u2713" : "\u25CB"} {c.title}</p><p className="text-xs text-slate-600 mt-1">{c.note}</p></Link>)}</div>
+      {checks.some((c) => c.done) && <details className="mt-4"><summary className="cursor-pointer text-sm text-emerald-700">View {checks.filter((c) => c.done).length} completed checks</summary><div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">{checks.filter((c) => c.done).map((c) => <Link key={c.title} to={c.to} className="rounded-lg bg-emerald-50 p-3 text-sm">{c.title}<span className="block text-xs text-slate-500 mt-1">{c.note}</span></Link>)}</div></details>}
     </Card>
     {!compact && <>
       <Card className="p-5"><h2 className="font-semibold">{rating}</h2><p className="text-sm text-slate-500 mt-1">{note}</p><p className="text-xs text-slate-400 mt-2">Indicator uses lifetime totals: great contribution means {type === "influencer" ? "10 approved posts/reels" : "INR 100,000 of recorded business"} or more.</p></Card>

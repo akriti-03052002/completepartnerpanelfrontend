@@ -100,16 +100,16 @@ export const ADMIN_NAV = [
   { key: "licence", label: "Payment from Licence", icon: Receipt, to: "/admin/licence-payments" },
   {
     key: "settlement",
-    label: "Settlement",
+    label: "Partner Payments",
     icon: Landmark,
     to: "/admin/settlements",
     prefixes: ["/admin/settlements"],
     children: [
-      { to: "/admin/settlements", label: "All Settlements" },
+      { to: "/admin/settlements", label: "All Partner Payments" },
       ...EARNING_TYPES.map(({ type, label }) => ({ to: `/admin/settlements?partnerType=${type}`, label }))
     ]
   },
-  { key: "kyc", label: "KYC Review", icon: FileCheck, to: "/admin/documents" },
+  { key: "kyc", label: "Identity Review (KYC)", icon: FileCheck, to: "/admin/documents" },
   { key: "bank", label: "Bank Review", icon: Landmark, to: "/admin/bank" },
   { key: "config", label: "Screen Pricing", icon: SlidersHorizontal, to: "/admin/config" }
 ];

@@ -6,6 +6,7 @@ import { useListFilter } from "../../hooks/useListFilter";
 // sets `filter: (row) => value` also gets a pick-list of that column's
 // values. Pass `searchable={false}` for a table that should have neither.
 export default function Table({ columns, rows, empty = "Nothing to show yet.", searchable = true, searchPlaceholder = "Search", mobileColumns }) {
+  const cardColumns = mobileColumns || columns.map((column) => column.key);
   const filters = searchable
     ? columns.filter((col) => col.filter).map((col) => ({ label: col.filterLabel || col.header, value: col.filter }))
     : [];
@@ -16,8 +17,8 @@ export default function Table({ columns, rows, empty = "Nothing to show yet.", s
   return (
     <div>
       {searchable && <ListToolbar toolbar={toolbar} placeholder={searchPlaceholder} className="p-3 border-b border-slate-100" />}
-      {mobileColumns && <div className="sm:hidden divide-y divide-slate-100">{hasRows ? visibleRows.map((row, index) => <div key={row._id || index} className="p-4 space-y-3">{columns.filter((column) => mobileColumns.includes(column.key)).map((column) => <div key={column.key} className="flex items-start justify-between gap-4 text-sm"><span className="text-slate-500 shrink-0">{column.header}</span><div className="text-right min-w-0 break-words">{column.render ? column.render(row) : row[column.key]}</div></div>)}</div>) : <p className="p-6 text-sm text-slate-400">{searchable && toolbar.active ? "Nothing matches your search or filters." : empty}</p>}</div>}
-      <div className={`overflow-x-auto ${mobileColumns ? "hidden sm:block" : ""}`}>
+      {cardColumns && <div className="sm:hidden divide-y divide-slate-100">{hasRows ? visibleRows.map((row, index) => <div key={row._id || index} className="p-4 space-y-3">{columns.filter((column) => cardColumns.includes(column.key)).map((column) => <div key={column.key} className="flex items-start justify-between gap-4 text-sm"><span className="text-slate-500 shrink-0">{column.header}</span><div className="text-right min-w-0 break-words flex-1">{column.render ? column.render(row) : row[column.key]}</div></div>)}</div>) : <p className="p-6 text-sm text-slate-400">{searchable && toolbar.active ? "Nothing matches your search or filters." : empty}</p>}</div>}
+      <div className={`overflow-x-auto ${cardColumns ? "hidden sm:block" : ""}`}>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-200 text-left text-slate-500">

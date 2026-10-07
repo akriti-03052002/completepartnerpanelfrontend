@@ -25,9 +25,9 @@ const PARTNER_SECTIONS = [
   { key: "customers", label: () => "Customers", icon: Users, partnerTypes: ["vendor", "reseller"] },
   { key: "leads", label: () => "Leads", icon: Users, partnerTypes: ["affiliate"] },
   { key: "rewards", label: (type) => EARNINGS_LABEL[type] || "Earnings", icon: Trophy, partnerTypes: EARNING_TYPES },
-  { key: "settlements", label: () => "Settlements", icon: Landmark, partnerTypes: EARNING_TYPES },
-  { key: "kyc", label: () => "KYC & Bank", icon: FileCheck, partnerTypes: ALL_TYPES },
-  { key: "payout", label: () => "Payout Settings", icon: Wallet, partnerTypes: EARNING_TYPES },
+  { key: "settlements", label: () => "Partner Payments", icon: Landmark, partnerTypes: EARNING_TYPES },
+  { key: "kyc", label: () => "Identity & Bank", icon: FileCheck, partnerTypes: ALL_TYPES },
+  { key: "payout", label: () => "Payment Settings", icon: Wallet, partnerTypes: EARNING_TYPES },
   { key: "team", label: () => "Team", icon: UserCog, partnerTypes: ["affiliate", "vendor", "reseller"] },
   { key: "activity", label: () => "Activity", icon: History, partnerTypes: ALL_TYPES }
 ];
