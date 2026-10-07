@@ -76,6 +76,9 @@ export default function PartnerLayout() {
     navigate("/partner/login", { replace: true });
   };
 
+  const page = NAV_ITEMS.find(item => item.to === location.pathname && item.partnerTypes.includes(partner?.partnerType?.toLowerCase()));
+  const allowed = !page || (hasPermission(page.permission) && page.partnerTypes.includes(partner?.partnerType?.toLowerCase()));
+
   return (
     <div className="h-screen overflow-hidden flex bg-light-grey">
       {sidebarOpen && (
@@ -185,7 +188,7 @@ export default function PartnerLayout() {
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           <PageGuide partnerType={partner?.partnerType?.toLowerCase()} />
-          <Outlet />
+          {allowed ? <Outlet /> : <div role="alert" className="rounded-xl bg-white p-6"><h1 className="font-semibold">Access restricted</h1><p className="text-sm text-slate-500 mt-2">Your role cannot open this page. Choose an available page from the menu.</p></div>}
         </main>
       </div>
     </div>

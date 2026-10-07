@@ -1,8 +1,10 @@
+import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import Card from "../ui/Card";
 const count = (rows = {}) => Object.values(rows).reduce((n, row) => n + (row.count || 0), 0);
 const total = (rows = {}) => Object.values(rows).reduce((n, row) => n + (row.amount || 0), 0);
 const money = (n) => `INR ${Number(n || 0).toLocaleString("en-IN")}`;
 export default function BusinessOverview({ type, summary = {}, socialAccounts }) {
+  const { hasPermission } = usePartnerAuth();
   let tiles, note, business = 0, completed;
   if (type === "affiliate") {
     const leads = summary.leads || {};
@@ -33,11 +35,13 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
     );
     note = "Paid licence invoices show your business with SPOTX, including tax. Customer sales revenue is not recorded here.";
   }
-  if (type !== "reseller") {
+  if (type !== "reseller" && hasPermission("commissions:view")) {
     const earned = total(Object.fromEntries(Object.entries(summary.earnings || {}).filter(([s]) => s !== "cancelled")));
     const paid = summary.earnings?.settled?.amount || 0;
     tiles.push(["Your earnings", money(earned)], ["Paid to you", money(paid)], ["Awaiting payment", money(earned - paid)]);
   }
+  if (type === "reseller" && !hasPermission("reseller:billing:view")) tiles = tiles.filter(([label]) => !["Licence invoices paid", "Outstanding licence invoices"].includes(label));
+  if (type === "affiliate" && !hasPermission("referrals:view")) tiles = tiles.filter(([label]) => !["Leads you referred", "Won deals", "Deals in progress", "Business you referred"].includes(label));
   const great = type === "influencer" ? completed >= 10 : business >= 100000;
   const rating = great ? "\u{1F31F} Great contribution" : completed || business ? "\u{1F4C8} Your business is growing" : "\u{1F331} Your journey is starting";
   return <Card className="p-5 space-y-4"><div><h2 className="font-semibold text-lg">Your business overview</h2><p className="text-sm mt-1">{rating}</p><p className="text-xs text-slate-500 mt-1">Lifetime totals for your partner account only. Great contribution means {type === "influencer" ? "10 approved posts/reels" : "INR 100,000 of recorded business"} or more.</p></div><div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{tiles.map(([title, value]) => <div key={title} className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">{title}</p><p className="text-xl font-bold mt-1 break-words">{value}</p></div>)}</div><p className="text-sm text-slate-500">{note}</p></Card>;

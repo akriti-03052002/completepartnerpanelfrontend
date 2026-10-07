@@ -1,3 +1,4 @@
+import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import api from "../../services/api";
@@ -12,6 +13,8 @@ const EMPTY_FORM = { name: "", email: "", phone: "", role: "sales" };
 const ROLES = ["admin", "sales", "finance", "viewer"];
 
 export default function Team() {
+  const { hasPermission } = usePartnerAuth();
+  const canManage = hasPermission("team:manage");
   const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -55,9 +58,9 @@ export default function Team() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-900">Team</h1>
-        <Button onClick={() => setShowForm((v) => !v)}>
+        {canManage && <Button onClick={() => setShowForm((v) => !v)}>
           <span className="flex items-center gap-2"><Plus size={16} /> Invite Teammate</span>
-        </Button>
+        </Button>}
       </div>
 
       {successMessage && (
@@ -69,7 +72,7 @@ export default function Team() {
         </Card>
       )}
 
-      {showForm && (
+      {canManage && showForm && (
         <Card className="p-6">
           {error && <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
           <p className="text-sm text-slate-500 mb-4">
@@ -107,7 +110,7 @@ export default function Team() {
                 key: "actions",
                 header: "",
                 render: (m) =>
-                  m.role === "owner" ? null : (
+                  !canManage || m.role === "owner" ? null : (
                     <button onClick={() => toggleStatus(m)} className="text-xs font-semibold text-brand-red hover:underline">
                       {m.status === "blocked" ? "Unblock" : "Block"}
                     </button>

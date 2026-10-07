@@ -1,3 +1,4 @@
+import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import Pagination from "../../components/ui/Pagination";
 import { useEffect, useState } from "react";
 import { Plus, Copy, Check, Loader2 } from "lucide-react";
@@ -45,6 +46,8 @@ const subscriptionBadge = (customer) => {
 };
 
 export default function Customers() {
+  const { hasPermission } = usePartnerAuth();
+  const canManage = hasPermission("customers:manage");
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(null);
   const [partner, setPartner] = useState(null);
@@ -184,7 +187,7 @@ export default function Customers() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-900">Customers</h1>
-        {isVendor && (
+        {isVendor && canManage && (
           <Button onClick={() => setShowForm((v) => !v)}>
             <span className="flex items-center gap-2"><Plus size={16} /> Register Customer</span>
           </Button>
@@ -211,7 +214,7 @@ export default function Customers() {
         </Card>
       )}
 
-      {showForm && (
+      {canManage && showForm && (
         <Card className="p-6">
           {error && <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -337,7 +340,7 @@ export default function Customers() {
             searchable
             searchPlaceholder="Search customers by company, email or phone"
             empty="No customers yet. Add a customer to start tracking their screens and subscription."
-            emptyAction={<Button type="button" onClick={() => setShowForm(true)}>Add your first customer</Button>}
+            emptyAction={canManage && <Button type="button" onClick={() => setShowForm(true)}>Add your first customer</Button>}
             rows={customers}
             columns={[
               { key: "company", header: "Company", render: (c) => c.companyName },

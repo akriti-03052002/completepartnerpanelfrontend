@@ -10,7 +10,7 @@ import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import ResellerDashboard from "./reseller/ResellerDashboard";
 
 export default function Dashboard() {
-  const { partner } = usePartnerAuth();
+  const { partner, hasPermission } = usePartnerAuth();
   const partnerType = partner?.partnerType?.trim().toLowerCase();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,7 +55,7 @@ export default function Dashboard() {
     : { title: "Your account is active", note: "Choose a task below to manage your business.", to: partnerType === "influencer" ? "/partner/post-reel" : partnerType === "affiliate" ? "/partner/deals" : "/partner/customers", action: partnerType === "influencer" ? "Manage posts and reels" : partnerType === "affiliate" ? "Manage leads" : "Manage customers" };
   return (
     <div className="space-y-6">
-      <Card className="p-5 flex flex-wrap items-center justify-between gap-4"><div><h2 className="font-semibold">{nextStep.title}</h2><p className="text-sm text-slate-500 mt-1">{nextStep.note}</p></div><Link to={nextStep.to} className="rounded-lg bg-brand-red text-white px-4 py-2 text-sm font-semibold">{nextStep.action}</Link></Card>
+      <Card className="p-5 flex flex-wrap items-center justify-between gap-4"><div><h2 className="font-semibold">{nextStep.title}</h2><p className="text-sm text-slate-500 mt-1">{nextStep.note}</p></div>{(nextStep.to === "/partner/profile" ? hasPermission("profile:update") : nextStep.to === "/partner/documents" ? hasPermission("documents:view") : nextStep.to === "/partner/bank" ? hasPermission("bank:view") : nextStep.to === "/partner/deals" ? hasPermission("referrals:view") : nextStep.to === "/partner/customers" ? hasPermission("customers:view") : hasPermission("profile:view")) && <Link to={nextStep.to} className="rounded-lg bg-brand-red text-white px-4 py-2 text-sm font-semibold">{nextStep.action}</Link>}</Card>
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
         <div className="flex gap-4 flex-wrap">
@@ -84,7 +84,7 @@ export default function Dashboard() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="p-6 lg:col-span-2">
+        {hasPermission("commissions:view") && <Card className="p-6 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp size={18} className="text-brand-red" />
             <h2 className="font-semibold text-slate-900">{earningsTrendLabel}</h2>
@@ -103,7 +103,7 @@ export default function Dashboard() {
               </LineChart>
             </ResponsiveContainer>
           )}
-        </Card>
+        </Card>}
 
         <Card className="p-6">
           <h2 className="font-semibold text-slate-900 mb-4">Recent Activity</h2>

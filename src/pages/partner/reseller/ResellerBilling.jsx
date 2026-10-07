@@ -1,3 +1,4 @@
+import { usePartnerAuth } from "../../../context/PartnerAuthContext";
 import PaymentHistory from "../../../components/ui/PaymentHistory";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -11,6 +12,8 @@ import { Select } from "../../../components/ui/Input";
 import { waitForRazorpay } from "../../../utils/razorpayCheckout";
 
 export default function ResellerBilling() {
+  const { hasPermission } = usePartnerAuth();
+  const canPay = hasPermission("reseller:billing:pay");
   const queryClient = useQueryClient();
 
   const { data: invoices = [], isLoading: invoicesLoading, error: invoicesError } = useQuery({
@@ -109,6 +112,7 @@ export default function ResellerBilling() {
   };
 
   const handlePay = async (invoice) => {
+    if (!canPay) return;
     setError("");
     setPayingId(invoice._id);
 
@@ -233,7 +237,7 @@ export default function ResellerBilling() {
                   <div className="flex flex-col items-start gap-2">
                     <button type="button" onClick={() => setHistoryInvoice(i.invoice)} className="text-xs font-semibold text-brand-red hover:underline">Payment history</button>
                     <button type="button" disabled={breakdownLoading} onClick={() => openInvoiceBreakdown(i.invoice._id)} className="text-xs font-semibold text-brand-red hover:underline disabled:opacity-50">View details</button>
-                    {i.status !== "paid" && (i.invoice.canPayNow ? (
+                    {canPay && i.status !== "paid" && (i.invoice.canPayNow ? (
                       <Button loading={payingId === i.invoice._id} onClick={() => handlePay(i.invoice)}>Pay Now</Button>
                     ) : i.invoice.paymentMode === "online" ? (
                       <span className="text-xs text-slate-400">Online payment available later</span>
