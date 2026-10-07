@@ -1,3 +1,4 @@
+import { mutationFeedback } from "./mutationFeedback";
 import axios from "axios";
 
 // Customer-side axios instance. Attaches the customer JWT to every
@@ -22,7 +23,7 @@ customerApi.interceptors.request.use((config) => {
 });
 
 customerApi.interceptors.response.use(
-  (response) => response,
+  mutationFeedback,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("customerToken");

@@ -1,3 +1,4 @@
+import { mutationFeedback } from "./mutationFeedback";
 import axios from "axios";
 
 // Admin-side axios instance. Fully separate token/storage keys from
@@ -20,7 +21,7 @@ adminApi.interceptors.request.use((config) => {
 });
 
 adminApi.interceptors.response.use(
-  (response) => response,
+  mutationFeedback,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("adminToken");

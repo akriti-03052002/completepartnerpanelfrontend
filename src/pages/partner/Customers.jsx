@@ -333,7 +333,8 @@ export default function Customers() {
           <Table
             searchable
             searchPlaceholder="Search customers by company, email or phone"
-            empty="No customers yet."
+            empty="No customers yet. Add a customer to start tracking their screens and subscription."
+            emptyAction={<Button type="button" onClick={() => setShowForm(true)}>Add your first customer</Button>}
             rows={customers}
             columns={[
               { key: "company", header: "Company", render: (c) => c.companyName },

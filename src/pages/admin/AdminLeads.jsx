@@ -1,3 +1,4 @@
+import { useSessionState } from "../../hooks/useSessionState";
 import Pagination from "../../components/ui/Pagination";
 import { useEffect, useState } from "react";
 import adminApi from "../../services/adminApi";
@@ -23,11 +24,11 @@ const actionClass = (tone) => `text-xs font-semibold hover:underline ${
 }`;
 
 export default function AdminLeads() {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useSessionState("page", 1);
   const [paging, setPaging] = useState({ total: 0, pages: 0 });
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useSessionState("filter", "");
   const [pricePerScreen, setPricePerScreen] = useState(0);
   const [planPrices, setPlanPrices] = useState({ basic: 0, premium: 0 });
   const [winTarget, setWinTarget] = useState(null);
@@ -75,6 +76,7 @@ export default function AdminLeads() {
 
   const submitWin = async (e) => {
     e.preventDefault();
+    if (!window.confirm(`Mark this deal won and award INR ${Number(winForm.commissionAmount).toLocaleString("en-IN")} to this affiliate? The reward will be added to their earnings.`)) return;
     setError("");
     setBusy(true);
     try {

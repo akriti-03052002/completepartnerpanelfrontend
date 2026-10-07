@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useSessionState } from "./useSessionState";
 import { searchRows } from "../utils/searchRows";
 
 // "pending_approval" → "Pending approval"
@@ -21,9 +21,9 @@ const valueOf = (filter, row) => {
  * each are the values actually present in the rows, so a filter never
  * offers something that would match nothing.
  */
-export function useListFilter(rows, filters = []) {
-  const [query, setQuery] = useState("");
-  const [chosen, setChosen] = useState({});
+export function useListFilter(rows, filters = [], listKey = "list") {
+  const [query, setQuery] = useSessionState(`${listKey}:search`, "");
+  const [chosen, setChosen] = useSessionState(`${listKey}:filters`, {});
   const all = rows || [];
 
   const controls = filters

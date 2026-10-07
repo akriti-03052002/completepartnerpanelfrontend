@@ -120,7 +120,8 @@ export default function Leads() {
           <Table
             searchable
             searchPlaceholder="Search deals by company, contact or status"
-            empty="No deals referred yet."
+            empty="No leads submitted yet. Add your first lead so SPOTX can review the opportunity."
+            emptyAction={<Button type="button" onClick={() => setShowForm(true)}>Add your first lead</Button>}
             rows={leads}
             columns={[
               {

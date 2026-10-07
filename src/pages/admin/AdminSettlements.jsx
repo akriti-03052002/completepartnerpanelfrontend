@@ -247,6 +247,7 @@ export default function AdminSettlements() {
   };
 
   const confirmMarkPaid = async () => {
+    if (!window.confirm("Confirm this partner payment was completed? The settlement will be recorded as paid. This does not send money.")) return;
     setPayModal((m) => ({ ...m, submitting: true, error: "" }));
     try {
       await adminApi.patch(`/admin/settlements/${payModal.settlementId}/mark-paid`, { transactionId: payModal.paymentId.trim() });
@@ -258,6 +259,7 @@ export default function AdminSettlements() {
   };
 
   const confirmMarkPaidOffline = async () => {
+    if (!window.confirm("Record this offline payment? Confirm the method, reference and cheque clearance status match your records.")) return;
     if (!payModal.confirmed || !payModal.payoutDetails) return;
     if (!payModal.referenceNumber.trim()) {
       setPayModal((m) => ({ ...m, error: "A reference number (UTR / cheque no. / etc) is required." }));

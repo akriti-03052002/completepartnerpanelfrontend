@@ -106,6 +106,7 @@ export default function AdminPartnerDetail() {
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const applyCommission = async () => {
+    if (!window.confirm("Assign these commission terms to this vendor? Future earnings will use the new terms and a new agreement will be issued.")) return;
     setCommissionError("");
     setCommissionSuccess("");
 
@@ -144,6 +145,7 @@ export default function AdminPartnerDetail() {
   };
 
   const applyStatus = async () => {
+    if (["rejected", "suspended", "inactive"].includes(selectedStatus) && !window.confirm(`Set this partner to ${selectedStatus}? This can restrict their account and payouts. Continue?`)) return;
     let rejectionReason;
 
     if (selectedStatus === "rejected") {

@@ -1,3 +1,4 @@
+import { useSessionState } from "../../../hooks/useSessionState";
 import Pagination from "../../ui/Pagination";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -77,7 +78,7 @@ const buildList = (kind, partnerType) => {
 
 export default function PartnerRecords({ partnerId, partnerType, kind }) {
   const list = buildList(kind, partnerType);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useSessionState("page", 1);
   const [paging, setPaging] = useState(null);
   const [rows, setRows] = useState(null);
 

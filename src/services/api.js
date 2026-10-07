@@ -1,3 +1,4 @@
+import { mutationFeedback } from "./mutationFeedback";
 import axios from "axios";
 
 // Partner-side axios instance. Attaches the partner JWT to every
@@ -20,7 +21,7 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  mutationFeedback,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("partnerToken");

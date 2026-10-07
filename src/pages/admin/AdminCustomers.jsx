@@ -1,3 +1,4 @@
+import { useSessionState } from "../../hooks/useSessionState";
 import { useEffect, useState } from "react";
 import { KeyRound } from "lucide-react";
 import adminApi from "../../services/adminApi";
@@ -26,8 +27,8 @@ export default function AdminCustomers() {
   const [customers, setCustomers] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState("");
-  const [vendorId, setVendorId] = useState("");
+  const [status, setStatus] = useSessionState("status", "");
+  const [vendorId, setVendorId] = useSessionState("vendorId", "");
   const [markPaidId, setMarkPaidId] = useState(null);
   const [revenue, setRevenue] = useState("");
   const [screenCount, setScreenCount] = useState("");
@@ -65,6 +66,7 @@ export default function AdminCustomers() {
   };
 
   const submitMarkPaid = async (id) => {
+    if (!window.confirm(`Record INR ${Number(revenue).toLocaleString("en-IN")} as received? This activates the customer subscription and processes vendor commission. Confirm only after receiving payment.`)) return;
     setError("");
     setBusyId(id);
     try {
@@ -86,6 +88,7 @@ export default function AdminCustomers() {
   };
 
   const cancel = async (id) => {
+    if (!window.confirm("Cancel this customer subscription? Their active subscription access will end.")) return;
     setBusyId(id);
     try {
       await adminApi.patch(`/admin/customers/${id}/cancel`);
@@ -96,6 +99,7 @@ export default function AdminCustomers() {
   };
 
   const expire = async (id) => {
+    if (!window.confirm("Mark this subscription expired? The customer will need to renew for active access.")) return;
     setBusyId(id);
     try {
       await adminApi.patch(`/admin/customers/${id}/expire`);

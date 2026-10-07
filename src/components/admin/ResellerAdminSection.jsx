@@ -150,6 +150,7 @@ export default function ResellerAdminSection({ partnerId }) {
   };
 
   const confirmInvoiceOfflinePayment = async (paymentDetails) => {
+    if (!window.confirm("Record this licence invoice payment? Confirm the amount and payment reference have been checked.")) return;
     setInvoiceOfflineError("");
     try {
       const res = await adminApi.patch(`/admin/reseller/invoices/${verifyingInvoiceId}/verify-offline`, paymentDetails);
@@ -162,6 +163,7 @@ export default function ResellerAdminSection({ partnerId }) {
   };
 
   const adjustInventory = async () => {
+    if (!window.confirm(`Adjust this reseller licence count by ${adjustQty}? This changes available licences. Continue?`)) return;
     const qty = parseInt(adjustQty, 10);
     if (!qty || qty < 1 || !adjustReason.trim()) {
       setMessage("Enter a quantity of at least 1 and a reason for the adjustment.");

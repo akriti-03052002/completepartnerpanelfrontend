@@ -1,3 +1,4 @@
+import { useSessionState } from "../../hooks/useSessionState";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import adminApi from "../../services/adminApi";
@@ -22,7 +23,7 @@ const earningLabel = (partnerType) => ({
 export default function AdminCommissions() {
   const [commissions, setCommissions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useSessionState("status", "");
   // Which type's commission is shown comes from the menu: "All Commission"
   // has none; Influencer / Affiliate / Vendor each put theirs in the address.
   const [searchParams, setSearchParams] = useSearchParams();
@@ -65,6 +66,7 @@ export default function AdminCommissions() {
   // Approving is the only step before paying: the commission goes straight
   // into a settlement, and the reply says which one.
   const approve = async (id) => {
+    if (!window.confirm("Approve this commission? It becomes eligible for a partner payment. This does not transfer money.")) return;
     try {
       const res = await adminApi.patch(`/admin/commissions/${id}/approve`);
       toast.success(res.data.message || "Commission approved.");

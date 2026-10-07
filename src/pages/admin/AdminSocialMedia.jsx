@@ -1,3 +1,4 @@
+import { useSessionState } from "../../hooks/useSessionState";
 import Pagination from "../../components/ui/Pagination";
 import { useEffect, useState } from "react";
 import { ExternalLink, Share2 } from "lucide-react";
@@ -39,12 +40,12 @@ const POST_TABS = [
 // influencer's tab instead: the same queues, narrowed to that influencer,
 // without the page heading.
 export default function AdminSocialMedia({ view = "accounts", partnerId = "", onReviewsUpdated }) {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useSessionState("page", 1);
   const [paging, setPaging] = useState({ total: 0, pages: 0 });
   const [counts, setCounts] = useState({});
   const [accounts, setAccounts] = useState([]);
   const [submissions, setSubmissions] = useState([]);
-  const [postTab, setPostTab] = useState("pending");
+  const [postTab, setPostTab] = useSessionState("postTab", "pending");
   const [reasons, setReasons] = useState({});
   const [notes, setNotes] = useState({});
   const [ownership, setOwnership] = useState({});
