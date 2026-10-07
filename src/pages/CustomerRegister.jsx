@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, Loader2, Lock } from "lucide-react";
 import customerApi from "../services/customerApi.js";
-import { useCustomerAuth } from "../context/CustomerAuthContext";
 import Logo from "../components/ui/Logo";
 import { COUNTRIES } from "../data/countries";
 import { INDIAN_STATES } from "../data/indianStates";
@@ -14,8 +13,6 @@ const inputClass =
   "w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition";
 
 export default function CustomerRegister() {
-  const navigate = useNavigate();
-  const { setSession } = useCustomerAuth();
   const [searchParams] = useSearchParams();
   const codeFromLink = searchParams.get("ref") || "";
 
@@ -203,22 +200,10 @@ export default function CustomerRegister() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6">
         <div className="w-full max-w-md text-center bg-white border border-slate-200 rounded-3xl shadow-sm p-8">
           <CheckCircle2 size={40} className="text-green-600 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-slate-900 mb-2">You're all set, {success.customer.companyName}</h2>
-          <p className="text-sm text-slate-500">
-            Your 30-day free trial has started and ends on{" "}
-            <span className="font-semibold text-slate-700">{new Date(success.customer.trialEndsAt).toLocaleDateString()}</span>.
-          </p>
-          <p className="text-sm text-slate-500 mt-4">Your vendor will be in touch to help set up your screens.</p>
-          <button
-            type="button"
-            onClick={() => {
-              setSession(success);
-              navigate("/customer/dashboard", { replace: true });
-            }}
-            className="w-full mt-6 bg-brand-black text-white py-3.5 rounded-xl font-semibold hover:bg-charcoal transition"
-          >
-            Go to Dashboard
-          </button>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Verify your email</h2>
+          <p className="text-sm text-slate-500">Your account for {success.customer.companyName} was created. {success.emailSent ? "Check your inbox and spam folder. Open the link to verify your email and confirm your password before logging in." : "We could not send your verification email. Request a new link below."}</p>
+          <Link to="/customer/forgot-password" className="block mt-6 font-semibold hover:underline">Resend verification / password link</Link>
+          <Link to="/customer/login" className="block mt-4 font-semibold hover:underline">Go to login</Link>
         </div>
       </div>
     );

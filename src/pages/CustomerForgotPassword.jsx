@@ -30,13 +30,13 @@ export default function CustomerForgotPassword() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex justify-center"><Logo size="lg" /></div>
-          <p className="text-slate-500 mt-2">Reset your password</p>
+          <p className="text-slate-500 mt-2">Verify your email or reset your password</p>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-3xl shadow-sm p-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Forgot Password?</h2>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Request an email link</h2>
           <p className="text-sm text-slate-500 mb-6">
-            Enter your email and we'll send you a link to reset your password.
+            Enter your registered email to verify your address or reset your password.
           </p>
 
           {message && (
@@ -70,7 +70,7 @@ export default function CustomerForgotPassword() {
                 disabled={loading}
                 className="w-full bg-brand-black text-white py-3.5 rounded-xl font-semibold hover:bg-charcoal transition disabled:opacity-50"
               >
-                {loading ? "Sending..." : "Send Reset Link"}
+                {loading ? "Sending..." : "Send Email Link"}
               </button>
             </form>
           )}

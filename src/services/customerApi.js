@@ -25,7 +25,7 @@ customerApi.interceptors.request.use((config) => {
 customerApi.interceptors.response.use(
   mutationFeedback,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !error.config?.url?.startsWith("/public/")) {
       localStorage.removeItem("customerToken");
       localStorage.removeItem("customer");
 

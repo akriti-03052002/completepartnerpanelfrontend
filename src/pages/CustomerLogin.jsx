@@ -54,7 +54,7 @@ export default function CustomerLogin() {
           </div>
 
           {error && (
-            <div className="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>
+            <div className="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}<Link to="/customer/forgot-password" className="block mt-2 font-semibold underline">Resend verification or reset password</Link></div>
           )}
 
           <form onSubmit={handleSubmit}>

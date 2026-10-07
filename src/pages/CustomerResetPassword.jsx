@@ -43,7 +43,7 @@ export default function CustomerResetPassword() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex justify-center"><Logo size="lg" /></div>
-          <p className="text-slate-500 mt-2">Set your password</p>
+          <p className="text-slate-500 mt-2">Verify your email and set your password</p>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-3xl shadow-sm p-8">
