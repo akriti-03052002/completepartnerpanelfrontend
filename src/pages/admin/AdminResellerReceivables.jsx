@@ -1,6 +1,7 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import InvoiceDownload from "../../components/ui/InvoiceDownload";
 import PaymentHistory from "../../components/ui/PaymentHistory";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import adminApi from "../../services/adminApi";
 import Badge from "../../components/ui/Badge";
@@ -17,10 +18,11 @@ const DURATIONS = [
   { key: "365d", days: 365 }
 ];
 
-const PAGE_LOAD_TIME = Date.now();
 const money = (value) => `₹${(value || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
 
 export default function AdminResellerReceivables({ partnerId, status, duration, search }) {
+  const fetching = useRef(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
   const [currentTime, setCurrentTime] = useState(() => Date.now());
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(Date.now()), 60000);
@@ -36,12 +38,19 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
   const [offlineError, setOfflineError] = useState("");
   const [switchingInvoiceId, setSwitchingInvoiceId] = useState(null);
 
+  useAutoRefresh(() => {
+    setCurrentTime(Date.now());
+    if (!fetching.current) setReloadKey(key => key + 1);
+  });
+
   useEffect(() => {
     let active = true;
+    fetching.current = true;
     adminApi.get("/admin/reseller/invoices", { params: { partnerId: partnerId || undefined } })
       .then((res) => {
         if (active) {
           setInvoices(res.data.data);
+          setLastUpdated(new Date());
           setError("");
         }
       })
@@ -49,19 +58,19 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
         if (active) setError(err.response?.data?.message || "Couldn't load reseller invoices.");
       })
       .finally(() => {
-        if (active) setLoading(false);
+        if (active) { setLoading(false); fetching.current = false; }
       });
     return () => { active = false; };
   }, [partnerId, reloadKey]);
 
   const filtered = useMemo(() => {
     const durationDef = DURATIONS.find((item) => item.key === duration);
-    const cutoff = durationDef?.days ? PAGE_LOAD_TIME - durationDef.days * 24 * 60 * 60 * 1000 : null;
+    const cutoff = durationDef?.days ? currentTime - durationDef.days * 24 * 60 * 60 * 1000 : null;
     const query = search.trim().toLowerCase();
     const invoiceStatuses = ["pending", "overdue", "paid", "failed"];
 
     return invoices.filter((invoice) => {
-      if (status !== "all" && (!invoiceStatuses.includes(status) || invoice.paymentStatus !== status)) return false;
+      if (status !== "all" && (!invoiceStatuses.includes(status) || (invoice.paymentStatus !== "paid" && new Date(invoice.dueDate).getTime() < currentTime ? "overdue" : invoice.paymentStatus) !== status)) return false;
       if (cutoff && new Date(invoice.createdAt).getTime() < cutoff) return false;
       if (query && ![
         invoice.invoiceNumber,
@@ -72,7 +81,7 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
       ].some((value) => value?.toLowerCase().includes(query))) return false;
       return true;
     });
-  }, [duration, invoices, search, status]);
+  }, [duration, invoices, search, status, currentTime]);
 
   const outstandingTotal = filtered
     .filter((invoice) => invoice.paymentStatus !== "paid")
@@ -120,7 +129,7 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
   return (
     <>
       {historyInvoice && <PaymentHistory invoice={historyInvoice} onClose={() => setHistoryInvoice(null)} />}
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">Overdue: {money(overdueTotal)} across {overdueInvoices.length} invoices. <button type="button" disabled={checkingReminders} onClick={checkReminders} className="font-semibold underline disabled:opacity-50">{checkingReminders ? "Checking..." : "Check payment reminders"}</button></div>
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">{loading ? "Loading overdue invoices..." : !lastUpdated ? "Overdue totals unavailable." : <>Overdue: {money(overdueTotal)} across {overdueInvoices.length} invoices.</>} <button type="button" disabled={checkingReminders} onClick={checkReminders} className="font-semibold underline disabled:opacity-50">{checkingReminders ? "Checking..." : "Check payment reminders"}</button><p className="text-xs text-slate-500 mt-1">{lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}. Totals match your current filters. ` : ""}{error ? "Refresh failed; displayed totals may be out of date." : "Updates every 15 seconds while this tab is open."}</p></div>
       <Card>
         <div className="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -189,7 +198,7 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
                 },
                 { key: "dueDate", header: "Due date", render: (invoice) => new Date(invoice.dueDate).toLocaleDateString("en-IN") },
                 { key: "mode", header: "Collection", render: (invoice) => <span className="capitalize">{invoice.offlinePayment?.method || invoice.paymentMode || "offline"}</span> },
-                { key: "status", header: "Payment status", render: (invoice) => <Badge status={invoice.paymentStatus} /> },
+                { key: "status", header: "Payment status", render: (invoice) => <Badge status={invoice.paymentStatus !== "paid" && new Date(invoice.dueDate).getTime() < currentTime ? "overdue" : invoice.paymentStatus} /> },
                 {
                   key: "payment",
                   header: "Payment reference",
