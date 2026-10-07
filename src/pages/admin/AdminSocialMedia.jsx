@@ -109,8 +109,8 @@ export default function AdminSocialMedia({ view = "accounts", partnerId = "" }) 
         if (!active) return;
         setAccounts(result.accounts);
         setSubmissions(result.submissions);
-    setPaging(result.paging);
-    setCounts(result.counts);
+        setPaging(result.paging);
+        setCounts(result.counts);
       })
       .catch((loadError) => { if (active) setError(loadError.response?.data?.message || "Couldn't load social media reviews."); })
       .finally(() => { if (active) setLoading(false); });
@@ -264,7 +264,7 @@ export default function AdminSocialMedia({ view = "accounts", partnerId = "" }) 
               <button
                 key={tab.key}
                 type="button"
-                onClick={() => { setLoading(true); setPage(1); setPostTab(tab.key); }}
+                onClick={() => { if (postTab === tab.key && page === 1) return; setLoading(true); setPage(1); setPostTab(tab.key); }}
                 className={`px-3 py-2.5 -mb-px border-b-2 text-sm font-semibold transition flex items-center gap-2 ${active ? "border-brand-black text-slate-900" : "border-transparent text-slate-500 hover:text-slate-800"}`}
               >
                 {tab.label}
@@ -327,7 +327,7 @@ export default function AdminSocialMedia({ view = "accounts", partnerId = "" }) 
           </div>
         )}
         <p className="px-4 text-xs text-slate-400">Search and filters apply to this page of results.</p>
-        <Pagination page={page} {...paging} onChange={(next) => { setLoading(true); setPage(next); }} />
+        {!loading && <Pagination page={page} {...paging} onChange={(next) => { setLoading(true); setPage(next); }} />}
       </Card>
       )}
     </div>
