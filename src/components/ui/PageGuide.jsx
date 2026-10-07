@@ -1,10 +1,18 @@
-import { useLocation } from "react-router-dom";
+import { usePartnerAuth } from "../../context/PartnerAuthContext";
+import { useAdminAuth } from "../../context/AdminAuthContext";
+import { Link, useLocation } from "react-router-dom";
 
 const partnerJourney = {
   affiliate: ["Complete your profile, identity documents and bank details. SPOTX reviews them before you can refer leads.", "Add a lead: a potential customer interested in SPOTX. Track whether the deal is in progress, won or lost.", "A won deal may earn a reward. Your earnings page shows the reward; Payments to You shows its payment status."],
   influencer: ["Complete your creator profile, identity documents and bank details.", "Connect your social accounts for review, then submit your post or reel links. Account review and content approval are separate checks.", "Approved paid content appears in Content Earnings. Payments to You shows when that money is paid."],
   vendor: ["Complete your profile, identity documents and bank details. SPOTX sets your individual commission terms.", "Invite customers with your referral link or add them yourself. Customers verify their email and manage their screens.", "Customer payments can earn you commission under your agreed terms. Customer payments and payments to you are shown separately."],
   reseller: ["Complete your profile and verification. Check your pricing and required advance payment before requesting licences.", "Request licences, wait for SPOTX approval, then assign them to customers. One licence allows one customer screen.", "Customers register their screens. You pay SPOTX's licence invoices; your customers pay you separately."]
+};
+const nextPages = {
+  affiliate: [["Track leads and deals", "/partner/deals", "referrals:view"], ["Check your rewards", "/partner/commissions", "commissions:view"]],
+  influencer: [["Check social accounts", "/partner/social-media", "profile:view"], ["Check posts and reels", "/partner/post-reel", "profile:view"]],
+  vendor: [["Manage your customers", "/partner/customers", "customers:view"], ["Check your commission", "/partner/commissions", "commissions:view"]],
+  reseller: [["Check available licences", "/partner/reseller/inventory", "reseller:inventory:view"], ["Check bills and due dates", "/partner/reseller/billing", "reseller:billing:view"]]
 };
 const guides = [
   ["/partner/team", "Manage your team", ["See who can use your partner account and what each person can do.", "Open a member to check their role. Only account owners can invite members or change their access.", "Give each member only the access they need. Removing access does not delete your customer or business records."]],
@@ -37,6 +45,18 @@ const guides = [
 ];
 export default function PageGuide({ partnerType }) {
   const { pathname } = useLocation();
+  const partnerAuth = usePartnerAuth();
+  const adminAuth = useAdminAuth();
+  let actions = [];
+  if (pathname.startsWith("/partner/")) actions = (nextPages[partnerType] || []).filter(([, to, permission]) => to !== pathname && partnerAuth?.hasPermission(permission));
+  else if (pathname.startsWith("/reseller/customer/")) actions = [["Manage your screens", "/reseller/customer/screens"]];
+  else if (pathname.startsWith("/customer/")) actions = [["Manage your screens", "/customer/screens"], ["Review your subscription", "/customer/subscription"], ["Check paid invoices", "/customer/billing"]];
+  else if (pathname.startsWith("/admin/")) {
+    actions = [["Find a partner", "/admin/partners"]];
+    if (["super_admin", "finance"].includes(adminAuth?.user?.role)) actions.push(["Check reseller bills", "/admin/licence-payments"]);
+    if (["super_admin", "kyc_reviewer"].includes(adminAuth?.user?.role)) actions.push(["Review identity documents", "/admin/documents"]);
+  }
+  actions = actions.filter(([, to]) => to !== pathname);
   const found = guides.find(([prefix]) => pathname === prefix || pathname.startsWith(prefix + "/"));
   const steps = found?.[2] || partnerJourney[partnerType];
   if (!steps) return null;
@@ -46,6 +66,7 @@ export default function PageGuide({ partnerType }) {
       <p className="mt-1 leading-6 text-slate-600">{steps[0]}</p>
       <details key={pathname} className="mt-2">
         <summary className="cursor-pointer text-sm font-semibold text-slate-700">Show steps and important details</summary>
+        {actions.length > 0 && <div aria-label="Related tasks" className="mt-3 flex flex-wrap gap-2">{actions.map(([label, to]) => <Link key={to} to={to} className="inline-flex min-h-11 items-center rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">{label}</Link>)}</div>}
         <ol className="mt-3 list-decimal pl-5 space-y-2 leading-6 text-slate-600">{steps.map(step => <li key={step}>{step}</li>)}</ol>
       </details>
     </section>

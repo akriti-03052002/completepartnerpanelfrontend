@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import customerPortalApi from "../services/resellerCustomerPortalApi";
 import Card from "../components/ui/Card";
@@ -33,9 +34,9 @@ export default function CustomerPortalDashboard() {
               <Badge status={data.status} />
             </div>
             <dl className="space-y-2 text-sm">
-              <div className="flex justify-between"><dt className="text-slate-500">Contact</dt><dd className="font-medium text-slate-900">{data.contactName || "—"}</dd></div>
-              <div className="flex justify-between"><dt className="text-slate-500">Email</dt><dd className="font-medium text-slate-900">{data.email}</dd></div>
-              <div className="flex justify-between"><dt className="text-slate-500">Phone</dt><dd className="font-medium text-slate-900">{data.phone || "—"}</dd></div>
+              <div className="flex flex-wrap justify-between gap-2"><dt className="text-slate-500">Contact</dt><dd className="font-medium text-slate-900 break-all">{data.contactName || "—"}</dd></div>
+              <div className="flex flex-wrap justify-between gap-2"><dt className="text-slate-500">Email</dt><dd className="font-medium text-slate-900 break-all">{data.email}</dd></div>
+              <div className="flex flex-wrap justify-between gap-2"><dt className="text-slate-500">Phone</dt><dd className="font-medium text-slate-900 break-all">{data.phone || "—"}</dd></div>
             </dl>
           </Card>
 
@@ -44,17 +45,19 @@ export default function CustomerPortalDashboard() {
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <p className="text-2xl font-bold text-slate-900">{data.screens.allocated}</p>
-                <p className="text-xs text-slate-500 mt-1">Allocated</p>
+                <p className="text-xs text-slate-500 mt-1">Screen allowance</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-brand-red">{data.screens.active}</p>
-                <p className="text-xs text-slate-500 mt-1">Active</p>
+                <p className="text-xs text-slate-500 mt-1">Enabled screens</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-900">{data.screens.suspended}</p>
-                <p className="text-xs text-slate-500 mt-1">Suspended</p>
+                <p className="text-xs text-slate-500 mt-1">Paused screens</p>
               </div>
             </div>
+            <p className="mt-4 text-sm text-slate-600">Your allowance is the number of screens your reseller has assigned. Enabled screens can be used; paused screens need your reseller's help.</p>
+            <Link to="/reseller/customer/screens" className="mt-3 inline-flex min-h-11 items-center rounded-xl bg-brand-black px-4 text-sm font-semibold text-white hover:bg-charcoal">Manage your screens</Link>
             <p className="text-xs text-slate-400 mt-4 pt-4 border-t border-slate-100">
               Questions about your screens or billing? Contact {data.resellerName} directly.
             </p>
