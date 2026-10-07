@@ -35,6 +35,20 @@ const COMMISSION_TYPE_OPTIONS = [
 
 const STATUS_OPTIONS = ["draft", "pending_verification", "under_review", "active", "suspended", "rejected", "inactive"];
 
+function PartnerStatusControl({ selectedStatus, onChange, onApply, busy }) {
+  return (
+    <Card className="p-6">
+      <h2 className="font-semibold text-slate-900 mb-4">Partner Status</h2>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Select aria-label="Partner status" value={selectedStatus} onChange={(e) => onChange(e.target.value)} className="flex-1" disabled={busy}>
+          {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
+        </Select>
+        <Button onClick={onApply} loading={busy}>Apply</Button>
+      </div>
+    </Card>
+  );
+}
+
 // Bank Proof and Other are always optional (see partnerVerification.js —
 // neither is ever in REQUIRED_DOCUMENTS_BY_PARTNER_TYPE), so once the
 // partner is verified there's nothing left for the admin to chase here.
@@ -270,7 +284,10 @@ export default function AdminPartnerDetail() {
       <PartnerProfileSummary partner={partner} documents={documents} requiredDocumentTypes={requiredDocumentTypes} bankAccount={bankAccount} summary={data.summary} compact={tab !== "overview"} />
 
       {tab === "overview" && (
+        <>
+        <PartnerStatusControl selectedStatus={selectedStatus} onChange={setSelectedStatus} onApply={applyStatus} busy={busy} />
         <PartnerOverview partner={partner} summary={data.summary} />
+        </>
       )}
 
       {/* This influencer's own review queues — the same screens as the
@@ -282,15 +299,7 @@ export default function AdminPartnerDetail() {
       {tab === "details" && (
       <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="p-6">
-          <h2 className="font-semibold text-slate-900 mb-4">Partner Status</h2>
-          <div className="flex gap-3">
-            <Select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="flex-1">
-              {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
-            </Select>
-            <Button onClick={applyStatus} loading={busy}>Apply</Button>
-          </div>
-        </Card>
+        <PartnerStatusControl selectedStatus={selectedStatus} onChange={setSelectedStatus} onApply={applyStatus} busy={busy} />
 
         {partner.partnerType === "reseller" && (
           <Card className="p-6 md:col-span-2">
