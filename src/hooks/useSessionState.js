@@ -6,7 +6,7 @@ export function useSessionState(name, initial) {
     const stored = JSON.parse(localStorage.getItem(window.location.pathname.startsWith("/admin") ? "adminUser" : window.location.pathname.startsWith("/partner") ? "partnerUser" : "customer") || "null");
     account = stored?.id || stored?._id || stored?.email || account;
   } catch { /* Storage may be unavailable. */ }
-  const key = `ui:${account}:${window.location.pathname}:${name}`;
+  const key = `ui:${account}:${window.location.pathname}${window.location.search}:${name}`;
   const read = () => { try { const raw = sessionStorage.getItem(key); return raw === null ? initial : JSON.parse(raw); } catch { return initial; } };
   const [entries, setEntries] = useState(() => ({ [key]: read() }));
   const value = Object.hasOwn(entries, key) ? entries[key] : read();

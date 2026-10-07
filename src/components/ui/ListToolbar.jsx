@@ -4,7 +4,7 @@ import { optionLabel } from "../../hooks/useListFilter";
 // The search box and filter pick-lists shown above a list. Give it the
 // `toolbar` from useListFilter. Draws nothing while the list is empty.
 export default function ListToolbar({ toolbar, placeholder = "Search", className = "" }) {
-  if (toolbar.total === 0) return null;
+  if (toolbar.total === 0 && !toolbar.active) return null;
 
   return (
     <div className={`flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 ${className}`}>

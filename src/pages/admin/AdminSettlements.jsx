@@ -1,3 +1,4 @@
+import { useSessionState } from "../../hooks/useSessionState";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, History, Landmark, RefreshCw, Search, Info, CalendarX2, X, Clock3, FileText, Download, FolderOpen } from "lucide-react";
@@ -60,9 +61,9 @@ export default function AdminSettlements() {
   const [settlements, setSettlements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastFetchedAt, setLastFetchedAt] = useState(null);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useSessionState("statusFilter", "all");
   const [duration, setDuration] = useState("all");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useSessionState("search", "");
   // Which type's settlements are shown comes from the menu: "All
   // Settlements" has none; each paid type puts its own in the address.
   const [searchParams, setSearchParams] = useSearchParams();

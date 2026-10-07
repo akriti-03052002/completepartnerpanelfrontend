@@ -1,3 +1,4 @@
+import { useSessionState } from "../../hooks/useSessionState";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -22,13 +23,13 @@ const TYPE_TITLES = { influencer: "Influencers", affiliate: "Affiliates", vendor
 const EMPTY_FORM = { partnerType: "vendor", contactName: "", email: "", phone: "" };
 
 export default function AdminPartners() {
-  const [page, setPage] = useState(1);
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useSessionState("page", 1);
+  const [search, setSearch] = useSessionState("search", "");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [searchParams, setSearchParams] = useSearchParams();
   const status = searchParams.get("status") || "";
   const verificationStatus = searchParams.get("verificationStatus") || "";
   const partnerType = searchParams.get("partnerType") || "";
-  const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
@@ -36,7 +37,7 @@ export default function AdminPartners() {
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
-    const timer = setTimeout(() => { setDebouncedSearch(search); setPage(1); }, 300);
+    const timer = setTimeout(() => { setDebouncedSearch(search); }, 300);
     return () => clearTimeout(timer);
   }, [search]);
   const { data, isLoading: loading, error: listError, refetch: load } = useQuery({
@@ -134,7 +135,7 @@ export default function AdminPartners() {
       )}
 
       <Card className="p-4 flex flex-col sm:flex-row gap-3">
-        <SearchBox placeholder="Search by name, business, email, phone or code" value={search} onChange={setSearch} className="flex-1" />
+        <SearchBox placeholder="Search by name, business, email, phone or code" value={search} onChange={(value) => { setSearch(value); setPage(1); }} className="flex-1" />
         <Select value={status} onChange={(e) => {
           const next = new URLSearchParams(searchParams);
           if (e.target.value) next.set("status", e.target.value);
