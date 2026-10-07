@@ -172,7 +172,7 @@ export default function ResellerCustomers() {
         <Card className="p-4 border-amber-200 bg-amber-50">
           <p className="text-sm text-amber-800">
             {prepayment?.status === "awaiting_payment"
-              ? <>Complete your one-time prepayment from the <Link to="/partner/reseller/buy" className="font-semibold underline">Buy Licenses</Link> page before adding customers.</>
+              ? <>Complete your one-time prepayment from the <Link to="/partner/reseller/buy" className="font-semibold underline">Request Licences</Link> page before adding customers.</>
               : "SPOTX needs to set up your one-time prepayment before you can add customers. Contact SPOTX to get started."}
           </p>
         </Card>
@@ -282,7 +282,7 @@ function InsufficientLicensesModal({ max, onReduce, onClose }) {
         <div className="flex items-center justify-end gap-3">
           <Button variant="outline" onClick={onReduce}>Reduce to {max}</Button>
           <Link to="/partner/reseller/buy">
-            <Button>Buy More Licenses</Button>
+            <Button>Request More Licences</Button>
           </Link>
         </div>
       </div>
@@ -408,8 +408,8 @@ function CustomerRow({ customer, allocation, available, expanded, onToggle, onCh
 
           {allocation && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-              <MiniStat label="Allocated" value={allocation.allocatedLicenses} />
-              <MiniStat label="Registered" value={allocation.registeredScreens} />
+              <MiniStat label="Assigned licences" value={allocation.allocatedLicenses} />
+              <MiniStat label="Registered screens" value={allocation.registeredScreens} />
               <MiniStat label="Active" value={allocation.activeScreens} />
               <MiniStat label="Suspended" value={allocation.suspendedScreens} />
             </div>

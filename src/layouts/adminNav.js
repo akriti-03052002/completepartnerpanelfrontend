@@ -97,7 +97,7 @@ export const ADMIN_NAV = [
       ...EARNING_TYPES.map(({ type, label }) => ({ to: `/admin/commissions?partnerType=${type}`, label }))
     ]
   },
-  { key: "licence", label: "Payment from Licence", icon: Receipt, to: "/admin/licence-payments" },
+  { key: "licence", label: "Licence Payments", icon: Receipt, to: "/admin/licence-payments" },
   {
     key: "settlement",
     label: "Partner Payments",
@@ -109,7 +109,7 @@ export const ADMIN_NAV = [
       ...EARNING_TYPES.map(({ type, label }) => ({ to: `/admin/settlements?partnerType=${type}`, label }))
     ]
   },
-  { key: "kyc", label: "Identity Review (KYC)", icon: FileCheck, to: "/admin/documents" },
+  { key: "kyc", label: "Identity Review", icon: FileCheck, to: "/admin/documents" },
   { key: "bank", label: "Bank Review", icon: Landmark, to: "/admin/bank" },
   { key: "config", label: "Screen Pricing", icon: SlidersHorizontal, to: "/admin/config" }
 ];

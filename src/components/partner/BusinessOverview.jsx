@@ -20,10 +20,10 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
     note = "Payment totals use recorded receipts. Online receipts include tax; your commission is calculated before tax.";
   } else {
     business = summary.invoices?.paid?.amount || 0; completed = summary.inventory?.totalPurchasedLicenses || 0;
-    tiles = [["Your customers", count(summary.customers)], ["Licences purchased", completed], ["Licences allocated", summary.inventory?.totalAllocatedLicenses || 0], ["Licence invoices paid", money(business)], ["Outstanding licence invoices", money(total(Object.fromEntries(Object.entries(summary.invoices || {}).filter(([s]) => s !== "paid"))))]];
+    tiles = [["Your customers", count(summary.customers)], ["Bought licences", completed], ["Assigned to customers", summary.inventory?.totalAllocatedLicenses || 0], ["Licence invoices paid", money(business)], ["Outstanding licence invoices", money(total(Object.fromEntries(Object.entries(summary.invoices || {}).filter(([s]) => s !== "paid"))))]];
     const inventory = summary.inventory || {};
     tiles.push(
-      ["Licences available", Math.max(0, completed - (inventory.totalAllocatedLicenses || 0))],
+      ["Ready to assign", Math.max(0, completed - (inventory.totalAllocatedLicenses || 0))],
       ["Registered screens", inventory.totalRegisteredScreens || 0],
       ["Active screens", inventory.totalActiveScreens || 0],
       ["Active customers", summary.customers?.active?.count || 0],

@@ -1,3 +1,4 @@
+import PageGuide from "../components/ui/PageGuide";
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { LayoutDashboard, UserCircle, Receipt, Monitor, CreditCard, LogOut, Menu, X } from "lucide-react";
@@ -86,6 +87,7 @@ export default function CustomerLayout() {
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <PageGuide />
           <Outlet />
         </main>
       </div>

@@ -152,7 +152,7 @@ export default function ResellerBuyLicenses() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">Buy Software Licenses</h1>
+      <h1 className="text-2xl font-bold text-slate-900">Request Screen Licences</h1>
       {prepayment?.cheque?.status && <p className="rounded-xl border border-slate-200 bg-white p-4 text-sm">Prepayment cheque {prepayment.cheque.number}: <span className="capitalize font-semibold">{prepayment.cheque.status}</span>. {prepayment.status !== "done" && "License purchases stay locked until payment clears."}</p>}
 
       {error && <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
@@ -160,18 +160,18 @@ export default function ResellerBuyLicenses() {
 
       {!loading && !prepaymentDone && (
         <Card className="p-6 max-w-lg">
-          <p className="text-sm font-semibold text-slate-900 mb-1">One-time prepayment required</p>
+          <p className="text-sm font-semibold text-slate-900 mb-1">One-time advance payment required</p>
           {prepayment?.status === "awaiting_payment" ? (
             <>
               <p className="text-sm text-slate-500 mb-4">
-                Pay your one-time prepayment of <strong className="text-slate-900">₹{prepayment.amount?.toLocaleString("en-IN")}</strong> to
+                Pay your one-time advance payment of <strong className="text-slate-900">₹{prepayment.amount?.toLocaleString("en-IN")}</strong> to
                 unlock buying licenses. This is a single one-time payment — not a recurring charge.
               </p>
               <Button onClick={payPrepayment} loading={payingPrepayment}>Pay ₹{prepayment.amount?.toLocaleString("en-IN")}</Button>
             </>
           ) : (
             <p className="text-sm text-slate-500">
-              SPOTX needs to set up your one-time prepayment before you can buy licenses. Contact SPOTX to get started.
+              SPOTX needs to set up your advance payment before you can request licences. Contact SPOTX to get started.
             </p>
           )}
         </Card>
@@ -194,13 +194,13 @@ export default function ResellerBuyLicenses() {
             your billing cycle, the first on the day it is accepted.
           </p>
 
-          <Button className="mt-4 w-full" onClick={handleRequest} loading={submitting}>Request Licenses</Button>
+          <Button className="mt-4 w-full" onClick={handleRequest} loading={submitting}>Submit Licence Request</Button>
         </Card>
       )}
 
       <Card>
         <div className="p-4 border-b border-slate-100">
-          <p className="text-sm font-semibold text-slate-900">Purchase Orders</p>
+          <p className="text-sm font-semibold text-slate-900">Your Licence Requests</p>
         </div>
         {loading ? (
           <p className="text-slate-400 text-sm p-6">Loading...</p>

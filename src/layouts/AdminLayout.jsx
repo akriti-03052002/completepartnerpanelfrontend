@@ -1,3 +1,4 @@
+import PageGuide from "../components/ui/PageGuide";
 import { useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { ChevronDown, LogOut, Menu, X } from "lucide-react";
@@ -171,6 +172,7 @@ export default function AdminLayout() {
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <PageGuide />
           <Outlet context={{ setViewedPartnerType }} />
         </main>
       </div>

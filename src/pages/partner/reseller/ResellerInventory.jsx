@@ -36,20 +36,20 @@ export default function ResellerInventory() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-900">Software Inventory</h1>
-        <Link to="/partner/reseller/buy"><Button>Buy More Licenses</Button></Link>
+        <h1 className="text-2xl font-bold text-slate-900">Screen Licences</h1>
+        <Link to="/partner/reseller/buy"><Button>Request More Licences</Button></Link>
       </div>
 
       <Card className="p-6">
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-          <Stat label="Total Purchased" value={inventory?.totalPurchasedLicenses || 0} highlight />
-          <Stat label="Allocated" value={inventory?.totalAllocatedLicenses || 0} />
-          <Stat label="Active" value={inventory?.totalActiveScreens || 0} />
-          <Stat label="Available" value={available} />
-          <Stat label="Suspended" value={inventory?.totalSuspendedScreens || 0} />
+          <Stat label="Bought licences" value={inventory?.totalPurchasedLicenses || 0} highlight />
+          <Stat label="Assigned to customers" value={inventory?.totalAllocatedLicenses || 0} />
+          <Stat label="Active screens" value={inventory?.totalActiveScreens || 0} />
+          <Stat label="Ready to assign" value={available} />
+          <Stat label="Paused screens" value={inventory?.totalSuspendedScreens || 0} />
         </div>
         <p className="text-xs text-slate-400 mt-4 pt-4 border-t border-slate-100">
-          SPOTX bills you on <strong>Total Purchased</strong> every billing cycle, regardless of how many are allocated, delivered, or active.
+          SPOTX bills you on <strong>bought licences</strong> every billing cycle, regardless of how many are allocated, delivered, or active.
         </p>
       </Card>
 

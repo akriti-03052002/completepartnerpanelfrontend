@@ -1,3 +1,4 @@
+import PageGuide from "./components/ui/PageGuide";
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, Link, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -163,7 +164,7 @@ function ResellerCustomerPortalLayout() {
           <button type="button" onClick={logout} className="text-sm text-slate-500 hover:text-slate-900">Log out</button>
         </div>
       </header>
-      <main className="max-w-5xl mx-auto p-4 sm:p-6"><Outlet /></main>
+      <main className="max-w-5xl mx-auto p-4 sm:p-6"><PageGuide /><Outlet /></main>
     </div>
   );
 }

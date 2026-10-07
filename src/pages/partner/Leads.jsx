@@ -75,7 +75,7 @@ export default function Leads() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Deals</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Leads & Deals</h1>
           <p className="text-sm text-slate-500 mt-1">
             Refer a business and track the deal here. SPOTX handles pricing and sales; you earn a referral reward when the deal is won.
           </p>

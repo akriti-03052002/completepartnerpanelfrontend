@@ -1,3 +1,4 @@
+import PageGuide from "../components/ui/PageGuide";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, useLocation, Link } from "react-router-dom";
 import {
@@ -18,18 +19,18 @@ const ALL_PARTNER_TYPES = ["influencer", "affiliate", "vendor", "reseller"];
 const NAV_ITEMS = [
   { to: "/partner/dashboard", label: "Dashboard", icon: LayoutDashboard, permission: "dashboard:view", partnerTypes: ALL_PARTNER_TYPES },
   { to: "/partner/social-media", label: "Social Media Accounts", icon: Share2, permission: "profile:view", partnerTypes: ["influencer"] },
-  { to: "/partner/post-reel", label: "Post / Reel", icon: Clapperboard, permission: "profile:view", partnerTypes: ["influencer"] },
+  { to: "/partner/post-reel", label: "Posts & Reels", icon: Clapperboard, permission: "profile:view", partnerTypes: ["influencer"] },
   { to: "/partner/commissions", label: "Content Earnings", icon: Wallet, permission: "commissions:view", partnerTypes: ["influencer"], locked: true },
   { to: "/partner/commissions", label: "Customer Commissions", icon: Wallet, permission: "commissions:view", partnerTypes: ["vendor"], locked: true },
   { to: "/partner/settlements", label: "Payments to You", icon: Landmark, permission: "settlements:view", partnerTypes: ["influencer", "affiliate", "vendor"], locked: true },
 
-  { to: "/partner/deals", label: "Deals", icon: Briefcase, permission: "referrals:view", partnerTypes: ["affiliate"], locked: true },
+  { to: "/partner/deals", label: "Leads & Deals", icon: Briefcase, permission: "referrals:view", partnerTypes: ["affiliate"], locked: true },
   { to: "/partner/commissions", label: "Referral Rewards", icon: Wallet, permission: "commissions:view", partnerTypes: ["affiliate"], locked: true },
 
   // Reseller-only.
   { to: "/partner/reseller/customers", label: "Customers", icon: Building2, permission: "reseller:customers:manage", partnerTypes: ["reseller"], locked: true },
-  { to: "/partner/reseller/inventory", label: "Software Licenses", icon: PackageSearch, permission: "reseller:inventory:view", partnerTypes: ["reseller"], locked: true },
-  { to: "/partner/reseller/buy", label: "Buy More Licenses", icon: ShoppingCart, permission: "reseller:license:purchase", partnerTypes: ["reseller"], locked: true },
+  { to: "/partner/reseller/inventory", label: "Screen Licences", icon: PackageSearch, permission: "reseller:inventory:view", partnerTypes: ["reseller"], locked: true },
+  { to: "/partner/reseller/buy", label: "Request More Licences", icon: ShoppingCart, permission: "reseller:license:purchase", partnerTypes: ["reseller"], locked: true },
   { to: "/partner/reseller/billing", label: "Billing & Payments", icon: Receipt, permission: "reseller:billing:view", partnerTypes: ["reseller"], locked: true },
 
   { to: "/partner/customers", label: "Customers", icon: Building2, permission: "customers:view", partnerTypes: ["vendor"], locked: true },
@@ -88,7 +89,7 @@ export default function PartnerLayout() {
       >
         <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200">
           <Logo size="sm" />
-          <button className="lg:hidden text-slate-500 hover:text-brand-black" onClick={() => setSidebarOpen(false)}>
+          <button className="lg:hidden text-slate-500 hover:text-brand-black" aria-label="Close menu" onClick={() => setSidebarOpen(false)}>
             <X size={20} />
           </button>
         </div>
@@ -133,7 +134,7 @@ export default function PartnerLayout() {
 
       <div className="flex-1 flex flex-col min-w-0 min-h-0">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 gap-3">
-          <button className="lg:hidden text-slate-500 hover:text-brand-black shrink-0" onClick={() => setSidebarOpen(true)}>
+          <button className="lg:hidden text-slate-500 hover:text-brand-black shrink-0" aria-label="Open menu" onClick={() => setSidebarOpen(true)}>
             <Menu size={22} />
           </button>
           <div className="min-w-0">
@@ -183,6 +184,7 @@ export default function PartnerLayout() {
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <PageGuide partnerType={partner?.partnerType?.toLowerCase()} />
           <Outlet />
         </main>
       </div>

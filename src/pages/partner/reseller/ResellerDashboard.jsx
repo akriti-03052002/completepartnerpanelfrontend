@@ -61,12 +61,12 @@ export default function ResellerDashboard() {
         </Card>
 
       <Card className="p-6">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Quick Actions</p>
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Other actions</p>
         <div className="flex flex-wrap gap-3">
-          <Link to="/partner/reseller/buy"><Button><span className="flex items-center gap-2"><ShoppingCart size={16} /> Buy Software Licenses</span></Button></Link>
-          <Link to="/partner/reseller/customers"><Button variant="outline"><span className="flex items-center gap-2"><Building2 size={16} /> Manage Customers</span></Button></Link>
-          <Link to="/partner/reseller/inventory"><Button variant="outline"><span className="flex items-center gap-2"><PackageSearch size={16} /> View Inventory</span></Button></Link>
-          <Link to="/partner/reseller/billing"><Button variant="outline"><span className="flex items-center gap-2"><Receipt size={16} /> View Billing</span></Button></Link>
+          <Link to="/partner/reseller/buy"><Button><span className="flex items-center gap-2"><ShoppingCart size={16} /> Request Screen Licences</span></Button></Link>
+          {(currentInvoice || available === 0) && <Link to="/partner/reseller/customers"><Button variant="outline"><span className="flex items-center gap-2"><Building2 size={16} /> Manage Customers</span></Button></Link>}
+          {(currentInvoice || available > 0) && <Link to="/partner/reseller/inventory"><Button variant="outline"><span className="flex items-center gap-2"><PackageSearch size={16} /> View Screen Licences</span></Button></Link>}
+          {!currentInvoice && <Link to="/partner/reseller/billing"><Button variant="outline"><span className="flex items-center gap-2"><Receipt size={16} /> View Billing</span></Button></Link>}
         </div>
       </Card>
     </div>
