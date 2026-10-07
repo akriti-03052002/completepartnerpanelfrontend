@@ -24,8 +24,9 @@ const EMPTY_FORM = { partnerType: "vendor", contactName: "", email: "", phone: "
 export default function AdminPartners() {
   const [page, setPage] = useState(1);
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [status, setStatus] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
+  const status = searchParams.get("status") || "";
+  const verificationStatus = searchParams.get("verificationStatus") || "";
   const partnerType = searchParams.get("partnerType") || "";
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -39,9 +40,9 @@ export default function AdminPartners() {
     return () => clearTimeout(timer);
   }, [search]);
   const { data, isLoading: loading, error: listError, refetch: load } = useQuery({
-    queryKey: ["admin", "partners", status, partnerType, debouncedSearch, page],
+    queryKey: ["admin", "partners", status, verificationStatus, partnerType, debouncedSearch, page],
     queryFn: () => adminApi.get("/admin/partners", {
-      params: { status: status || undefined, partnerType: partnerType || undefined, search: debouncedSearch || undefined, page, limit: 25 }
+      params: { status: status || undefined, verificationStatus: verificationStatus || undefined, partnerType: partnerType || undefined, search: debouncedSearch || undefined, page, limit: 25 }
     }).then((res) => res.data)
   });
   const visiblePartners = data?.data || [];
@@ -134,8 +135,24 @@ export default function AdminPartners() {
 
       <Card className="p-4 flex flex-col sm:flex-row gap-3">
         <SearchBox placeholder="Search by name, business, email, phone or code" value={search} onChange={setSearch} className="flex-1" />
-        <Select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className="sm:w-56">
+        <Select value={status} onChange={(e) => {
+          const next = new URLSearchParams(searchParams);
+          if (e.target.value) next.set("status", e.target.value);
+          else next.delete("status");
+          setSearchParams(next);
+          setPage(1);
+        }} className="sm:w-56">
           {STATUSES.map((s) => <option key={s} value={s}>{s ? s.replace(/_/g, " ") : "All statuses"}</option>)}
+        </Select>
+        <Select value={verificationStatus} onChange={(e) => {
+          const next = new URLSearchParams(searchParams);
+          if (e.target.value) next.set("verificationStatus", e.target.value);
+          else next.delete("verificationStatus");
+          setSearchParams(next);
+          setPage(1);
+        }} className="sm:w-56">
+          <option value="">All verification statuses</option>
+          <option value="verified">Verified</option>
         </Select>
         <Select value={partnerType} onChange={handlePartnerTypeChange} className="sm:w-56">
           <option value="">All partner types</option>

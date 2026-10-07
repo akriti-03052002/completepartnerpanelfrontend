@@ -55,7 +55,7 @@ function CountTile({ label, value, to, note }) {
       {note && <p className="text-xs text-slate-400 mt-1">{note}</p>}
     </Card>
   );
-  return to ? <Link to={to} className="block">{body}</Link> : body;
+  return to ? <Link to={to} className="block rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red">{body}</Link> : body;
 }
 
 // Every figure on this page comes from GET /admin/stats/dashboard, which
@@ -221,7 +221,7 @@ export default function AdminDashboard() {
             to="/admin/customers"
             linkLabel="Customers"
             rows={[
-              { label: "Screens paid for by customers", value: count(vendor.paidScreens) },
+              { label: "Paid screens", value: count(vendor.paidScreens) },
               { label: "Customers", value: `${count(vendor.activeCustomers)} active of ${count(vendor.totalCustomers)}` },
               { label: "Total amount", value: money(vendor.totalAmount), strong: true }
             ]}
@@ -285,12 +285,12 @@ export default function AdminDashboard() {
           <CountTile label="Influencers" value={partners.byType.influencer} to="/admin/partners?partnerType=influencer" />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mt-4">
-          <CountTile label="Active" value={partners.active} note="All types" />
-          <CountTile label="Verified" value={partners.verified} note="KYC and bank verified" />
+          <CountTile label="Active" value={partners.active} to="/admin/partners?status=active" note="All types" />
+          <CountTile label="Verified" value={partners.verified} to="/admin/partners?verificationStatus=verified" note="KYC and bank verified" />
           <CountTile label="KYC pending" value={partners.kycPending} to="/admin/documents" note="Documents not all verified" />
           <CountTile label="Bank details pending" value={partners.bankPending} to="/admin/bank" note="No verified bank account" />
-          <CountTile label="Rejected" value={partners.rejected} />
-          <CountTile label="Suspended" value={partners.suspended} />
+          <CountTile label="Rejected" value={partners.rejected} to="/admin/partners?status=rejected" />
+          <CountTile label="Suspended" value={partners.suspended} to="/admin/partners?status=suspended" />
         </div>
       </section>
     </div>
