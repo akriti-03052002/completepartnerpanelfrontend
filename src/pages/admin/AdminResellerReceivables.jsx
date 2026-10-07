@@ -1,3 +1,4 @@
+import InvoiceDownload from "../../components/ui/InvoiceDownload";
 import PaymentHistory from "../../components/ui/PaymentHistory";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -199,6 +200,7 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
                   header: "",
                   render: (invoice) => (
                     <div className="flex items-center gap-3">
+                      <InvoiceDownload client={adminApi} path={`/admin/reseller/invoices/${invoice._id}/download`} filename={`${invoice.invoiceNumber || "invoice"}.pdf`} />
                       {invoice.partnerId?._id && (
                         <Link to={`/admin/partners/${invoice.partnerId._id}`} className="text-xs font-semibold text-brand-red hover:underline">Partner</Link>
                       )}

@@ -1,3 +1,4 @@
+import InvoiceDownload from "../../components/ui/InvoiceDownload";
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, History, CalendarClock, RefreshCw, Search, Info, CalendarX2, X, Landmark, Clock3, FileText, Upload } from "lucide-react";
 import api from "../../services/api";
@@ -369,6 +370,7 @@ function BillSection({ bill, canSubmitBill, billRequired, settlementId, onBillSu
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-slate-600"><FileText size={14} className="text-slate-400" /> {bill.billNumber}</span>
             <Badge status={bill.status} />
+            <InvoiceDownload client={api} path={`/partner/settlements/${settlementId}/bill/download`} filename={bill.file?.originalName || "bill.pdf"} label="Download bill" />
           </div>
           <div className="flex justify-between"><span className="text-slate-500">Total on bill</span><span className="text-slate-900">{money(bill.amount.totalBillAmount, currency)}</span></div>
           {bill.status === "rejected" && bill.rejectionReason && (

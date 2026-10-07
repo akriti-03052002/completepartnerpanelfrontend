@@ -1,3 +1,4 @@
+import InvoiceDownload from "../../components/ui/InvoiceDownload";
 import { useEffect, useState } from "react";
 import { Receipt } from "lucide-react";
 import customerApi from "../../services/customerApi";
@@ -36,18 +37,18 @@ export default function Billing() {
               <tr>
                 <th className="text-left px-5 py-3 font-medium">Date</th>
                 <th className="text-left px-5 py-3 font-medium">Amount</th>
-                <th className="text-left px-5 py-3 font-medium">Status</th>
+                <th className="text-left px-5 py-3 font-medium">Status</th><th className="text-left px-5 py-3 font-medium">Invoice</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {visible.length === 0 && (
-                <tr><td colSpan={3} className="px-5 py-10 text-center text-slate-400">Nothing matches your search or filters.</td></tr>
+                <tr><td colSpan={4} className="px-5 py-10 text-center text-slate-400">Nothing matches your search or filters.</td></tr>
               )}
               {visible.map((invoice) => (
                 <tr key={invoice._id}>
                   <td className="px-5 py-3">{invoice.issuedAt ? new Date(invoice.issuedAt).toLocaleDateString() : new Date(invoice.createdAt).toLocaleDateString()}</td>
                   <td className="px-5 py-3 font-medium">{invoice.currency} {invoice.amount.toLocaleString()}</td>
-                  <td className="px-5 py-3"><Badge status={invoice.status} /></td>
+                  <td className="px-5 py-3"><Badge status={invoice.status} /></td><td className="px-5 py-3"><InvoiceDownload client={customerApi} path={`/customer/invoices/${invoice._id}/download`} /></td>
                 </tr>
               ))}
             </tbody>
