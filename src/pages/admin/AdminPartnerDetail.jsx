@@ -35,7 +35,8 @@ const COMMISSION_TYPE_OPTIONS = [
 
 const STATUS_OPTIONS = ["draft", "pending_verification", "under_review", "active", "suspended", "rejected", "inactive"];
 
-function PartnerStatusControl({ selectedStatus, onChange, onApply, busy }) {
+function PartnerStatusControl({ currentStatus, selectedStatus, onChange, onApply, busy, message }) {
+  const unchanged = selectedStatus === currentStatus;
   return (
     <Card className="p-6">
       <h2 className="font-semibold text-slate-900 mb-4">Partner Status</h2>
@@ -43,8 +44,10 @@ function PartnerStatusControl({ selectedStatus, onChange, onApply, busy }) {
         <Select aria-label="Partner status" value={selectedStatus} onChange={(e) => onChange(e.target.value)} className="flex-1" disabled={busy}>
           {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
         </Select>
-        <Button onClick={onApply} loading={busy}>Apply</Button>
+        <Button onClick={onApply} loading={busy} disabled={busy || unchanged}>Apply</Button>
       </div>
+      {unchanged && !message && <p className="text-xs text-slate-400 mt-2">Choose a different status to change it.</p>}
+      {message && <p className={`text-xs mt-2 ${message.error ? "text-red-600" : "text-emerald-600"}`}>{message.text}</p>}
     </Card>
   );
 }
@@ -90,6 +93,7 @@ export default function AdminPartnerDetail() {
   }, [viewedType, setViewedPartnerType]);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [busy, setBusy] = useState(false);
+  const [statusMessage, setStatusMessage] = useState(null); // { text, error? }
   const [previewDoc, setPreviewDoc] = useState(null);
   const [previewBank, setPreviewBank] = useState(false);
   const [editingAgreement, setEditingAgreement] = useState(false);
@@ -172,9 +176,13 @@ export default function AdminPartnerDetail() {
     }
 
     setBusy(true);
+    setStatusMessage(null);
     try {
       await adminApi.patch(`/admin/partners/${id}/status`, { status: selectedStatus, rejectionReason });
+      setStatusMessage({ text: `Status changed to ${selectedStatus.replace(/_/g, " ")}.` });
       load();
+    } catch (err) {
+      setStatusMessage({ error: true, text: err.response?.data?.message || "Could not change the partner status. Try again." });
     } finally {
       setBusy(false);
     }
@@ -285,7 +293,7 @@ export default function AdminPartnerDetail() {
 
       {tab === "overview" && (
         <>
-        <PartnerStatusControl selectedStatus={selectedStatus} onChange={setSelectedStatus} onApply={applyStatus} busy={busy} />
+        <PartnerStatusControl currentStatus={partner.status} selectedStatus={selectedStatus} onChange={(s) => { setSelectedStatus(s); setStatusMessage(null); }} onApply={applyStatus} busy={busy} message={statusMessage} />
         <PartnerOverview partner={partner} summary={data.summary} />
         </>
       )}
@@ -299,7 +307,7 @@ export default function AdminPartnerDetail() {
       {tab === "details" && (
       <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <PartnerStatusControl selectedStatus={selectedStatus} onChange={setSelectedStatus} onApply={applyStatus} busy={busy} />
+        <PartnerStatusControl currentStatus={partner.status} selectedStatus={selectedStatus} onChange={(s) => { setSelectedStatus(s); setStatusMessage(null); }} onApply={applyStatus} busy={busy} message={statusMessage} />
 
         {partner.partnerType === "reseller" && (
           <Card className="p-6 md:col-span-2">
