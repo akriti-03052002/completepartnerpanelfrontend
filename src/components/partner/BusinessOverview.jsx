@@ -2,7 +2,7 @@ import Card from "../ui/Card";
 const count = (rows = {}) => Object.values(rows).reduce((n, row) => n + (row.count || 0), 0);
 const total = (rows = {}) => Object.values(rows).reduce((n, row) => n + (row.amount || 0), 0);
 const money = (n) => `INR ${Number(n || 0).toLocaleString("en-IN")}`;
-export default function BusinessOverview({ type, summary = {} }) {
+export default function BusinessOverview({ type, summary = {}, socialAccounts }) {
   let tiles, note, business = 0, completed;
   if (type === "affiliate") {
     const leads = summary.leads || {};
@@ -12,6 +12,7 @@ export default function BusinessOverview({ type, summary = {} }) {
   } else if (type === "influencer") {
     completed = summary.posts?.approved?.count || 0;
     tiles = [["Posts and reels submitted", count(summary.posts)], ["Approved content", completed], ["Waiting for SPOTX", summary.posts?.pending?.count || 0], ["Instagram submissions", summary.platforms?.instagram?.count || 0]];
+    if (socialAccounts !== undefined) tiles.push(["Connected social accounts", socialAccounts]);
     note = "Your contribution is measured by approved content. Sales attributed to posts are not recorded.";
   } else if (type === "vendor") {
     business = summary.payments?.paid?.amount || 0; completed = summary.customers?.active?.count || 0;
@@ -20,6 +21,16 @@ export default function BusinessOverview({ type, summary = {} }) {
   } else {
     business = summary.invoices?.paid?.amount || 0; completed = summary.inventory?.totalPurchasedLicenses || 0;
     tiles = [["Your customers", count(summary.customers)], ["Licences purchased", completed], ["Licences allocated", summary.inventory?.totalAllocatedLicenses || 0], ["Licence invoices paid", money(business)], ["Outstanding licence invoices", money(total(Object.fromEntries(Object.entries(summary.invoices || {}).filter(([s]) => s !== "paid"))))]];
+    const inventory = summary.inventory || {};
+    tiles.push(
+      ["Licences available", Math.max(0, completed - (inventory.totalAllocatedLicenses || 0))],
+      ["Registered screens", inventory.totalRegisteredScreens || 0],
+      ["Active screens", inventory.totalActiveScreens || 0],
+      ["Active customers", summary.customers?.active?.count || 0],
+      ["Pending customers", ["pending", "allocated", "pending_activation"].reduce((n, status) => n + (summary.customers?.[status]?.count || 0), 0)],
+      ["Suspended customers", summary.customers?.suspended?.count || 0],
+      ["Cancelled customers", summary.customers?.cancelled?.count || 0]
+    );
     note = "Paid licence invoices show your business with SPOTX, including tax. Customer sales revenue is not recorded here.";
   }
   if (type !== "reseller") {
