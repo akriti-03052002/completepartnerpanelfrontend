@@ -1,3 +1,4 @@
+import StatusChart from "../ui/StatusChart";
 import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import Card from "../ui/Card";
 const count = (rows = {}) => Object.values(rows).reduce((n, row) => n + (row.count || 0), 0);
@@ -44,7 +45,16 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
   if (type === "affiliate" && !hasPermission("referrals:view")) tiles = tiles.filter(([label]) => !["Leads you referred", "Won deals", "Deals in progress", "Business you referred"].includes(label));
   const great = type === "influencer" ? completed >= 10 : business >= 100000;
   const rating = great ? "\u{1F31F} Great contribution" : completed || business ? "\u{1F4C8} Your business is growing" : "\u{1F331} Your journey is starting";
+  let chart = null;
+  if (type === "affiliate" && hasPermission("referrals:view") && summary.leads) chart = { title: "Deal progress", note: "Number of deals in each recorded status; won-deal value is separate.", rows: Object.entries(summary.leads).map(([label, row]) => ({ label, value: row.count })) };
+  if (type === "influencer" && summary.posts) chart = { title: "Content review progress", note: "Submitted posts and reels by review status. Approval does not mean payment is complete.", rows: Object.entries(summary.posts).map(([label, row]) => ({ label, value: row.count })) };
+  if (type === "vendor" && hasPermission("customers:view") && summary.customers) chart = { title: "Customer account status", note: "Your linked customers by current account status, rather than commission status.", rows: Object.entries(summary.customers).map(([label, row]) => ({ label, value: row.count })) };
+  if (type === "reseller" && hasPermission("reseller:inventory:view") && summary.inventory) {
+    const bought = Number(summary.inventory.totalPurchasedLicenses) || 0;
+    const assigned = Number(summary.inventory.totalAllocatedLicenses) || 0;
+    chart = { title: "Licence allocation", note: "Assigned licences reserve customer capacity. They do not mean a screen is active.", rows: [{ label: "Ready to assign", value: Math.max(0, bought - assigned) }, { label: "Assigned to customers", value: assigned }] };
+  }
   const secondary = type === "reseller" ? ["Registered screens", "Active screens", "Active customers", "Pending customers", "Suspended customers", "Cancelled customers"] : [];
   const renderTile = ([title, value]) => <div key={title} className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">{title}</p><p className="text-xl font-bold mt-1 break-words">{value}</p></div>;
-  return <Card className="p-5 space-y-4"><div><h2 className="font-semibold text-lg">Your business overview</h2><p className="text-sm mt-1">{rating}</p><p className="text-xs text-slate-500 mt-1">Lifetime totals for your partner account only. Great contribution means {type === "influencer" ? "10 approved posts/reels" : "INR 100,000 of recorded business"} or more.</p></div><div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{tiles.filter(([title]) => !secondary.includes(title)).map(renderTile)}</div>{secondary.length > 0 && <details><summary className="cursor-pointer text-sm font-semibold text-slate-700">Show customer and screen breakdown</summary><div className="mt-3 grid grid-cols-2 lg:grid-cols-3 gap-3">{tiles.filter(([title]) => secondary.includes(title)).map(renderTile)}</div></details>}<p className="text-sm text-slate-500">{note}</p></Card>;
+  return <Card className="p-5 space-y-4"><div><h2 className="font-semibold text-lg">Your business overview</h2><p className="text-sm mt-1">{rating}</p><p className="text-xs text-slate-500 mt-1">Lifetime totals for your partner account only. Great contribution means {type === "influencer" ? "10 approved posts/reels" : "INR 100,000 of recorded business"} or more.</p></div><div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{tiles.filter(([title]) => !secondary.includes(title)).map(renderTile)}</div>{secondary.length > 0 && <details><summary className="cursor-pointer text-sm font-semibold text-slate-700">Show customer and screen breakdown</summary><div className="mt-3 grid grid-cols-2 lg:grid-cols-3 gap-3">{tiles.filter(([title]) => secondary.includes(title)).map(renderTile)}</div></details>}{chart && <StatusChart {...chart} />}<p className="text-sm text-slate-500">{note}</p></Card>;
 }

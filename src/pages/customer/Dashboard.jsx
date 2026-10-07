@@ -100,7 +100,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
         <StatCard
           label={subscription.status === "trial" ? "Trial Days Left" : "Subscription Status"}
           value={subscription.status === "trial" ? (trialExpired ? "Expired" : trialDaysLeft) : subscription.status}
@@ -110,6 +110,7 @@ export default function Dashboard() {
         <StatCard label="Current Plan" value={planLabel} icon={Tag} />
         <StatCard label="Subscribed Screens" value={subscription.screenCount || 0} icon={CreditCard} />
         <StatCard label="Registered Screens" value={registeredScreenCount} icon={Monitor} />
+        <StatCard label="Available Screen Slots" value={Math.max(0, (Number(subscription.screenCount) || 0) - (Number(registeredScreenCount) || 0))} icon={Plus} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
