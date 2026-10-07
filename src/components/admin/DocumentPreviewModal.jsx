@@ -55,7 +55,7 @@ export default function DocumentPreviewModal({ doc, onClose, onVerify, onReject,
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+      <div role="dialog" aria-modal="true" aria-label="Document preview" className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 shrink-0">
           <div>
             <p className="text-sm font-semibold text-slate-900 capitalize">{doc.documentType.replace(/_/g, " ")}</p>
@@ -82,10 +82,11 @@ export default function DocumentPreviewModal({ doc, onClose, onVerify, onReject,
           )}
         </div>
 
+        {fileUrl && <div className="px-5 py-3 border-t text-sm"><a href={fileUrl} download={doc.file.originalName} className="text-brand-red font-semibold hover:underline">Download document</a><p className="text-xs text-slate-500 mt-1">If the preview does not display, download the file to open it.</p></div>}
         {doc.verification.status === "pending" && (onVerify || onReject) && (
           <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-slate-100 shrink-0">
-            <Button variant="danger" onClick={handleReject} loading={busy}>Reject</Button>
-            <Button onClick={handleVerify} loading={busy}>Verify</Button>
+            {onReject && <Button variant="danger" onClick={handleReject} loading={busy}>Reject document</Button>}
+            {onVerify && <Button onClick={handleVerify} loading={busy}>Approve document</Button>}
           </div>
         )}
       </div>

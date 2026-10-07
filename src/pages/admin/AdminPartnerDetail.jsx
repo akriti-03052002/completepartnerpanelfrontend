@@ -1,3 +1,4 @@
+import { useAdminAuth } from "../../context/AdminAuthContext";
 import PartnerCustomers from "../../components/admin/partner/PartnerCustomers";
 import PartnerProfileSummary from "../../components/admin/partner/PartnerProfileSummary";
 import { useEffect, useState } from "react";
@@ -35,16 +36,19 @@ const COMMISSION_TYPE_OPTIONS = [
 
 const STATUS_OPTIONS = ["draft", "pending_verification", "under_review", "active", "suspended", "rejected", "inactive"];
 
-function PartnerStatusControl({ selectedStatus, onChange, onApply, busy }) {
+function PartnerStatusControl({ selectedStatus, onChange, onApply, busy, error, success, canEdit }) {
   return (
     <Card className="p-6">
-      <h2 className="font-semibold text-slate-900 mb-4">Partner Status</h2>
+      <h2 className="font-semibold text-slate-900 mb-2">Account status</h2>
+      <p className="text-sm text-slate-500 mb-4">{canEdit ? "Choose a status, then save the change." : "Only a super admin or KYC reviewer can change this status."}</p>
       <div className="flex flex-col sm:flex-row gap-3">
-        <Select aria-label="Partner status" value={selectedStatus} onChange={(e) => onChange(e.target.value)} className="flex-1" disabled={busy}>
+        <Select aria-label="Partner status" value={selectedStatus} onChange={(e) => onChange(e.target.value)} className="flex-1" disabled={busy || !canEdit}>
           {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
         </Select>
-        <Button onClick={onApply} loading={busy}>Apply</Button>
+        {canEdit && <Button onClick={onApply} loading={busy}>Save status</Button>}
       </div>
+      {error && <p role="alert" className="text-sm text-red-600 mt-3">{error}</p>}
+      {success && <p role="status" className="text-sm text-emerald-700 mt-3">{success}</p>}
     </Card>
   );
 }
@@ -88,9 +92,12 @@ export default function AdminPartnerDetail() {
     setViewedPartnerType?.(viewedType);
     return () => setViewedPartnerType?.(null);
   }, [viewedType, setViewedPartnerType]);
+  const { user: adminUser } = useAdminAuth();
+  const canEditStatus = ["super_admin", "kyc_reviewer"].includes(adminUser?.role);
+  const [statusError, setStatusError] = useState("");
+  const [statusSuccess, setStatusSuccess] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [busy, setBusy] = useState(false);
-  const [statusError, setStatusError] = useState("");
   const [previewDoc, setPreviewDoc] = useState(null);
   const [previewBank, setPreviewBank] = useState(false);
   const [editingAgreement, setEditingAgreement] = useState(false);
@@ -107,7 +114,7 @@ export default function AdminPartnerDetail() {
   const [commissionSuccess, setCommissionSuccess] = useState("");
 
   const load = () => {
-    adminApi.get(`/admin/partners/${id}`).then((res) => {
+    return adminApi.get(`/admin/partners/${id}`).then((res) => {
       setData(res.data.data);
       setSelectedStatus(res.data.data.partner.status);
     });
@@ -173,12 +180,15 @@ export default function AdminPartnerDetail() {
       }
     }
 
+    setStatusError(""); setStatusSuccess("");
     setBusy(true);
     try {
       await adminApi.patch(`/admin/partners/${id}/status`, { status: selectedStatus, rejectionReason });
-      load();
-    } catch (err) {
-      setStatusError(err.response?.data?.message || "Could not update partner status. Check your connection and try again.");
+      setStatusSuccess("Account status saved.");
+      await load();
+    } catch (error) {
+      setStatusError(error.response?.data?.message || "Could not save the status. Please try again.");
+
     } finally {
       setBusy(false);
     }
@@ -269,7 +279,7 @@ export default function AdminPartnerDetail() {
 
       <label className="block sm:hidden text-sm font-medium">Profile section<select aria-label="Profile section" value={tab} onChange={(event) => navigate(partnerSectionPath(id, event.target.value))} className="mt-2 w-full rounded-xl border border-slate-200 bg-white p-3">{sections.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}</select></label>
       <nav className="hidden sm:flex flex-wrap gap-1 border-b border-slate-200" aria-label="Partner sections">
-        {sections.map((s) => (
+        {sections.filter(s => !["payout", "team", "activity"].includes(s.key)).map((s) => (
           <NavLink
             key={s.key}
             to={partnerSectionPath(id, s.key)}
@@ -284,13 +294,14 @@ export default function AdminPartnerDetail() {
           </NavLink>
         ))}
       </nav>
+      <details className="hidden sm:block rounded-xl border border-slate-200 bg-white p-3" open={["payout", "team", "activity"].includes(tab)}><summary className="cursor-pointer text-sm font-semibold">More: payment settings, team and activity</summary><div className="flex flex-wrap gap-3 mt-3">{sections.filter(s => ["payout", "team", "activity"].includes(s.key)).map(s => <NavLink key={s.key} to={partnerSectionPath(id, s.key)} className="text-sm font-medium text-brand-red hover:underline">{s.label}</NavLink>)}</div></details>
 
       <PartnerProfileSummary partner={partner} documents={documents} requiredDocumentTypes={requiredDocumentTypes} bankAccount={bankAccount} summary={data.summary} compact={tab !== "overview"} />
-      {statusError && <p role="alert" className="text-sm text-red-700">{statusError}</p>}
+
 
       {tab === "overview" && (
         <>
-        <PartnerStatusControl selectedStatus={selectedStatus} onChange={setSelectedStatus} onApply={applyStatus} busy={busy} />
+        <PartnerStatusControl selectedStatus={selectedStatus} onChange={setSelectedStatus} onApply={applyStatus} busy={busy} canEdit={canEditStatus} error={statusError} success={statusSuccess} />
         <PartnerOverview partner={partner} summary={data.summary} />
         </>
       )}
@@ -304,7 +315,7 @@ export default function AdminPartnerDetail() {
       {tab === "details" && (
       <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <PartnerStatusControl selectedStatus={selectedStatus} onChange={setSelectedStatus} onApply={applyStatus} busy={busy} />
+        <PartnerStatusControl selectedStatus={selectedStatus} onChange={setSelectedStatus} onApply={applyStatus} busy={busy} canEdit={canEditStatus} error={statusError} success={statusSuccess} />
 
         {partner.partnerType === "reseller" && (
           <Card className="p-6 md:col-span-2">

@@ -9,7 +9,7 @@ const EARNING_TYPES = ["influencer", "affiliate", "vendor"];
 // partner's own sidebar (see PartnerLayout).
 const EARNINGS_LABEL = {
   influencer: "Content Earnings",
-  affiliate: "Rewards",
+  affiliate: "Referral Rewards",
   vendor: "Commissions"
 };
 
@@ -19,14 +19,14 @@ const EARNINGS_LABEL = {
 // partner's type.
 const PARTNER_SECTIONS = [
   { key: "overview", label: () => "Overview", icon: LayoutDashboard, partnerTypes: ALL_TYPES },
-  { key: "details", label: () => "Details", icon: UserCircle, partnerTypes: ALL_TYPES },
-  { key: "posts", label: () => "Post / Reel Approval", icon: Clapperboard, partnerTypes: ["influencer"] },
-  { key: "accounts", label: () => "Account Approval", icon: Share2, partnerTypes: ["influencer"] },
+  { key: "details", label: () => "Profile Details", icon: UserCircle, partnerTypes: ALL_TYPES },
+  { key: "posts", label: () => "Review Posts & Reels", icon: Clapperboard, partnerTypes: ["influencer"] },
+  { key: "accounts", label: () => "Review Social Accounts", icon: Share2, partnerTypes: ["influencer"] },
   { key: "customers", label: () => "Customers", icon: Users, partnerTypes: ["vendor", "reseller"] },
-  { key: "leads", label: () => "Leads", icon: Users, partnerTypes: ["affiliate"] },
+  { key: "leads", label: () => "Leads & Deals", icon: Users, partnerTypes: ["affiliate"] },
   { key: "rewards", label: (type) => EARNINGS_LABEL[type] || "Earnings", icon: Trophy, partnerTypes: EARNING_TYPES },
   { key: "settlements", label: () => "Partner Payments", icon: Landmark, partnerTypes: EARNING_TYPES },
-  { key: "kyc", label: () => "Identity & Bank", icon: FileCheck, partnerTypes: ALL_TYPES },
+  { key: "kyc", label: () => "Documents & Bank", icon: FileCheck, partnerTypes: ALL_TYPES },
   { key: "payout", label: () => "Payment Settings", icon: Wallet, partnerTypes: EARNING_TYPES },
   { key: "team", label: () => "Team", icon: UserCog, partnerTypes: ["affiliate", "vendor", "reseller"] },
   { key: "activity", label: () => "Activity", icon: History, partnerTypes: ALL_TYPES }
