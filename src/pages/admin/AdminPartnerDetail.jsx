@@ -90,6 +90,7 @@ export default function AdminPartnerDetail() {
   }, [viewedType, setViewedPartnerType]);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [busy, setBusy] = useState(false);
+  const [statusError, setStatusError] = useState("");
   const [previewDoc, setPreviewDoc] = useState(null);
   const [previewBank, setPreviewBank] = useState(false);
   const [editingAgreement, setEditingAgreement] = useState(false);
@@ -159,6 +160,7 @@ export default function AdminPartnerDetail() {
   };
 
   const applyStatus = async () => {
+    setStatusError("");
     if (["rejected", "suspended", "inactive"].includes(selectedStatus) && !window.confirm(`Set this partner to ${selectedStatus}? This can restrict their account and payouts. Continue?`)) return;
     let rejectionReason;
 
@@ -175,6 +177,8 @@ export default function AdminPartnerDetail() {
     try {
       await adminApi.patch(`/admin/partners/${id}/status`, { status: selectedStatus, rejectionReason });
       load();
+    } catch (err) {
+      setStatusError(err.response?.data?.message || "Could not update partner status. Check your connection and try again.");
     } finally {
       setBusy(false);
     }
@@ -282,6 +286,7 @@ export default function AdminPartnerDetail() {
       </nav>
 
       <PartnerProfileSummary partner={partner} documents={documents} requiredDocumentTypes={requiredDocumentTypes} bankAccount={bankAccount} summary={data.summary} compact={tab !== "overview"} />
+      {statusError && <p role="alert" className="text-sm text-red-700">{statusError}</p>}
 
       {tab === "overview" && (
         <>
