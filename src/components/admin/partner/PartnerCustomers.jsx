@@ -22,7 +22,8 @@ export default function PartnerCustomers({ partnerId }) {
       <Table rows={result.data} empty="No customers belong to this partner yet. Customers appear here after registration with this partner's referral link." columns={[
         { key: "name", header: "Customer" }, { key: "contact", header: "Contact" },
         { key: "email", header: "Email" }, { key: "status", header: "Status", render: (row) => <Badge status={row.status} /> },
-        { key: "screens", header: "Screens", render: (row) => row.screens ?? "See licence allocation" }
+        { key: "registeredScreens", header: "Registered screens", render: row => row.registeredScreens ?? "—" },
+        { key: "subscribedScreens", header: "Subscribed screens", render: row => row.subscribedScreens ?? row.screens ?? "—" }
       ]} />
       <Pagination page={page} {...result.pagination} onChange={(next) => { setResult(null); setPage(next); }} />
     </> : <p className="p-4 text-slate-500">Loading customers...</p>}
