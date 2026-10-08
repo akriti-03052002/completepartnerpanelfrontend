@@ -1,4 +1,5 @@
 import { useSessionState } from "../../hooks/useSessionState";
+import { useSearchParams } from "react-router-dom";
 import Pagination from "../../components/ui/Pagination";
 import { useEffect, useState } from "react";
 import adminApi from "../../services/adminApi";
@@ -28,7 +29,9 @@ export default function AdminLeads() {
   const [paging, setPaging] = useState({ total: 0, pages: 0 });
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useSessionState("filter", "");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filter = searchParams.get("status") || "";
+  const setFilter = value => { setPage(1); setSearchParams(value ? { status: value } : {}); };
   const [pricePerScreen, setPricePerScreen] = useState(0);
   const [planPrices, setPlanPrices] = useState({ basic: 0, premium: 0 });
   const [winTarget, setWinTarget] = useState(null);

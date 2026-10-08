@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import adminApi from "../../services/adminApi";
+import { loadBankChecks } from "../../services/loadBankChecks";
+import { loadIdentityChecks } from "../../services/loadIdentityChecks";
+import { useAdminAuth } from "../../context/AdminAuthContext";
 import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
@@ -41,8 +44,8 @@ const TYPES = {
       { label: "Rejected leads", value: count(d.rejectedLeads) }
     ],
     actions: (d, e) => [
-      { label: "New leads to contact", value: d.newLeads, to: "/admin/leads" },
-      { label: "Leads in progress", value: d.contactedLeads, to: "/admin/leads" },
+      { label: "New leads to contact", value: d.newLeads, to: "/admin/leads?status=new" },
+      { label: "Leads in progress", value: d.contactedLeads, to: "/admin/leads?status=contacted" },
       { label: "Rewards waiting for approval", value: e.awaitingApproval, to: "/admin/commissions?partnerType=affiliate" },
       { label: "Rewards waiting to be settled", value: e.pending > 0 ? money(e.pending) : 0, to: "/admin/settlements?partnerType=affiliate" }
     ]
@@ -82,26 +85,37 @@ const TYPES = {
   }
 };
 
-function Tile({ label, value, note }) {
-  return (
+function Tile({ label, value, note, to }) {
+  const body = (
     <Card className="p-4">
       <p className="text-sm text-slate-500">{label}</p>
       <p className="text-2xl font-bold text-slate-900 mt-1 tabular-nums">{value}</p>
       {note && <p className="text-xs text-slate-400 mt-1">{note}</p>}
     </Card>
   );
+  return to ? <Link to={to} className="block rounded-2xl focus-visible:outline-2">{body}</Link> : body;
 }
 
 // The quick overview shown when a partner type is opened in the menu.
 // Everything comes from GET /admin/stats/type/:partnerType, computed live.
 export default function AdminTypeOverview() {
+  const { user } = useAdminAuth();
   const { partnerType } = useParams();
   const config = TYPES[partnerType];
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
 
-  const load = () => adminApi.get(`/admin/stats/type/${partnerType}`)
-    .then((res) => { setData(res.data.data); setError(""); })
+  const load = () => Promise.all([
+    adminApi.get(`/admin/stats/type/${partnerType}`),
+    ["super_admin", "kyc_reviewer", "finance"].includes(user?.role) ? loadBankChecks() : Promise.resolve(null),
+    ["super_admin", "kyc_reviewer"].includes(user?.role) ? loadIdentityChecks() : Promise.resolve(null)
+  ])
+    .then(([res, bank, identity]) => {
+      const overview = res.data.data;
+      if (bank) overview.partners.bankPending = bank.incompletePartners.filter(p => p.partnerType === partnerType).length;
+      if (identity) overview.partners.kycPending = identity.filter(p => p.partnerType === partnerType).length;
+      setData(overview); setError("");
+    })
     .catch((err) => setError(err.response?.data?.message || "Couldn't load the overview."));
 
   useEffect(() => {
@@ -151,12 +165,13 @@ export default function AdminTypeOverview() {
           <Link to={listPath} className="text-xs font-semibold text-brand-red hover:underline">View all {config.plural.toLowerCase()}</Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
-          <Tile label="Total" value={count(partners.total)} />
-          <Tile label="Active" value={count(partners.active)} />
-          <Tile label="Awaiting verification" value={count(partners.pendingVerification)} />
-          <Tile label="KYC pending" value={count(partners.kycPending)} />
-          <Tile label="Bank details pending" value={count(partners.bankPending)} />
-          <Tile label="Rejected / suspended" value={`${count(partners.rejected)} / ${count(partners.suspended)}`} />
+          <Tile label="Total" value={count(partners.total)} to={listPath} />
+          <Tile label="Active" value={count(partners.active)} to={`${listPath}&status=active`} />
+          <Tile label="Awaiting verification" value={count(partners.pendingVerification)} to={`${listPath}&status=awaiting_verification`} />
+          <Tile label="Identity checks incomplete" value={count(partners.kycPending)} to={`/admin/documents?partnerType=${partnerType}`} />
+          <Tile label="Bank checks incomplete" value={count(partners.bankPending)} to={`/admin/bank?partnerType=${partnerType}`} />
+          <Tile label="Rejected" value={count(partners.rejected)} to={`${listPath}&status=rejected`} />
+          <Tile label="Suspended" value={count(partners.suspended)} to={`${listPath}&status=suspended`} />
         </div>
       </section>
 

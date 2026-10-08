@@ -12,7 +12,7 @@ import { Select, Input } from "../../components/ui/Input";
 import PhoneInput from "../../components/ui/PhoneInput";
 import SearchBox from "../../components/ui/SearchBox";
 
-const STATUSES = ["", "draft", "pending_verification", "under_review", "active", "suspended", "rejected", "inactive"];
+const STATUSES = ["", "awaiting_verification", "draft", "pending_verification", "under_review", "active", "suspended", "rejected", "inactive"];
 const PARTNER_TYPES = ["vendor", "affiliate", "influencer", "reseller"];
 
 // Only the fields needed to invite someone in — business name, legal

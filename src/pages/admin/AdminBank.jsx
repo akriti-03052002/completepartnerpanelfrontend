@@ -5,8 +5,11 @@ import Card from "../../components/ui/Card";
 import Table from "../../components/ui/Table";
 import Badge from "../../components/ui/Badge";
 import IncompleteChecks from "../../components/admin/IncompleteChecks";
+import { useSearchParams } from "react-router-dom";
 
 export default function AdminBank() {
+  const [searchParams] = useSearchParams();
+  const partnerType = searchParams.get("partnerType") || "";
   const [accounts, setAccounts] = useState([]);
   const [incompletePartners, setIncompletePartners] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +81,7 @@ export default function AdminBank() {
       <p className="text-sm text-slate-500 -mt-4">Revealing full account details is restricted to finance admins and is audit-logged on every access.</p>
       {error && <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
       {loading && <p className="text-sm text-slate-400">Loading bank checks...</p>}
-      {!loading && !error && <IncompleteChecks partners={incompletePartners} kind="bank" renderAction={p => p.checkStatus === "Bank update awaiting review" && <button onClick={() => setReviewChangeId(p.bankAccountId)} className="text-xs font-semibold text-brand-red hover:underline">Review bank update</button>} />}
+      {!loading && !error && <IncompleteChecks partners={incompletePartners.filter(p => !partnerType || p.partnerType === partnerType)} kind="bank" renderAction={p => p.checkStatus === "Bank update awaiting review" && <button onClick={() => setReviewChangeId(p.bankAccountId)} className="text-xs font-semibold text-brand-red hover:underline">Review bank update</button>} />}
 
       {!loading && changeRequests.some(a => a._id === reviewChangeId) && (
         <div className="space-y-3">

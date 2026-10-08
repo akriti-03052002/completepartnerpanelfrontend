@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ArrowDownLeft, ArrowUpRight, RefreshCw, Users, ShieldCheck, Landmark, Wallet, Receipt, ArrowRight } from "lucide-react";
 import adminApi from "../../services/adminApi";
 import { loadBankChecks } from "../../services/loadBankChecks";
+import { loadIdentityChecks } from "../../services/loadIdentityChecks";
 import Card from "../../components/ui/Card";
 import PartnerTypeBarChart from "../../components/admin/PartnerTypeBarChart";
 import { PARTNER_TYPE_COLORS } from "../../utils/partnerTypeColors";
@@ -76,11 +77,13 @@ export default function AdminDashboard() {
 
   const fetchDashboard = () => Promise.all([
     adminApi.get("/admin/stats/dashboard"),
-    canReview || canFinance ? loadBankChecks() : Promise.resolve(null)
+    canReview || canFinance ? loadBankChecks() : Promise.resolve(null),
+    canReview ? loadIdentityChecks() : Promise.resolve(null)
   ])
-    .then(([res, bankChecks]) => {
+    .then(([res, bankChecks, identityChecks]) => {
       const dashboard = res.data.data;
       if (bankChecks) dashboard.partners.bankPending = bankChecks.incompletePartners.length;
+      if (identityChecks) dashboard.partners.kycPending = identityChecks.length;
       setData(dashboard); setUpdatedAt(new Date()); setError("");
     })
     .catch((err) => setError(err.response?.data?.message || "Couldn't load the dashboard."));
