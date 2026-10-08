@@ -7,6 +7,7 @@ export default function IncompleteChecks({ partners, kind }) {
     <h2 className="font-semibold text-slate-900">{kind === "bank" ? "Bank checks incomplete" : "Identity checks incomplete"} ({partners.length})</h2>
     {["Not submitted", "Waiting for review", "Needs correction"].map(status => {
       const rows = partners.filter(p => p.checkStatus === status);
+      if (!rows.length) return null;
       return <section key={status} className="space-y-2">
         <h3 className="text-sm font-semibold">{status} ({rows.length})</h3>
         <Card><Table rows={rows} empty={`No partners: ${status.toLowerCase()}.`} columns={[

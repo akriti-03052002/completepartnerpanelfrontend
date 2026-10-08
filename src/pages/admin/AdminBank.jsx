@@ -12,30 +12,32 @@ export default function AdminBank() {
   const [revealed, setRevealed] = useState({});
   const [error, setError] = useState("");
 
-  const load = () => adminApi.get("/admin/bank/pending").then((res) => { setAccounts(res.data.data); setIncompletePartners(res.data.incompletePartners || []); setError(""); }).catch(() => setError("Could not load bank details. Please try again.")).finally(() => setLoading(false));
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await adminApi.get("/admin/bank/pending");
+      let incomplete = res.data.incompletePartners;
+      if (!Array.isArray(incomplete)) {
+        // Older deployments return only submitted accounts. Fetch partner
+        // details as well so missing bank accounts cannot disappear.
+        const partnerRes = await adminApi.get("/admin/partners");
+        const partners = partnerRes.data.data.filter(p => !["rejected", "inactive"].includes(p.status));
+        const details = await Promise.all(partners.map(p => adminApi.get(`/admin/partners/${p._id}`)));
+        incomplete = details.flatMap(({ data: response }) => {
+          const { partner, bankAccount } = response.data;
+          if (bankAccount?.verification?.status === "verified") return [];
+          return [{ ...partner, checkStatus: !bankAccount ? "Not submitted" : bankAccount.verification?.status === "rejected" ? "Needs correction" : "Waiting for review" }];
+        });
+      }
+      setAccounts(res.data.data);
+      setIncompletePartners(incomplete);
+      setError("");
+    } catch (err) {
+      setError(err.response?.data?.message || "Could not load all bank checks. Please try again.");
+    } finally { setLoading(false); }
+  };
 
   useEffect(() => { load(); }, []);
-
-  const verify = async (account, status) => {
-    setError("");
-    const razorpayCheck = account.razorpayCheck;
-    const razorpayPassed = razorpayCheck?.paymentStatus === "captured" && razorpayCheck?.nameMatchStatus === "matched";
-
-    let overrideReason;
-    if (status === "verified" && !razorpayPassed) {
-      overrideReason = window.prompt(
-        "The Razorpay bank check hasn't passed (payment not captured, or the name doesn't match). Enter a reason to verify anyway:"
-      );
-      if (!overrideReason?.trim()) return;
-    }
-
-    try {
-      await adminApi.patch(`/admin/bank/${account._id}/verify`, { status, overrideReason });
-      load();
-    } catch (err) {
-      setError(err.response?.data?.message || "Couldn't update this bank account.");
-    }
-  };
 
   // A Reseller's staged replacement for an already-verified account — the
   // live account is untouched until this is approved.
@@ -78,65 +80,21 @@ export default function AdminBank() {
     }
   };
 
-  const newAccounts = accounts.filter((a) => a.verification?.status === "pending");
+
   const changeRequests = accounts.filter((a) => a.pendingChange);
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">Bank Account Review</h1>
+      <h1 className="text-2xl font-bold text-slate-900">Bank checks incomplete</h1>
       <p className="text-sm text-slate-500 -mt-4">Revealing full account details is restricted to finance admins and is audit-logged on every access.</p>
       {error && <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
       {!loading && !error && <IncompleteChecks partners={incompletePartners} kind="bank" />}
 
-      <Card>
-        {loading ? (
-          <p className="text-slate-400 text-sm p-6">Loading...</p>
-        ) : (
-          <Table
-            empty="No bank accounts waiting for review."
-            rows={newAccounts}
-            columns={[
-              { key: "partner", header: "Partner", render: (a) => a.partnerId?.legalEntity?.businessName || "—" },
-              { key: "bank", header: "Bank", render: (a) => a.bankName },
-              { key: "acct", header: "Account", render: (a) => revealed[a._id] ? `${revealed[a._id].accountNumber} / ${revealed[a._id].ifsc}` : `•••• ${a.accountNumberLast4}` },
-              {
-                key: "razorpay",
-                header: "Razorpay Check",
-                filter: (a) => a.razorpayCheck?.paymentStatus || "not_initiated",
-                render: (a) => (
-                  <div className="flex flex-col gap-1 items-start">
-                    <Badge status={a.razorpayCheck?.paymentStatus || "not_initiated"}>
-                      {(a.razorpayCheck?.paymentStatus || "not_initiated").replace(/_/g, " ")}
-                    </Badge>
-                    <Badge status={a.razorpayCheck?.nameMatchStatus === "matched" ? "verified" : a.razorpayCheck?.nameMatchStatus === "mismatched" ? "rejected" : "not_submitted"}>
-                      {(a.razorpayCheck?.nameMatchStatus || "not_checked").replace(/_/g, " ")}
-                    </Badge>
-                  </div>
-                )
-              },
-              {
-                key: "actions",
-                header: "",
-                render: (a) => (
-                  <div className="flex gap-3">
-                    {!revealed[a._id] && (
-                      <button onClick={() => reveal(a._id)} className="text-xs font-semibold text-slate-500 hover:underline">Reveal</button>
-                    )}
-                    <button onClick={() => verify(a, "verified")} className="text-xs font-semibold text-emerald-600 hover:underline">Verify</button>
-                    <button onClick={() => verify(a, "rejected")} className="text-xs font-semibold text-brand-red hover:underline">Reject</button>
-                  </div>
-                )
-              }
-            ]}
-          />
-        )}
-      </Card>
-
       {!loading && changeRequests.length > 0 && (
         <div className="space-y-3">
           <div>
-            <h2 className="font-semibold text-slate-900">Reseller bank account change requests</h2>
-            <p className="text-sm text-slate-500">The partner&apos;s current verified account stays live until a change is approved.</p>
+            <h2 className="font-semibold text-slate-900">Reseller bank account change requests ({changeRequests.length})</h2>
+            <p className="text-sm text-slate-500">These partners already have a verified bank account. Change requests are separate from the incomplete checks counted above.</p>
           </div>
           <Card>
             <Table
