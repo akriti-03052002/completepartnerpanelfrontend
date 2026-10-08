@@ -1,6 +1,8 @@
 import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { Link, useLocation } from "react-router-dom";
+import { useEffect, useRef, useId } from "react";
+import { CircleHelp, X } from "lucide-react";
 
 const partnerJourney = {
   affiliate: ["Complete your profile, identity documents and bank details. SPOTX reviews them before you can refer leads.", "Add a lead: a potential customer interested in SPOTX. Track whether the deal is in progress, won or lost.", "A won deal may earn a reward. Your earnings page shows the reward; Payments to You shows its payment status."],
@@ -44,7 +46,10 @@ const guides = [
   ["/customer", "How to use your customer account", ["Use Screens to add and manage your devices.", "Use Subscription to review your plan, screen allowance and dates before making changes.", "Use Billing to check recorded invoices and payments. A payment to SPOTX is separate from your vendor's commission."]]
 ];
 export default function PageGuide({ partnerType }) {
+  const dialog = useRef(null);
+  const titleId = useId();
   const { pathname } = useLocation();
+  useEffect(() => { dialog.current?.close(); }, [pathname]);
   const partnerAuth = usePartnerAuth();
   const adminAuth = useAdminAuth();
   let actions = [];
@@ -61,14 +66,20 @@ export default function PageGuide({ partnerType }) {
   const steps = found?.[2] || partnerJourney[partnerType];
   if (!steps) return null;
   return (
-    <section aria-label="Page help" className="mb-5 rounded-xl border border-slate-200 bg-white p-4 text-sm">
-      <p className="font-semibold text-slate-800">{found?.[1] || "How your partner account works"}</p>
-      <p className="mt-1 leading-6 text-slate-600">{steps[0]}</p>
-      <details key={pathname} className="mt-2">
-        <summary className="cursor-pointer text-sm font-semibold text-slate-700">Show steps and important details</summary>
-        {actions.length > 0 && <div aria-label="Related tasks" className="mt-3 flex flex-wrap gap-2">{actions.map(([label, to]) => <Link key={to} to={to} className="inline-flex min-h-11 items-center rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">{label}</Link>)}</div>}
-        <ol className="mt-3 list-decimal pl-5 space-y-2 leading-6 text-slate-600">{steps.map(step => <li key={step}>{step}</li>)}</ol>
-      </details>
-    </section>
+    <div className="flex justify-end">
+      <button type="button" onClick={() => dialog.current?.showModal()} aria-haspopup="dialog" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2">
+        <CircleHelp size={15} aria-hidden="true" /> Help
+      </button>
+      <dialog ref={dialog} aria-labelledby={titleId} onClick={e => { if (e.target === dialog.current) dialog.current.close(); }} className="m-auto w-[calc(100%-2rem)] max-w-lg rounded-2xl border border-slate-200 bg-white p-0 shadow-xl backdrop:bg-slate-950/40">
+        <div className="p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <h2 id={titleId} className="font-semibold text-slate-900">{found?.[1] || "How your partner account works"}</h2>
+            <button type="button" onClick={() => dialog.current.close()} aria-label="Close help" className="rounded-lg p-1 text-slate-500 hover:bg-slate-100"><X size={20} /></button>
+          </div>
+          <ol className="mt-4 list-decimal pl-5 space-y-3 text-sm leading-6 text-slate-600">{steps.map(step => <li key={step}>{step}</li>)}</ol>
+          {actions.length > 0 && <div aria-label="Related tasks" className="mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-4">{actions.map(([label, to]) => <Link key={to} to={to} onClick={() => dialog.current.close()} className="inline-flex items-center rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">{label}</Link>)}</div>}
+        </div>
+      </dialog>
+    </div>
   );
 }

@@ -176,6 +176,7 @@ export default function AdminLayout() {
             <Menu size={22} />
           </button>
           <div className="ml-auto flex items-center gap-3 sm:gap-4">
+            <PageGuide />
             <AdminNotificationBell />
             <div className="text-right">
               <p className="text-sm font-medium text-slate-900">{user?.name}</p>
@@ -186,7 +187,6 @@ export default function AdminLayout() {
 
         <main id="admin-main" tabIndex={-1} className="flex-1 overflow-y-auto p-4 sm:p-6 outline-none">
           <PageLocation />
-          <PageGuide />
           <Outlet context={{ setViewedPartnerType }} />
         </main>
       </div>
