@@ -41,7 +41,7 @@ export default function PartnerProfileSummary({ partner, documents = [], require
   const pending = checks.filter((check) => !check.done);
   const next = pending[0];
   if (compact) return <Card className="p-4 flex flex-wrap items-center justify-between gap-3">
-    <div><p className="text-sm font-semibold">{next ? `Next: ${next.title}` : "Verification checklist complete"}</p><p className="text-xs text-slate-500 mt-1">{next ? `${ownership(next)}: ${next.note}` : "No outstanding items in this checklist."} {pending.length > 0 ? `(${pending.length} items need attention)` : ""}</p></div>
+    <div><p className="text-sm font-semibold">{next ? `Next: ${next.title}` : "Verification checklist complete"}</p><p className="text-xs text-slate-500 mt-1">{next ? `${ownership(next)}: ${next.note}` : "No pending items in this checklist."} {pending.length > 0 ? `(${pending.length} items need attention)` : ""}</p></div>
     <Link to={next?.to || path("overview")} className="text-sm font-semibold text-brand-red">{next ? "Open next step" : "View overview"}</Link>
   </Card>;
   const earned = amount(Object.fromEntries(Object.entries(summary.earnings || {}).filter(([status]) => status !== "cancelled")));
@@ -61,8 +61,8 @@ export default function PartnerProfileSummary({ partner, documents = [], require
     tiles.push(["Customers", count(summary.customers), "customers"], ["Active customers", successes, "customers"], ["Active screens", summary.customers?.active?.amount || 0, "customers"], ["Customer payments", money(business), "customers"]);
   } else {
     business = summary.invoices?.paid?.amount || 0; successes = summary.inventory?.totalPurchasedLicenses || 0;
-    note = "Paid licence invoices including tax; outstanding invoices are shown separately.";
-    tiles.push(["Customers", count(summary.customers), "customers"], ["Active customers", summary.customers?.active?.count || 0, "customers"], ["Licences purchased", successes, "details"], ["Licences allocated", summary.inventory?.totalAllocatedLicenses || 0, "details"], ["Business paid", money(business), "details"], ["Invoices outstanding", money(amount(Object.fromEntries(Object.entries(summary.invoices || {}).filter(([s]) => s !== "paid")))), "details"]);
+    note = "Paid licence invoices including tax; unpaid invoices are shown separately.";
+    tiles.push(["Customers", count(summary.customers), "customers"], ["Active customers", summary.customers?.active?.count || 0, "customers"], ["Licences purchased", successes, "details"], ["Licences allocated", summary.inventory?.totalAllocatedLicenses || 0, "details"], ["Business paid", money(business), "details"], ["Invoice payments due", money(amount(Object.fromEntries(Object.entries(summary.invoices || {}).filter(([s]) => s !== "paid")))), "details"]);
   }
   if (type !== "reseller") tiles.push(["Commission/rewards earned", money(earned), "rewards"], ["Paid to partner", money(paid), "settlements"], ["Still to pay", money(earned - paid), "settlements"]);
   const great = type === "influencer" ? successes >= 10 : business >= 100000;

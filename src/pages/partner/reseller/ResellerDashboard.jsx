@@ -46,7 +46,7 @@ export default function ResellerDashboard() {
       <h1 className="text-2xl font-bold text-slate-900">Reseller Dashboard</h1>
       {loadError && <p role="alert" className="text-red-600">{loadError}</p>}
       {business && <BusinessOverview type="reseller" summary={business} />}
-      <Card className="p-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-semibold">{currentInvoice ? "Review your outstanding payment" : available === 0 ? "Check your screen licences" : "Manage your customers"}</h2><p className="text-sm text-slate-500 mt-1">{currentInvoice ? `Your next unpaid bill is due ${new Date(currentInvoice.dueDate).toLocaleDateString("en-IN")}. Open billing to review or pay it.` : available === 0 ? "Review your licences and request more when you need them." : `${available} licences are available for customer allocation.`}</p></div>{hasPermission(currentInvoice ? "reseller:billing:view" : available === 0 ? "reseller:inventory:view" : "reseller:customers:manage") && <Link to={currentInvoice ? "/partner/reseller/billing" : available === 0 ? "/partner/reseller/inventory" : "/partner/reseller/customers"} className="rounded-lg bg-brand-red text-white px-4 py-2 text-sm font-semibold">{currentInvoice ? "Open billing" : available === 0 ? "View licences" : "Open customers"}</Link>}</Card>
+      <Card className="p-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-semibold">{currentInvoice ? "Review your payment due" : available === 0 ? "Check your screen licences" : "Manage your customers"}</h2><p className="text-sm text-slate-500 mt-1">{currentInvoice ? `Your next unpaid bill is due ${new Date(currentInvoice.dueDate).toLocaleDateString("en-IN")}. Open billing to review or pay it.` : available === 0 ? "Review your licences and request more when you need them." : `${available} licences are available for customer allocation.`}</p></div>{hasPermission(currentInvoice ? "reseller:billing:view" : available === 0 ? "reseller:inventory:view" : "reseller:customers:manage") && <Link to={currentInvoice ? "/partner/reseller/billing" : available === 0 ? "/partner/reseller/inventory" : "/partner/reseller/customers"} className="rounded-lg bg-brand-red text-white px-4 py-2 text-sm font-semibold">{currentInvoice ? "Open billing" : available === 0 ? "View licences" : "Open customers"}</Link>}</Card>
 
         {hasPermission("reseller:billing:view") && <Card className="p-6">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Billing</p>
@@ -60,7 +60,7 @@ export default function ResellerDashboard() {
               <p className="text-xs text-slate-400">Due {new Date(currentInvoice.dueDate).toLocaleDateString()} · {currentInvoice.billingCycle}</p>
             </div>
           ) : (
-            <p className="text-sm text-slate-400">No outstanding invoice.</p>
+            <p className="text-sm text-slate-400">No unpaid invoices.</p>
           )}
           {lastPaid && (
             <p className="text-xs text-slate-400 mt-3 pt-3 border-t border-slate-100">

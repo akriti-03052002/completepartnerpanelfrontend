@@ -23,7 +23,7 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
     note = "Payment totals use recorded receipts. Online receipts include tax; your commission is calculated before tax.";
   } else {
     business = summary.invoices?.paid?.amount || 0; completed = summary.inventory?.totalPurchasedLicenses || 0;
-    tiles = [["Your customers", count(summary.customers)], ["Bought licences", completed], ["Assigned to customers", summary.inventory?.totalAllocatedLicenses || 0], ["Licence invoices paid", money(business)], ["Outstanding licence invoices", money(total(Object.fromEntries(Object.entries(summary.invoices || {}).filter(([s]) => s !== "paid"))))]];
+    tiles = [["Your customers", count(summary.customers)], ["Bought licences", completed], ["Assigned to customers", summary.inventory?.totalAllocatedLicenses || 0], ["Licence invoices paid", money(business)], ["Licence payments due", money(total(Object.fromEntries(Object.entries(summary.invoices || {}).filter(([s]) => s !== "paid"))))]];
     const inventory = summary.inventory || {};
     tiles.push(
       ["Ready to assign", Math.max(0, completed - (inventory.totalAllocatedLicenses || 0))],
@@ -41,7 +41,7 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
     const paid = summary.earnings?.settled?.amount || 0;
     tiles.push(["Your earnings", money(earned)], ["Paid to you", money(paid)], ["Awaiting payment", money(earned - paid)]);
   }
-  if (type === "reseller" && !hasPermission("reseller:billing:view")) tiles = tiles.filter(([label]) => !["Licence invoices paid", "Outstanding licence invoices"].includes(label));
+  if (type === "reseller" && !hasPermission("reseller:billing:view")) tiles = tiles.filter(([label]) => !["Licence invoices paid", "Licence payments due"].includes(label));
   if (type === "affiliate" && !hasPermission("referrals:view")) tiles = tiles.filter(([label]) => !["Leads you referred", "Won deals", "Deals in progress", "Business you referred"].includes(label));
   const great = type === "influencer" ? completed >= 10 : business >= 100000;
   const rating = great ? "\u{1F31F} Great contribution" : completed || business ? "\u{1F4C8} Your business is growing" : "\u{1F331} Your journey is starting";

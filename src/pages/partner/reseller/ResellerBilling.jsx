@@ -199,7 +199,7 @@ export default function ResellerBilling() {
 
       {error && <div role="alert" className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
       {info && <div role="status" className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">{info}</div>}
-      {!loading && !invoicesError && <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm space-y-1"><p>Outstanding: <strong>{rupees(outstanding.reduce((sum, invoice) => sum + invoice.total, 0))}</strong> across {outstanding.length} invoices.</p><p>Overdue: <strong>{rupees(overdue.reduce((sum, invoice) => sum + invoice.total, 0))}</strong> across {overdue.length} invoices. {overdue.length > 0 && "Open a pending invoice below to pay online or contact SPOTX about offline payment."}</p></div>}
+      {!loading && !invoicesError && <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm space-y-1"><p>Amount due: <strong>{rupees(outstanding.reduce((sum, invoice) => sum + invoice.total, 0))}</strong> across {outstanding.length} invoices.</p><p>Overdue: <strong>{rupees(overdue.reduce((sum, invoice) => sum + invoice.total, 0))}</strong> across {overdue.length} invoices. {overdue.length > 0 && "Open a pending invoice below to pay online or contact SPOTX about offline payment."}</p></div>}
 
       <Card>
         <div className="p-4 border-b border-slate-100">

@@ -5,7 +5,7 @@ import Table from "../ui/Table";
 export default function IncompleteChecks({ partners, kind, renderAction }) {
   return <div className="space-y-4">
     <h2 className="font-semibold text-slate-900">{kind === "bank" ? "Bank checks incomplete" : "Identity checks incomplete"} ({partners.length})</h2>
-    {["Not submitted", "Waiting for review", "Needs correction", "Bank update awaiting review"].map(status => {
+    {["Waiting for review", "Bank update awaiting review", "Needs correction", "Not submitted"].map(status => {
       const rows = partners.filter(p => p.checkStatus === status);
       if (!rows.length) return null;
       return <section key={status} className="space-y-2">
