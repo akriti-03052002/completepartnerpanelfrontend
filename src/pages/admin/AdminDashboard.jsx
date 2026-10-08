@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowDownLeft, ArrowUpRight, RefreshCw, Users, ShieldCheck, Landmark, Wallet, Receipt, ArrowRight } from "lucide-react";
 import adminApi from "../../services/adminApi";
+import { loadBankChecks } from "../../services/loadBankChecks";
 import Card from "../../components/ui/Card";
 import PartnerTypeBarChart from "../../components/admin/PartnerTypeBarChart";
 import { PARTNER_TYPE_COLORS } from "../../utils/partnerTypeColors";
@@ -73,8 +74,15 @@ export default function AdminDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [updatedAt, setUpdatedAt] = useState(null);
 
-  const fetchDashboard = () => adminApi.get("/admin/stats/dashboard")
-    .then((res) => { setData(res.data.data); setUpdatedAt(new Date()); setError(""); })
+  const fetchDashboard = () => Promise.all([
+    adminApi.get("/admin/stats/dashboard"),
+    canReview || canFinance ? loadBankChecks() : Promise.resolve(null)
+  ])
+    .then(([res, bankChecks]) => {
+      const dashboard = res.data.data;
+      if (bankChecks) dashboard.partners.bankPending = bankChecks.incompletePartners.length;
+      setData(dashboard); setUpdatedAt(new Date()); setError("");
+    })
     .catch((err) => setError(err.response?.data?.message || "Couldn't load the dashboard."));
 
   const load = () => {
