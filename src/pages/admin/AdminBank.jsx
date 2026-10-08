@@ -112,7 +112,7 @@ export default function AdminBank() {
                 {
                   key: "razorpay",
                   header: "Razorpay Check",
-                  filter: (a) => a.razorpayCheck?.paymentStatus || "not_initiated",
+                  filter: (a) => a.pendingChange?.razorpayCheck?.paymentStatus || "not_initiated",
                   render: (a) => {
                     const check = a.pendingChange.razorpayCheck;
                     return (

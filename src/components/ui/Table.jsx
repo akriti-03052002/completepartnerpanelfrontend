@@ -1,4 +1,5 @@
 import ListToolbar from "./ListToolbar";
+import { useId } from "react";
 import { useListFilter } from "../../hooks/useListFilter";
 
 // Every table has a search box above it that narrows the rows by anything
@@ -7,10 +8,11 @@ import { useListFilter } from "../../hooks/useListFilter";
 // values. Pass `searchable={false}` for a table that should have neither.
 export default function Table({ columns, rows, empty = "Nothing to show yet.", searchable = true, searchPlaceholder = "Search", emptyAction, mobileColumns }) {
   const cardColumns = mobileColumns || columns.map((column) => column.key);
+  const tableId = useId();
   const filters = searchable
     ? columns.filter((col) => col.filter).map((col) => ({ label: col.filterLabel || col.header, value: col.filter }))
     : [];
-  const { visible, toolbar } = useListFilter(rows, filters, `table:${columns.map((column) => column.key).join(",")}`);
+  const { visible, toolbar } = useListFilter(rows, filters, `table:${tableId}:${columns.map((column) => column.key).join(",")}`);
   const visibleRows = searchable ? visible : rows || [];
   const hasRows = visibleRows.length > 0;
 

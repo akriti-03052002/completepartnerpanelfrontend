@@ -96,7 +96,7 @@ export default function AdminSettlements() {
     return adminApi.get("/admin/settlements", {
       params: {
         page, limit: 50, todayStart, partnerType: partnerTypeFilter || undefined,
-        partnerId: partnerFilterId || undefined
+        partnerId: partnerFilterId || undefined, status: statusFilter === "all" ? undefined : statusFilter, duration, search: search || undefined
       }
     })
       .then((res) => { setSettlements(res.data.data); setPagination(res.data.pagination); setSummary(res.data.summary || null); setLastFetchedAt(new Date()); })
@@ -104,7 +104,7 @@ export default function AdminSettlements() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, [partnerTypeFilter, partnerFilterId, page]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, [partnerTypeFilter, partnerFilterId, page, statusFilter, duration, search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Live data: the list (and the open settlement's detail, bill and
   // history) reloads quietly every few seconds and whenever this tab is
@@ -114,7 +114,7 @@ export default function AdminSettlements() {
   useAutoRefresh(() => {
     if (payModal || reasonModal) return;
     adminApi.get("/admin/settlements", {
-      params: { page, limit: 50, todayStart, partnerType: partnerTypeFilter || undefined, partnerId: partnerFilterId || undefined }
+      params: { page, limit: 50, todayStart, partnerType: partnerTypeFilter || undefined, partnerId: partnerFilterId || undefined, status: statusFilter === "all" ? undefined : statusFilter, duration, search: search || undefined }
     })
       .then((res) => { setSettlements(res.data.data); setPagination(res.data.pagination); setSummary(res.data.summary || null); setLastFetchedAt(new Date()); setLoadError(""); })
       .catch(() => {});
@@ -369,9 +369,9 @@ export default function AdminSettlements() {
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex flex-wrap gap-2">
-            <FilterPill label="All" active={statusFilter === "all"} onClick={() => setStatusFilter("all")} />
+            <FilterPill label="All" active={statusFilter === "all"} onClick={() => { setPage(1); setStatusFilter("all"); }} />
             {visibleStatusOptions.map((s) => (
-              <FilterPill key={s} label={s.replace(/_/g, " ")} active={statusFilter === s} onClick={() => setStatusFilter(s)} />
+              <FilterPill key={s} label={s.replace(/_/g, " ")} active={statusFilter === s} onClick={() => { setPage(1); setStatusFilter(s); }} />
             ))}
           </div>
 
@@ -386,7 +386,7 @@ export default function AdminSettlements() {
                 <option key={p._id} value={p._id}>{p.legalEntity?.businessName || p.partnerCode} ({p.partnerCode})</option>
               ))}
             </Select>
-            <Select value={duration} onChange={(e) => setDuration(e.target.value)} className="w-40">
+            <Select value={duration} onChange={(e) => { setPage(1); setDuration(e.target.value); }} className="w-40">
               {DURATIONS.map((d) => <option key={d.key} value={d.key}>{d.label}</option>)}
             </Select>
             <div className="relative">
@@ -394,7 +394,7 @@ export default function AdminSettlements() {
               <input
                 placeholder="Search settlement ID / UTR"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => { setPage(1); setSearch(e.target.value); }}
                 className="pl-9 pr-4 py-3 w-56 border border-slate-200 rounded-xl outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition text-sm"
               />
             </div>
@@ -522,7 +522,7 @@ export default function AdminSettlements() {
             />
             </div>
           )}
-          {!loading && pagination && <><p className="px-4 text-xs text-slate-500">List search and filters apply to this page. Summary amounts include all matching partners.</p><Pagination {...pagination} onChange={setPage} /></>}
+          {!loading && pagination && <><p className="px-4 text-xs text-slate-500">Search and filters apply to all payments, including other pages.</p><Pagination {...pagination} onChange={setPage} /></>}
       </Card>}
       </div>
 
