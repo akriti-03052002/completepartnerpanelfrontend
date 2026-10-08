@@ -11,6 +11,7 @@ export default function AdminBank() {
   const [loading, setLoading] = useState(true);
   const [revealed, setRevealed] = useState({});
   const [error, setError] = useState("");
+  const [reviewChangeId, setReviewChangeId] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -29,6 +30,14 @@ export default function AdminBank() {
           return [{ ...partner, checkStatus: !bankAccount ? "Not submitted" : bankAccount.verification?.status === "rejected" ? "Needs correction" : "Waiting for review" }];
         });
       }
+      // Include updates even when the server still uses the older count.
+      const byPartner = new Map(incomplete.map(p => [String(p._id), p]));
+      for (const account of res.data.data) {
+        if (account.pendingChange && account.partnerId && !["rejected", "inactive"].includes(account.partnerId.status)) {
+          byPartner.set(String(account.partnerId._id), { ...account.partnerId, checkStatus: "Bank update awaiting review", bankAccountId: account._id });
+        }
+      }
+      incomplete = [...byPartner.values()];
       setAccounts(res.data.data);
       setIncompletePartners(incomplete);
       setError("");
@@ -88,18 +97,20 @@ export default function AdminBank() {
       <h1 className="text-2xl font-bold text-slate-900">Bank checks incomplete</h1>
       <p className="text-sm text-slate-500 -mt-4">Revealing full account details is restricted to finance admins and is audit-logged on every access.</p>
       {error && <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
-      {!loading && !error && <IncompleteChecks partners={incompletePartners} kind="bank" />}
+      {loading && <p className="text-sm text-slate-400">Loading bank checks...</p>}
+      {!loading && !error && <IncompleteChecks partners={incompletePartners} kind="bank" renderAction={p => p.checkStatus === "Bank update awaiting review" && <button onClick={() => setReviewChangeId(p.bankAccountId)} className="text-xs font-semibold text-brand-red hover:underline">Review bank update</button>} />}
 
-      {!loading && changeRequests.length > 0 && (
+      {!loading && changeRequests.some(a => a._id === reviewChangeId) && (
         <div className="space-y-3">
           <div>
-            <h2 className="font-semibold text-slate-900">Reseller bank account change requests ({changeRequests.length})</h2>
-            <p className="text-sm text-slate-500">These partners already have a verified bank account. Change requests are separate from the incomplete checks counted above.</p>
+            <h2 className="font-semibold text-slate-900">Review bank update</h2>
+            <button onClick={() => setReviewChangeId(null)} className="text-xs underline">Close review</button>
+            <p className="text-sm text-slate-500">The existing verified bank account stays live until this update is approved.</p>
           </div>
           <Card>
             <Table
               empty="No bank account changes waiting for review."
-              rows={changeRequests}
+              rows={changeRequests.filter(a => a._id === reviewChangeId)}
               columns={[
                 { key: "partner", header: "Partner", render: (a) => a.partnerId?.legalEntity?.businessName || "—" },
                 { key: "current", header: "Current Account", render: (a) => `${a.bankName} · •••• ${a.accountNumberLast4}` },

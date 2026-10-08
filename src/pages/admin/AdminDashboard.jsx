@@ -323,7 +323,7 @@ export default function AdminDashboard() {
           <CountTile label="Active" value={partners.active} to="/admin/partners?status=active" note="All types" />
           <CountTile label="Verified" value={partners.verified} to="/admin/partners?verificationStatus=verified" note="KYC and bank verified" />
           <CountTile label="Identity checks incomplete" value={partners.kycPending} to="/admin/documents" note="Documents not all verified" />
-          <CountTile label="Bank checks incomplete" value={partners.bankPending} to="/admin/bank" note="No verified bank account" />
+          <CountTile label="Bank checks incomplete" value={partners.bankPending} to="/admin/bank" note="Missing details, verification or bank updates" />
           <CountTile label="Rejected" value={partners.rejected} to="/admin/partners?status=rejected" />
           <CountTile label="Suspended" value={partners.suspended} to="/admin/partners?status=suspended" />
         </div>
