@@ -164,10 +164,10 @@ function ResellerCustomerPortalLayout() {
             <NavLink to="/reseller/customer/dashboard" className={({ isActive }) => isActive ? "text-brand-red font-semibold underline underline-offset-4" : "text-slate-700 hover:text-brand-red"}>Account</NavLink>
             <NavLink to="/reseller/customer/screens" className={({ isActive }) => isActive ? "text-brand-red font-semibold underline underline-offset-4" : "text-slate-700 hover:text-brand-red"}>Screens</NavLink>
           </nav>
-          <button type="button" onClick={logout} className="text-sm text-slate-500 hover:text-slate-900">Log out</button>
+          <div className="flex items-center gap-3"><PageGuide /><button type="button" onClick={logout} className="text-sm text-slate-500 hover:text-slate-900">Log out</button></div>
         </div>
       </header>
-      <main className="max-w-5xl mx-auto p-4 sm:p-6"><PageLocation /><PageGuide /><Outlet /></main>
+      <main className="max-w-5xl mx-auto p-4 sm:p-6"><PageLocation /><Outlet /></main>
     </div>
   );
 }

@@ -63,7 +63,7 @@ export default function AdminLayout() {
   return (
     // Exactly one screen tall: the sidebar menu and the page content each
     // scroll on their own, so a long menu is always reachable.
-    <div className="h-screen overflow-hidden flex bg-light-grey">
+    <div className="panel-shell h-dvh min-h-0 overflow-hidden flex bg-light-grey">
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/40 z-30 lg:hidden" onClick={closeMobile} />
       )}
@@ -185,7 +185,7 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main id="admin-main" tabIndex={-1} className="flex-1 overflow-y-auto p-4 sm:p-6 outline-none">
+        <main id="admin-main" tabIndex={-1} className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6 outline-none">
           <PageLocation />
           <Outlet context={{ setViewedPartnerType }} />
         </main>

@@ -25,7 +25,7 @@ export default function CustomerLayout() {
   };
 
   return (
-    <div className="h-screen overflow-hidden flex bg-light-grey">
+    <div className="panel-shell h-dvh min-h-0 overflow-hidden flex bg-light-grey">
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/40 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
@@ -78,7 +78,7 @@ export default function CustomerLayout() {
 
       <div className="flex-1 flex flex-col min-w-0 min-h-0">
         <a href="#customer-main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-3 focus:text-brand-red">Skip to page content</a>
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 gap-3">
+        <header className="h-16 shrink-0 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 gap-3">
           <button aria-label="Open customer navigation" className="lg:hidden text-slate-500 hover:text-brand-black shrink-0" onClick={() => setSidebarOpen(true)}>
             <Menu size={22} />
           </button>
@@ -86,11 +86,11 @@ export default function CustomerLayout() {
             <p className="text-sm font-semibold text-slate-900 truncate">{customer?.companyName}</p>
             <p className="text-xs text-slate-400 truncate">{customer?.email}</p>
           </div>
+          <PageGuide />
         </header>
 
-        <main id="customer-main" tabIndex={-1} className="flex-1 overflow-y-auto p-4 sm:p-6 outline-none">
+        <main id="customer-main" tabIndex={-1} className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6 outline-none">
           <PageLocation />
-          <PageGuide />
           <Outlet />
         </main>
       </div>
