@@ -178,6 +178,8 @@ export default function AdminCustomers() {
               { key: "email", header: "Email", render: (c) => c.email },
               { key: "phone", header: "Phone", render: (c) => c.phone || "—" },
               { key: "status", header: "Subscription", render: (c) => subscriptionBadge(c) },
+              { key: "registeredScreens", header: "Registered screens", render: c => c.registeredScreens ?? "—" },
+              { key: "subscribedScreens", header: "Subscribed screens", render: c => c.subscribedScreens ?? c.subscription?.screenCount ?? 0 },
               { key: "plan", header: "Plan", render: (c) => c.subscription.plan ? <Badge tone="neutral">{c.subscription.plan}</Badge> : "—", filter: (c) => c.subscription.plan },
               { key: "trial", header: "Trial Ends", render: (c) => c.trial?.endsAt ? new Date(c.trial.endsAt).toLocaleDateString() : "—" },
               { key: "date", header: "Registered", render: (c) => new Date(c.createdAt).toLocaleDateString() },
