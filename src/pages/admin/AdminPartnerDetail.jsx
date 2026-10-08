@@ -1,8 +1,9 @@
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import PartnerCustomers from "../../components/admin/partner/PartnerCustomers";
+import AdminBankEntry from "../../components/admin/partner/AdminBankEntry";
 import PartnerProfileSummary from "../../components/admin/partner/PartnerProfileSummary";
 import { useEffect, useState } from "react";
-import { NavLink, Navigate, useNavigate, useOutletContext, useParams } from "react-router-dom";
+import { NavLink, Navigate, useNavigate, useOutletContext, useParams, useLocation } from "react-router-dom";
 import adminApi from "../../services/adminApi";
 import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
@@ -88,8 +89,12 @@ const actorLabel = (type) => ({ spotx_user: "SPOTX", partner_user: "Partner" }[t
 // type — see partnerSections.js.
 export default function AdminPartnerDetail() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id, section: sectionParam } = useParams();
   const [data, setData] = useState(null);
+  useEffect(() => {
+    if (data && location.hash === "#bank-details") document.getElementById("bank-details")?.scrollIntoView({ block: "start" });
+  }, [data, location.hash, location.pathname]);
   const activityList = useListFilter(data?.activity, [
     { label: "Done by", value: (a) => actorLabel(a.performedBy?.type) },
     { label: "Activity", value: (a) => a.activityType }
@@ -541,9 +546,9 @@ export default function AdminPartnerDetail() {
       </div>
 
       <Card className="p-6">
-        <h2 className="font-semibold text-slate-900 mb-4">Bank Account</h2>
+        <h2 id="bank-details" className="font-semibold text-slate-900 mb-4 scroll-mt-24">Bank Account</h2>
         {!bankAccount ? (
-          <p className="text-sm text-slate-400">No bank account on file.</p>
+          <AdminBankEntry partnerId={partner._id} onSaved={load} />
         ) : (
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -565,6 +570,7 @@ export default function AdminPartnerDetail() {
               <div className="flex justify-between"><dt className="text-slate-500">Account Number</dt><dd className="font-medium">•••• {bankAccount.accountNumberLast4}</dd></div>
               <div className="flex justify-between"><dt className="text-slate-500">IFSC</dt><dd className="font-medium">{bankAccount.ifscMasked}</dd></div>
             </dl>
+            {bankAccount.verification.status === "rejected" && <AdminBankEntry partnerId={partner._id} onSaved={load} />}
             {bankAccount.verification.status === "verified" && (
               <p className="text-xs text-slate-400 mt-3">Full details are no longer viewable once verified.</p>
             )}

@@ -3,14 +3,16 @@ import adminApi from "../../services/adminApi";
 import Card from "../../components/ui/Card";
 import Table from "../../components/ui/Table";
 import Badge from "../../components/ui/Badge";
+import IncompleteChecks from "../../components/admin/IncompleteChecks";
 
 export default function AdminBank() {
   const [accounts, setAccounts] = useState([]);
+  const [incompletePartners, setIncompletePartners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [revealed, setRevealed] = useState({});
   const [error, setError] = useState("");
 
-  const load = () => adminApi.get("/admin/bank/pending").then((res) => { setAccounts(res.data.data); setError(""); }).catch(() => setError("Could not load bank details. Please try again.")).finally(() => setLoading(false));
+  const load = () => adminApi.get("/admin/bank/pending").then((res) => { setAccounts(res.data.data); setIncompletePartners(res.data.incompletePartners || []); setError(""); }).catch(() => setError("Could not load bank details. Please try again.")).finally(() => setLoading(false));
 
   useEffect(() => { load(); }, []);
 
@@ -84,6 +86,7 @@ export default function AdminBank() {
       <h1 className="text-2xl font-bold text-slate-900">Bank Account Review</h1>
       <p className="text-sm text-slate-500 -mt-4">Revealing full account details is restricted to finance admins and is audit-logged on every access.</p>
       {error && <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
+      {!loading && !error && <IncompleteChecks partners={incompletePartners} kind="bank" />}
 
       <Card>
         {loading ? (

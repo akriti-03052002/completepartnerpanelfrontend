@@ -3,14 +3,16 @@ import adminApi from "../../services/adminApi";
 import Card from "../../components/ui/Card";
 import Table from "../../components/ui/Table";
 import DocumentPreviewModal from "../../components/admin/DocumentPreviewModal";
+import IncompleteChecks from "../../components/admin/IncompleteChecks";
 
 export default function AdminDocuments() {
   const [documents, setDocuments] = useState([]);
+  const [incompletePartners, setIncompletePartners] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [previewDoc, setPreviewDoc] = useState(null);
 
-  const load = () => adminApi.get("/admin/documents/pending").then((res) => { setDocuments(res.data.data); setError(""); }).catch(() => setError("Could not load documents. Please try again.")).finally(() => setLoading(false));
+  const load = () => adminApi.get("/admin/documents/pending").then((res) => { setDocuments(res.data.data); setIncompletePartners(res.data.incompletePartners || []); setError(""); }).catch(() => setError("Could not load documents. Please try again.")).finally(() => setLoading(false));
 
   useEffect(() => { load(); }, []);
 
@@ -48,6 +50,7 @@ export default function AdminDocuments() {
           />
         )}
       </Card>
+      {!loading && !error && <IncompleteChecks partners={incompletePartners} kind="documents" />}
 
       {previewDoc && (
         <DocumentPreviewModal
