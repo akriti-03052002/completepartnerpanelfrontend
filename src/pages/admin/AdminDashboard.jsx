@@ -192,36 +192,25 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-3xl bg-slate-950 p-6 sm:p-8 flex items-center justify-between flex-wrap gap-5">
-        <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-24 h-72 w-72 rounded-full bg-red-500/15 blur-3xl" />
-        <div className="relative"><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3"><span className="h-2 w-2 rounded-full bg-emerald-400" />Partner operations</p><h1 className="text-3xl font-bold tracking-tight text-white">Admin Dashboard</h1><p className="mt-2 text-sm text-slate-300">Your partners, approvals and business performance at a glance.</p></div>
+      <div className="flex items-center justify-between flex-wrap gap-3 border-b border-slate-200 pb-4">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Dashboard</h1>
+        <div className="flex items-center gap-3">
+        <span className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />Updated {updatedAt?.toLocaleTimeString() || "just now"}</span>
         <button
           type="button"
           onClick={load}
           disabled={refreshing}
           aria-label="Refresh dashboard"
           aria-busy={refreshing}
-          className="relative flex min-h-11 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-xs text-slate-200 hover:bg-white/20 disabled:opacity-60"
+          className="flex min-h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60"
         >
           <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
-          {refreshing ? "Refreshing..." : `Refresh - updated ${updatedAt?.toLocaleTimeString() || "just now"}`}
+          {refreshing ? "Refreshing..." : "Refresh"}
         </button>
+        </div>
       </div>
 
       {error && <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
-
-      <section aria-labelledby="admin-tasks-heading">
-        <h2 id="admin-tasks-heading" className="font-semibold text-lg text-slate-900">Choose a task</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-          {tasks.map(({ label, to, icon: Icon, note }) => (
-            <Link key={to} to={to} className="group flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-slate-400 hover:shadow-sm">
-              <span className="rounded-xl bg-red-50 p-2.5 text-brand-red"><Icon size={20} aria-hidden="true" /></span>
-              <span className="min-w-0 flex-1 self-center" title={note}><span className="block font-semibold text-sm text-slate-900">{label}</span></span>
-              <ArrowRight size={16} aria-hidden="true" className="mt-3 shrink-0 text-slate-400 group-hover:text-slate-900" />
-            </Link>
-          ))}
-        </div>
-      </section>
 
       {/* ---------- Business overview ---------- */}
       <section aria-labelledby="overview-heading">
@@ -327,6 +316,19 @@ export default function AdminDashboard() {
           <CountTile label="Suspended" value={partners.suspended} to="/admin/partners?status=suspended" />
         </div>
       </section>
+      <section aria-labelledby="admin-tasks-heading">
+        <h2 id="admin-tasks-heading" className="font-semibold text-lg text-slate-900">Choose a task</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {tasks.map(({ label, to, icon: Icon, note }) => (
+            <Link key={to} to={to} className="group flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-slate-400 hover:shadow-sm">
+              <span className="rounded-xl bg-red-50 p-2.5 text-brand-red"><Icon size={20} aria-hidden="true" /></span>
+              <span className="min-w-0 flex-1 self-center" title={note}><span className="block font-semibold text-sm text-slate-900">{label}</span></span>
+              <ArrowRight size={16} aria-hidden="true" className="mt-3 shrink-0 text-slate-400 group-hover:text-slate-900" />
+            </Link>
+          ))}
+        </div>
+      </section>
+
     </div>
   );
 }
