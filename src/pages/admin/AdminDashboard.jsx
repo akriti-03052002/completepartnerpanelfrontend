@@ -1,7 +1,7 @@
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowDownLeft, ArrowUpRight, RefreshCw, Users, ShieldCheck, Landmark, Wallet, Receipt, ArrowRight } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, RefreshCw, Users, ShieldCheck, Landmark, Wallet, Receipt, ArrowRight, Activity, Clock, CircleX, PauseCircle, Megaphone, Store, Handshake } from "lucide-react";
 import adminApi from "../../services/adminApi";
 import { loadBankChecks } from "../../services/loadBankChecks";
 import { loadIdentityChecks } from "../../services/loadIdentityChecks";
@@ -16,12 +16,12 @@ const count = (n) => (Number(n) || 0).toLocaleString("en-IN");
 // A headline number with what it means underneath.
 function Figure({ label, value, note, dot }) {
   return (
-    <div>
+    <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
       <p className="flex items-center gap-2 text-sm text-slate-500">
         {dot && <span className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ backgroundColor: dot }} />}
         {label}
       </p>
-      <p className="text-2xl font-bold text-slate-900 mt-1 tabular-nums">{value}</p>
+      <p className="text-3xl font-bold tracking-tight text-slate-900 mt-3 tabular-nums">{value}</p>
       {note && <p className="text-xs text-slate-400 mt-1">{note}</p>}
     </div>
   );
@@ -30,7 +30,7 @@ function Figure({ label, value, note, dot }) {
 // One partner type's block: a title and a short list of label / value rows.
 function TypeBlock({ type, title, rows, to, linkLabel }) {
   return (
-    <Card className="p-5">
+    <Card className="p-5 border-t-4" style={{ borderTopColor: PARTNER_TYPE_COLORS[type] }}>
       <div className="flex items-center justify-between gap-3 mb-4">
         <h3 className="flex items-center gap-2 font-semibold text-slate-900">
           <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: PARTNER_TYPE_COLORS[type] }} />
@@ -50,12 +50,37 @@ function TypeBlock({ type, title, rows, to, linkLabel }) {
   );
 }
 
-function CountTile({ label, value, to, note }) {
+const TILE_STYLES = {
+  "Total partners": { icon: Users, color: "text-slate-700", bg: "bg-slate-100" },
+  Resellers: { icon: Store, color: "text-violet-700", bg: "bg-violet-50", type: "reseller" },
+  Affiliates: { icon: Handshake, color: "text-amber-700", bg: "bg-amber-50", type: "affiliate" },
+  Vendors: { icon: Landmark, color: "text-blue-700", bg: "bg-blue-50", type: "vendor" },
+  Influencers: { icon: Megaphone, color: "text-pink-700", bg: "bg-pink-50", type: "influencer" },
+  Active: { icon: Activity, color: "text-emerald-700", bg: "bg-emerald-50" },
+  Verified: { icon: ShieldCheck, color: "text-teal-700", bg: "bg-teal-50" },
+  "Identity checks incomplete": { icon: Clock, color: "text-amber-700", bg: "bg-amber-50" },
+  "Bank checks incomplete": { icon: Landmark, color: "text-orange-700", bg: "bg-orange-50" },
+  Rejected: { icon: CircleX, color: "text-red-700", bg: "bg-red-50" },
+  Suspended: { icon: PauseCircle, color: "text-slate-600", bg: "bg-slate-100" }
+};
+
+function CountTile({ label, value, to, note, total }) {
+  const theme = TILE_STYLES[label] || TILE_STYLES["Total partners"];
+  const Icon = theme.icon;
+  const share = total > 0 ? Math.round((Number(value) || 0) / total * 100) : 0;
   const body = (
-    <Card className={`p-4 h-full ${to ? "hover:border-slate-300 transition" : ""}`}>
-      <p className="text-sm text-slate-500">{label}</p>
-      <p className="text-2xl font-bold text-slate-900 mt-1 tabular-nums">{count(value)}</p>
-      {note && <p className="text-xs text-slate-400 mt-1">{note}</p>}
+    <Card className={`group p-5 h-full ${to ? "hover:border-slate-300 hover:shadow-md motion-safe:hover:-translate-y-0.5 transition duration-200" : ""}`}>
+      <div className="flex items-center justify-between gap-2">
+        <span className={`rounded-xl p-2.5 ${theme.bg} ${theme.color}`}><Icon size={20} aria-hidden="true" /></span>
+        {to && <ArrowUpRight size={16} aria-hidden="true" className="text-slate-300 group-hover:text-slate-700 transition" />}
+      </div>
+      <p className="text-sm font-medium text-slate-600 mt-4">{label}</p>
+      <p className="text-3xl font-bold tracking-tight text-slate-900 mt-2 tabular-nums">{count(value)}</p>
+      {note && <p className="text-xs leading-5 text-slate-500 mt-2">{note}</p>}
+      {theme.type && total !== undefined && <div className="mt-4">
+        <div className="flex justify-between text-xs text-slate-500 mb-2"><span>Of all partners</span><span>{share}%</span></div>
+        <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden"><div className="h-full rounded-full" style={{ width: `${share}%`, backgroundColor: PARTNER_TYPE_COLORS[theme.type] }} /></div>
+      </div>}
     </Card>
   );
   return to ? <Link to={to} className="block rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red">{body}</Link> : body;
@@ -166,15 +191,16 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div><h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1><p className="mt-1 text-sm text-slate-500">Manage partners, approvals and payments from one place.</p></div>
+      <div className="relative overflow-hidden rounded-3xl bg-slate-950 p-6 sm:p-8 flex items-center justify-between flex-wrap gap-5">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-24 h-72 w-72 rounded-full bg-red-500/15 blur-3xl" />
+        <div className="relative"><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3"><span className="h-2 w-2 rounded-full bg-emerald-400" />Partner operations</p><h1 className="text-3xl font-bold tracking-tight text-white">Admin Dashboard</h1><p className="mt-2 text-sm text-slate-300">Your partners, approvals and business performance at a glance.</p></div>
         <button
           type="button"
           onClick={load}
           disabled={refreshing}
           aria-label="Refresh dashboard"
           aria-busy={refreshing}
-          className="flex min-h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-60"
+          className="relative flex min-h-11 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-xs text-slate-200 hover:bg-white/20 disabled:opacity-60"
         >
           <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
           {refreshing ? "Refreshing..." : `Refresh - updated ${updatedAt?.toLocaleTimeString() || "just now"}`}
@@ -189,7 +215,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {tasks.map(({ label, to, icon: Icon, note }) => (
             <Link key={to} to={to} className="group flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-slate-400 hover:shadow-sm">
-              <span className="rounded-xl bg-slate-100 p-2.5 text-slate-700"><Icon size={20} aria-hidden="true" /></span>
+              <span className="rounded-xl bg-red-50 p-2.5 text-brand-red"><Icon size={20} aria-hidden="true" /></span>
               <span className="min-w-0 flex-1"><span className="block font-semibold text-sm text-slate-900">{label}</span><span className="mt-1 block text-xs leading-5 text-slate-500">{note}</span></span>
               <ArrowRight size={16} aria-hidden="true" className="mt-3 shrink-0 text-slate-400 group-hover:text-slate-900" />
             </Link>
@@ -200,7 +226,7 @@ export default function AdminDashboard() {
       {/* ---------- Business overview ---------- */}
       <section aria-labelledby="overview-heading">
         <h2 id="overview-heading" className="font-semibold text-slate-900 mb-3">Business Overview</h2>
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
             <Figure label="From Resellers" value={money(overview.resellerRevenue)} note="Licence invoices and prepayments paid" dot={PARTNER_TYPE_COLORS.reseller} />
             <Figure label="From Vendors" value={money(overview.vendorRevenue)} note="Paid by their customers (before GST)" dot={PARTNER_TYPE_COLORS.vendor} />
@@ -325,10 +351,10 @@ export default function AdminDashboard() {
         <h2 id="partners-heading" className="font-semibold text-slate-900 mb-3">Partners</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
           <CountTile label="Total partners" value={partners.total} to="/admin/partners" />
-          <CountTile label="Resellers" value={partners.byType.reseller} to="/admin/partners?partnerType=reseller" />
-          <CountTile label="Affiliates" value={partners.byType.affiliate} to="/admin/partners?partnerType=affiliate" />
-          <CountTile label="Vendors" value={partners.byType.vendor} to="/admin/partners?partnerType=vendor" />
-          <CountTile label="Influencers" value={partners.byType.influencer} to="/admin/partners?partnerType=influencer" />
+          <CountTile label="Resellers" value={partners.byType.reseller} total={partners.total} to="/admin/partners?partnerType=reseller" />
+          <CountTile label="Affiliates" value={partners.byType.affiliate} total={partners.total} to="/admin/partners?partnerType=affiliate" />
+          <CountTile label="Vendors" value={partners.byType.vendor} total={partners.total} to="/admin/partners?partnerType=vendor" />
+          <CountTile label="Influencers" value={partners.byType.influencer} total={partners.total} to="/admin/partners?partnerType=influencer" />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mt-4">
           <CountTile label="Active" value={partners.active} to="/admin/partners?status=active" note="All types" />

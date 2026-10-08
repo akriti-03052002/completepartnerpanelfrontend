@@ -15,7 +15,7 @@ export default function PartnerTypeBarChart({ title, subtitle, rows, emptyText =
 
   return (
     <div>
-      <h3 className="font-semibold text-slate-900">{title}</h3>
+      <h3 className="text-lg font-semibold tracking-tight text-slate-900">{title}</h3>
       {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
 
       {!hasData ? (
@@ -43,10 +43,10 @@ export default function PartnerTypeBarChart({ title, subtitle, rows, emptyText =
                     <span className="text-sm font-semibold text-slate-900 tabular-nums">{row.valueLabel}</span>
                   </div>
                   {/* The track is the full scale; the bar grows from the left edge. */}
-                  <div className="h-4 rounded-r bg-slate-100">
+                  <div className="h-5 rounded-full bg-slate-100 overflow-hidden">
                     <div
-                      className="h-4 rounded-r transition-[width] duration-300"
-                      style={{ width: `${percent}%`, minWidth: row.value > 0 ? 3 : 0, backgroundColor: PARTNER_TYPE_COLORS[row.key] }}
+                      className="h-5 rounded-full motion-safe:transition-[width] duration-500"
+                      style={{ width: `${percent}%`, minWidth: row.value > 0 ? 3 : 0, backgroundColor: PARTNER_TYPE_COLORS[row.key], backgroundImage: "linear-gradient(90deg, transparent, rgba(255,255,255,0.25))" }}
                     />
                   </div>
                 </button>
