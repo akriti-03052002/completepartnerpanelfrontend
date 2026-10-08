@@ -7,6 +7,7 @@ import Table from "../../components/ui/Table";
 import Badge from "../../components/ui/Badge";
 import { Select, Input } from "../../components/ui/Input";
 import CustomerDetailModal from "../../components/admin/CustomerDetailModal";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 
 const STATUSES = ["", "trial", "active", "expired", "cancelled"];
 const DURATIONS = [
@@ -42,12 +43,14 @@ export default function AdminCustomers() {
   const [successMessage, setSuccessMessage] = useState("");
 
   const load = () => {
-    adminApi.get("/admin/customers", { params: { status: status || undefined, partnerId: vendorId || undefined } })
-      .then((res) => setCustomers(res.data.data))
+    return adminApi.get("/admin/customers", { params: { status: status || undefined, partnerId: vendorId || undefined } })
+      .then((res) => { setCustomers(res.data.data); setError(""); })
+      .catch(err => setError(err.response?.data?.message || "Could not load customers."))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, [status, vendorId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useAutoRefresh(load, 15000);
 
   // Every customer belongs to a Vendor partner (see customerPublicController
   // — registration only accepts a vendor's referral code), so the filter
