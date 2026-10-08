@@ -1,6 +1,7 @@
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import PartnerCustomers from "../../components/admin/partner/PartnerCustomers";
 import AdminBankEntry from "../../components/admin/partner/AdminBankEntry";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import PartnerProfileSummary from "../../components/admin/partner/PartnerProfileSummary";
 import { useEffect, useState } from "react";
 import { NavLink, Navigate, useNavigate, useOutletContext, useParams, useLocation } from "react-router-dom";
@@ -136,6 +137,10 @@ export default function AdminPartnerDetail() {
   };
 
   const loadCommission = () => adminApi.get(`/admin/partners/${id}/commission-assignment`).then((res) => setCommission(res.data.data));
+  useAutoRefresh(() => {
+    if (busy || uploadingType || commissionBusy || editingAgreement || selectedStatus !== data?.partner?.status || document.querySelector("input:focus, textarea:focus, select:focus, dialog[open]")) return;
+    return Promise.all([load(), loadCommission()]);
+  });
 
   useEffect(() => {
     load();

@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { AlertCircle } from "lucide-react";
 import api from "../../services/api";
@@ -37,6 +38,7 @@ export default function Bank() {
       })
     ]).finally(() => setLoading(false));
 
+  useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
   useEffect(() => { load(); }, []);
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));

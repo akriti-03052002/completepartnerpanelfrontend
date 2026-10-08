@@ -2,6 +2,9 @@ import toast from "react-hot-toast";
 export function mutationFeedback(response) {
   const method = response.config.method?.toLowerCase();
   const url = response.config.url || "";
+  if (["post", "put", "patch", "delete"].includes(method) && response.data?.success !== false) {
+    window.dispatchEvent(new Event("spotx:data-changed"));
+  }
   // Authentication and payment verification have their own completion UI.
   // Commission approvals already display a toast with settlement details.
   if (["post", "put", "patch", "delete"].includes(method) && response.data?.success !== false

@@ -1,4 +1,5 @@
 import InvoiceDownload from "../../components/ui/InvoiceDownload";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { Receipt } from "lucide-react";
 import customerApi from "../../services/customerApi";
@@ -11,6 +12,7 @@ export default function Billing() {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const { visible, toolbar } = useListFilter(invoices, [{ label: "Status", value: (invoice) => invoice.status }]);
+  useAutoRefresh(() => customerApi.get("/customer/invoices").then(res => setInvoices(res.data.data)));
 
   useEffect(() => {
     customerApi.get("/customer/invoices").then((res) => setInvoices(res.data.data)).finally(() => setLoading(false));

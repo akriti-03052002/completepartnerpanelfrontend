@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import BusinessOverview from "../../components/partner/BusinessOverview";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
+  useAutoRefresh(() => setRetry(value => value + 1));
 
   // Reseller is billed on purchased licenses, not commission/subscription
   // stats — /partner/dashboard below is shaped for the commission-earning

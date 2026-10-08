@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { UploadCloud, Download, FileText, AlertCircle, Eye } from "lucide-react";
 import api from "../../services/api";
@@ -38,7 +39,7 @@ export default function Documents() {
   const [errors, setErrors] = useState({}); // { [documentType]: message }
 
   const load = () => {
-    Promise.all([
+    return Promise.all([
       api.get("/partner/documents").then((res) => setDocuments(res.data.data)),
       api.get("/partner/profile").then((res) => {
         setRequiredTypes(res.data.data.requiredDocumentTypes || []);
@@ -49,6 +50,7 @@ export default function Documents() {
     ]).finally(() => setLoading(false));
   };
 
+  useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
   useEffect(() => { load(); }, []);
 
   // Most recent upload per type — a rejected doc can be re-uploaded, which

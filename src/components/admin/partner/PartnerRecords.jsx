@@ -1,4 +1,5 @@
 import { useSessionState } from "../../../hooks/useSessionState";
+import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
 import Pagination from "../../ui/Pagination";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -81,6 +82,8 @@ export default function PartnerRecords({ partnerId, partnerType, kind }) {
   const [page, setPage] = useSessionState("page", 1);
   const [paging, setPaging] = useState(null);
   const [rows, setRows] = useState(null);
+  useAutoRefresh(() => adminApi.get(list.url, { params: { partnerId, page } })
+    .then(res => { setRows(res.data.data); setPaging(res.data.pagination || null); }));
 
   useEffect(() => {
     adminApi.get(list.url, { params: { partnerId, page } })

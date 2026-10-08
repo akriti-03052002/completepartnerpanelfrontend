@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { Share2, CheckCircle2, AlertCircle, X, ChevronDown, PenLine } from "lucide-react";
 import api from "../../services/api";
@@ -78,6 +79,7 @@ export default function SocialMedia() {
     }
   };
 
+  useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return loadAccounts(); });
   useEffect(() => {
     if (new URLSearchParams(window.location.search).has("social")) {
       window.history.replaceState(null, "", window.location.pathname);

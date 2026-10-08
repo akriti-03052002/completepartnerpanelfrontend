@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
 import { usePartnerAuth } from "../../../context/PartnerAuthContext";
 import BusinessOverview from "../../../components/partner/BusinessOverview";
 import { useEffect, useState } from "react";
@@ -15,6 +16,7 @@ import Button from "../../../components/ui/Button";
 export default function ResellerDashboard() {
   const { hasPermission } = usePartnerAuth();
   const [retry, setRetry] = useState(0);
+  useAutoRefresh(() => setRetry(value => value + 1));
   const [business, setBusiness] = useState(null);
   const [loadError, setLoadError] = useState("");
   const [inventory, setInventory] = useState(null);

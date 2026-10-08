@@ -1,7 +1,7 @@
 import PageLocation from "./components/ui/PageLocation";
 import { endSession } from "./services/session";
 import PageGuide from "./components/ui/PageGuide";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, NavLink, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -78,7 +78,16 @@ const ResellerCustomerVerifyAndSetPassword = lazy(() => import("./pages/Reseller
 const ResellerCustomerScreens = lazy(() => import("./pages/ResellerCustomerScreens"));
 import { Toaster } from "react-hot-toast";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchInterval: 10000,
+      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: "always",
+      refetchOnReconnect: "always"
+    }
+  }
+});
 
 function PartnerTypeRoute({ type, children }) {
   const { partner } = usePartnerAuth();
@@ -86,6 +95,15 @@ function PartnerTypeRoute({ type, children }) {
   return allowedTypes.includes(partner?.partnerType?.toLowerCase())
     ? children
     : <Navigate to="/partner/dashboard" replace />;
+}
+
+function LiveQueryUpdates() {
+  useEffect(() => {
+    const refresh = () => queryClient.invalidateQueries({ refetchType: "active" });
+    window.addEventListener("spotx:data-changed", refresh);
+    return () => window.removeEventListener("spotx:data-changed", refresh);
+  }, []);
+  return null;
 }
 
 // ======================================================
@@ -273,6 +291,7 @@ function App() {
           </Routes>
           </Suspense>
           </ErrorBoundary>
+          <LiveQueryUpdates />
           <Toaster position="top-right" />
             </BrowserRouter>
           </CustomerAuthProvider>

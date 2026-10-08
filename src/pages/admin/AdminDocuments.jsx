@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { loadIdentityChecks } from "../../services/loadIdentityChecks";
 import { useSearchParams } from "react-router-dom";
@@ -10,13 +11,14 @@ export default function AdminDocuments() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const load = async () => {
-    setLoading(true);
+
     try {
       const incomplete = await loadIdentityChecks();
       setPartners(incomplete); setError("");
     } catch (err) { setError(err.response?.data?.message || "Could not load identity checks."); }
     finally { setLoading(false); }
   };
+  useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
   useEffect(() => { load(); }, []);
   return <div className="space-y-6">
     <h1 className="text-2xl font-bold text-slate-900">Identity checks incomplete</h1>

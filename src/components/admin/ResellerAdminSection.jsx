@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import adminApi from "../../services/adminApi";
 import Card from "../ui/Card";
@@ -50,6 +51,7 @@ export default function ResellerAdminSection({ partnerId }) {
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
   useEffect(() => { load(); }, [partnerId]);
 
   const savePricing = async () => {

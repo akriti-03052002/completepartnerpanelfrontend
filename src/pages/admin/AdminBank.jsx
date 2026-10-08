@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { loadBankChecks } from "../../services/loadBankChecks";
 import { useEffect, useState } from "react";
 import adminApi from "../../services/adminApi";
@@ -18,7 +19,7 @@ export default function AdminBank() {
   const [reviewChangeId, setReviewChangeId] = useState(null);
 
   const load = async () => {
-    setLoading(true);
+
     try {
       const result = await loadBankChecks();
       setAccounts(result.accounts);
@@ -29,6 +30,7 @@ export default function AdminBank() {
     } finally { setLoading(false); }
   };
 
+  useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
   useEffect(() => { load(); }, []);
 
   // A Reseller's staged replacement for an already-verified account — the

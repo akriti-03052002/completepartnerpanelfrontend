@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
 import { Link } from "react-router-dom";
 import api from "../../../services/api";
 import Card from "../../../components/ui/Card";
@@ -21,6 +22,10 @@ export default function ResellerInventory() {
   const [inventory, setInventory] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  useAutoRefresh(() => Promise.all([
+    api.get("/partner/reseller/inventory").then(res => setInventory(res.data.data)),
+    api.get("/partner/reseller/inventory/transactions").then(res => setTransactions(res.data.data))
+  ]));
 
   useEffect(() => {
     Promise.all([

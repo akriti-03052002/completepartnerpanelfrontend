@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { Monitor, Trash2 } from "lucide-react";
 import customerApi from "../../services/customerApi";
@@ -21,6 +22,7 @@ export default function Screens() {
     customerApi.get("/customer/screens").then((res) => setScreens(res.data.data)).finally(() => setLoading(false));
   };
 
+  useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
   useEffect(() => { load(); }, []);
 
   const submit = async (e) => {

@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -33,6 +34,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
+  useAutoRefresh(() => setRetry(value => value + 1));
 
   useEffect(() => {
     let active = true;

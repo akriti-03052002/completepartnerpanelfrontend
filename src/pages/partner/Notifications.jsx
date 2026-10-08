@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, Check, ChevronRight } from "lucide-react";
@@ -28,6 +29,7 @@ export default function Notifications() {
 
   const load = () => api.get("/partner/notifications").then((res) => setNotifications(res.data.data)).finally(() => setLoading(false));
 
+  useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
   useEffect(() => { load(); }, []);
 
   const markAllRead = async () => {

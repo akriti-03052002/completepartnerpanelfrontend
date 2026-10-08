@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
@@ -25,6 +26,7 @@ export default function Team() {
 
   const load = () => api.get("/partner/team").then((res) => setTeam(res.data.data)).finally(() => setLoading(false));
 
+  useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
   useEffect(() => { load(); }, []);
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));

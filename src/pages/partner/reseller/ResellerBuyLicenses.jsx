@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import api from "../../../services/api";
 import Card from "../../../components/ui/Card";
@@ -40,6 +41,7 @@ export default function ResellerBuyLicenses() {
     ]).finally(() => setLoading(false));
   };
 
+  useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
   useEffect(() => { load(); }, []);
 
   // Razorpay's own payment-lookup can lag a signature that already proved

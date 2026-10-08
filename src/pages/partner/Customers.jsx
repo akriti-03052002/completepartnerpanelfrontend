@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import Pagination from "../../components/ui/Pagination";
 import { useEffect, useState } from "react";
@@ -59,12 +60,13 @@ export default function Customers() {
   const [error, setError] = useState("");
 
   const load = () => {
-    Promise.all([
+    return Promise.all([
       api.get("/partner/profile").then((res) => setPartner(res.data.data.partner)),
       api.get("/partner/customers", { params: { page, limit: 50 } }).then((res) => { setCustomers(res.data.data); setPagination(res.data.pagination); })
     ]).finally(() => setLoading(false));
   };
 
+  useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
   useEffect(() => { load(); }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));

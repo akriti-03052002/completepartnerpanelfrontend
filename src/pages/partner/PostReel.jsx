@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { Clapperboard } from "lucide-react";
 import api from "../../services/api";
@@ -40,6 +41,7 @@ export default function PostReel() {
     }));
   };
 
+  useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return loadData(); });
   useEffect(() => {
     Promise.all([
       api.get("/partner/social/accounts"),

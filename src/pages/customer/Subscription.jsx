@@ -128,6 +128,7 @@ export default function Subscription() {
   };
 
   useEffect(() => { load().finally(() => setLoading(false)); }, []);
+  useAutoRefresh(() => customerApi.get("/customer/subscription").then(res => setData(res.data.data)));
 
   const count = Number(screenCount) || 0;
 
@@ -513,3 +514,4 @@ function ConfirmDialog({ charge, currentLabel, newLabel, durationLabel, submitti
     </div>
   );
 }
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";

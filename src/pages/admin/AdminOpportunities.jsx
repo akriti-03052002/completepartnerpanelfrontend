@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import adminApi from "../../services/adminApi";
 import Card from "../../components/ui/Card";
@@ -17,6 +18,7 @@ export default function AdminOpportunities() {
 
   const load = () => adminApi.get("/admin/opportunities").then((res) => setOpportunities(res.data.data)).finally(() => setLoading(false));
 
+  useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
   useEffect(() => { load(); }, []);
 
   const markLost = async (id) => {

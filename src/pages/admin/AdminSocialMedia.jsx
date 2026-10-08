@@ -1,3 +1,4 @@
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useSessionState } from "../../hooks/useSessionState";
 import Pagination from "../../components/ui/Pagination";
 import { useEffect, useState } from "react";
@@ -104,6 +105,7 @@ export default function AdminSocialMedia({ view = "accounts", partnerId = "", on
     }
   };
 
+  useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
   useEffect(() => {
     let active = true;
     fetchReviews()
