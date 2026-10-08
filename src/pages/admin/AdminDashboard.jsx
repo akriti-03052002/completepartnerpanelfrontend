@@ -7,6 +7,7 @@ import { loadBankChecks } from "../../services/loadBankChecks";
 import { loadIdentityChecks } from "../../services/loadIdentityChecks";
 import Card from "../../components/ui/Card";
 import PartnerTypeBarChart from "../../components/admin/PartnerTypeBarChart";
+import { PartnerMix, PaymentProgress } from "../../components/admin/DashboardVisuals";
 import { PARTNER_TYPE_COLORS } from "../../utils/partnerTypeColors";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 
@@ -22,7 +23,7 @@ function Figure({ label, value, note, dot }) {
         {label}
       </p>
       <p className="text-3xl font-bold tracking-tight text-slate-900 mt-3 tabular-nums">{value}</p>
-      {note && <p className="text-xs text-slate-400 mt-1">{note}</p>}
+      {note && <span className="sr-only">{note}</span>}
     </div>
   );
 }
@@ -76,7 +77,7 @@ function CountTile({ label, value, to, note, total }) {
       </div>
       <p className="text-sm font-medium text-slate-600 mt-4">{label}</p>
       <p className="text-3xl font-bold tracking-tight text-slate-900 mt-2 tabular-nums">{count(value)}</p>
-      {note && <p className="text-xs leading-5 text-slate-500 mt-2">{note}</p>}
+      {note && <span className="sr-only">{note}</span>}
       {theme.type && total !== undefined && <div className="mt-4">
         <div className="flex justify-between text-xs text-slate-500 mb-2"><span>Of all partners</span><span>{share}%</span></div>
         <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden"><div className="h-full rounded-full" style={{ width: `${share}%`, backgroundColor: PARTNER_TYPE_COLORS[theme.type] }} /></div>
@@ -211,12 +212,11 @@ export default function AdminDashboard() {
 
       <section aria-labelledby="admin-tasks-heading">
         <h2 id="admin-tasks-heading" className="font-semibold text-lg text-slate-900">Choose a task</h2>
-        <p className="mt-1 mb-4 text-sm text-slate-500">Open a partner profile to see their approval checklist, or go straight to a review below.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {tasks.map(({ label, to, icon: Icon, note }) => (
             <Link key={to} to={to} className="group flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-slate-400 hover:shadow-sm">
               <span className="rounded-xl bg-red-50 p-2.5 text-brand-red"><Icon size={20} aria-hidden="true" /></span>
-              <span className="min-w-0 flex-1"><span className="block font-semibold text-sm text-slate-900">{label}</span><span className="mt-1 block text-xs leading-5 text-slate-500">{note}</span></span>
+              <span className="min-w-0 flex-1 self-center" title={note}><span className="block font-semibold text-sm text-slate-900">{label}</span></span>
               <ArrowRight size={16} aria-hidden="true" className="mt-3 shrink-0 text-slate-400 group-hover:text-slate-900" />
             </Link>
           ))}
@@ -252,7 +252,7 @@ export default function AdminDashboard() {
           </div>
           <PartnerTypeBarChart
             title="Recorded Business by Partner Type"
-            subtitle="Affiliate figures are won-deal value, not cash received. Hover or tap for details."
+            subtitle="Affiliate: won-deal value"
             rows={incomeRows}
             emptyText="No payments received yet."
           />
@@ -265,7 +265,6 @@ export default function AdminDashboard() {
           </div>
           <PartnerTypeBarChart
             title="Commission we are giving"
-            subtitle="By partner type. Hover or tap a bar for paid and still-to-pay."
             rows={payoutRows}
             emptyText="No commission earned by partners yet."
           />
@@ -312,50 +311,13 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      {/* ---------- Business paid ---------- */}
-      <section aria-labelledby="paid-heading">
-        <div className="flex items-baseline justify-between gap-3 mb-3">
-          <h2 id="paid-heading" className="font-semibold text-slate-900">Payments to Partners</h2>
-          <Link to="/admin/settlements" className="text-xs font-semibold text-brand-red hover:underline">Settlements</Link>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          {[
-            { type: "vendor", title: "Vendor commission" },
-            { type: "affiliate", title: "Affiliate rewards" },
-            { type: "influencer", title: "Influencer payments" }
-          ].map(({ type, title }) => (
-            <TypeBlock
-              key={type}
-              type={type}
-              title={title}
-              rows={[
-                { label: "Total", value: money(payouts[type].total), strong: true },
-                { label: "Already paid", value: money(payouts[type].paid) },
-                { label: "Still to pay", value: money(payouts[type].pending) }
-              ]}
-            />
-          ))}
-          <Card className="p-5">
-            <h3 className="flex items-center gap-2 font-semibold text-slate-900 mb-4">
-              <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: PARTNER_TYPE_COLORS.reseller }} />
-              Reseller
-            </h3>
-            <p className="text-lg font-bold text-slate-900 tabular-nums">{money(0)}</p>
-            <p className="text-xs text-slate-400 mt-2">Resellers are not paid commission — they buy licences from SPOTX.</p>
-          </Card>
-        </div>
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6" aria-label="Partner mix and payment progress">
+        <PartnerMix partners={partners} />
+        <PaymentProgress payouts={payouts} />
       </section>
-
       {/* ---------- Partners ---------- */}
       <section aria-labelledby="partners-heading">
         <h2 id="partners-heading" className="font-semibold text-slate-900 mb-3">Partners</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-          <CountTile label="Total partners" value={partners.total} to="/admin/partners" />
-          <CountTile label="Resellers" value={partners.byType.reseller} total={partners.total} to="/admin/partners?partnerType=reseller" />
-          <CountTile label="Affiliates" value={partners.byType.affiliate} total={partners.total} to="/admin/partners?partnerType=affiliate" />
-          <CountTile label="Vendors" value={partners.byType.vendor} total={partners.total} to="/admin/partners?partnerType=vendor" />
-          <CountTile label="Influencers" value={partners.byType.influencer} total={partners.total} to="/admin/partners?partnerType=influencer" />
-        </div>
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mt-4">
           <CountTile label="Active" value={partners.active} to="/admin/partners?status=active" note="All types" />
           <CountTile label="Verified" value={partners.verified} to="/admin/partners?verificationStatus=verified" note="KYC and bank verified" />
