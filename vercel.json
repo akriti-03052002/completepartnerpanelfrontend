@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://completepartnerpanelbackend.onrender.com/api/:path*"
+      "destination": "https://completepartnerpanelbackend.vercel.app/api/:path*"
     },
     {
       "source": "/(.*)",
