@@ -1,6 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 
 let scriptPromise;
+let initializedClientId;
+let googleNonce;
+let activeSignIn;
+
+function initializeGoogle(clientId) {
+  if (initializedClientId === clientId) return;
+  if (initializedClientId) {
+    throw new Error("Google configuration changed. Reload this page to continue.");
+  }
+  googleNonce = crypto.randomUUID();
+  window.google.accounts.id.initialize({
+    client_id: clientId,
+    nonce: googleNonce,
+    auto_select: false,
+    callback: (response) => activeSignIn?.(response)
+  });
+  initializedClientId = clientId;
+}
 function loadGoogle() {
   if (window.google?.accounts?.id) return Promise.resolve();
   if (!scriptPromise) {
@@ -27,7 +45,24 @@ export default function GoogleSignIn({ api, endpoint, mode = "login", payload = 
 
   useEffect(() => {
     let cancelled = false;
-    const nonce = crypto.randomUUID();
+    let submitting = false;
+    const handleCredential = async ({ credential }) => {
+      if (cancelled || submitting || latest.current.disabled) return;
+      submitting = true;
+      setBusy(true);
+      latest.current.onError?.("");
+      try {
+        const response = await api.post(`${endpoint}/google/${mode}`, {
+          ...latest.current.payload, credential, nonce: googleNonce
+        });
+        if (!cancelled) latest.current.onSuccess(response.data);
+      } catch (error) {
+        if (!cancelled) latest.current.onError?.(error.response?.data?.message || "Google sign-in failed. Please try again.");
+      } finally {
+        submitting = false;
+        if (!cancelled) setBusy(false);
+      }
+    };
     async function setup() {
       try {
         const { data } = await api.get(`${endpoint}/google/config`);
@@ -35,22 +70,9 @@ export default function GoogleSignIn({ api, endpoint, mode = "login", payload = 
         if (!data.clientId) { setStatus("Google sign-in is not configured yet."); return; }
         await loadGoogle();
         if (cancelled) return;
-        window.google.accounts.id.initialize({
-          client_id: data.clientId,
-          nonce,
-          auto_select: false,
-          callback: async ({ credential }) => {
-            if (cancelled || latest.current.disabled || latest.current.busy) return;
-            setBusy(true);
-            latest.current.onError?.("");
-            try {
-              const response = await api.post(`${endpoint}/google/${mode}`, { ...latest.current.payload, credential, nonce });
-              if (!cancelled) latest.current.onSuccess(response.data);
-            } catch (error) {
-              if (!cancelled) latest.current.onError?.(error.response?.data?.message || "Google sign-in failed. Please try again.");
-            } finally { if (!cancelled) setBusy(false); }
-          }
-        });
+        initializeGoogle(data.clientId);
+        activeSignIn = handleCredential;
+        container.current.replaceChildren();
         window.google.accounts.id.renderButton(container.current, {
           theme: "outline", size: "large", text: mode === "register" ? "signup_with" : "signin_with",
           shape: "pill", width: Math.min(container.current.offsetWidth || 300, 400)
@@ -59,7 +81,10 @@ export default function GoogleSignIn({ api, endpoint, mode = "login", payload = 
       } catch (error) { if (!cancelled) setStatus(error.message || "Google sign-in is unavailable."); }
     }
     setup();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      if (activeSignIn === handleCredential) activeSignIn = undefined;
+    };
   }, [api, endpoint, mode]);
 
   return (
