@@ -17,7 +17,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
-  useAutoRefresh(() => setRetry(value => value + 1));
+  useAutoRefresh(() => {
+    if (partner && localStorage.getItem("partnerToken")) setRetry(value => value + 1);
+  });
 
   // Reseller is billed on purchased licenses, not commission/subscription
   // stats — /partner/dashboard below is shaped for the commission-earning
@@ -29,12 +31,13 @@ export default function Dashboard() {
     // isReseller short-circuits to <ResellerDashboard /> below before
     // `loading`/`data` are ever read, so there's nothing to fetch or
     // reset here for that case.
-    if (isReseller) return;
+    if (isReseller || !(partner?.id || partner?._id) || !localStorage.getItem("partnerToken")) return;
     let active = true;
-    api.get("/partner/dashboard").then((res) => { if (active) { setData(res.data.data); setError(""); } })
+    const controller = new AbortController();
+    api.get("/partner/dashboard", { signal: controller.signal }).then((res) => { if (active) { setData(res.data.data); setError(""); } })
       .catch(() => { if (active) setError("Could not load your dashboard. Please try again."); })
       .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+    return () => { active = false; controller.abort(); };
   }, [isReseller, retry, partner?.id, partner?._id]);
 
   if (isReseller) return <ResellerDashboard />;
