@@ -14,13 +14,14 @@ function initializeGoogle(clientId) {
   window.google.accounts.id.initialize({
     client_id: clientId,
     nonce: googleNonce,
+    ux_mode: "popup",
     auto_select: false,
-    button_auto_select: false,
     use_fedcm_for_button: false,
     callback: (response) => activeSignIn?.(response)
   });
   initializedClientId = clientId;
 }
+
 function loadGoogle() {
   if (window.google?.accounts?.id) return Promise.resolve();
   if (!scriptPromise) {
@@ -28,8 +29,19 @@ function loadGoogle() {
       const script = document.createElement("script");
       script.src = "https://accounts.google.com/gsi/client";
       script.async = true;
-      script.onload = resolve;
-      script.onerror = () => { script.remove(); scriptPromise = undefined; reject(new Error("Could not load Google sign-in. Check your connection.")); };
+      script.onload = () => {
+        if (window.google?.accounts?.id) resolve();
+        else {
+          script.remove();
+          scriptPromise = undefined;
+          reject(new Error("Google sign-in could not load. Please reload the page."));
+        }
+      };
+      script.onerror = () => {
+        script.remove();
+        scriptPromise = undefined;
+        reject(new Error("Could not load Google sign-in. Check your connection."));
+      };
       document.head.appendChild(script);
     });
   }
@@ -42,12 +54,13 @@ export default function GoogleSignIn({ api, endpoint, mode = "login", payload = 
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("Loading Google sign-in...");
   useEffect(() => {
-    latest.current = { payload, onSuccess, onError, disabled, busy };
-  }, [payload, onSuccess, onError, disabled, busy]);
+    latest.current = { payload, onSuccess, onError, disabled };
+  }, [payload, onSuccess, onError, disabled]);
 
   useEffect(() => {
     let cancelled = false;
     let submitting = false;
+    const controller = new AbortController();
     const handleCredential = async ({ credential }) => {
       if (cancelled || submitting || latest.current.disabled) return;
       submitting = true;
@@ -56,7 +69,7 @@ export default function GoogleSignIn({ api, endpoint, mode = "login", payload = 
       try {
         const response = await api.post(`${endpoint}/google/${mode}`, {
           ...latest.current.payload, credential, nonce: googleNonce
-        });
+        }, { signal: controller.signal });
         if (!cancelled) latest.current.onSuccess(response.data);
       } catch (error) {
         if (!cancelled) latest.current.onError?.(error.response?.data?.message || "Google sign-in failed. Please try again.");
@@ -67,18 +80,21 @@ export default function GoogleSignIn({ api, endpoint, mode = "login", payload = 
     };
     async function setup() {
       try {
-        const { data } = await api.get(`${endpoint}/google/config`);
+        const { data } = await api.get(`${endpoint}/google/config`, { signal: controller.signal });
         if (cancelled) return;
         if (!data.clientId) { setStatus("Google sign-in is not configured yet."); return; }
         await loadGoogle();
-        if (cancelled) return;
+        if (cancelled || !container.current) return;
         initializeGoogle(data.clientId);
         activeSignIn = handleCredential;
         container.current.replaceChildren();
         window.google.accounts.id.renderButton(container.current, {
           // Google's medium button disables personalized name/email rendering.
-          theme: "outline", size: "medium", text: mode === "register" ? "signup_with" : "signin_with",
-          shape: "pill", width: Math.min(container.current.offsetWidth || 300, 400)
+          theme: "outline",
+          size: "medium",
+          text: mode === "register" ? "signup_with" : "signin_with",
+          shape: "rectangular",
+          width: Math.min(container.current.offsetWidth || 300, 400)
         });
         setStatus("");
       } catch (error) { if (!cancelled) setStatus(error.message || "Google sign-in is unavailable."); }
@@ -86,6 +102,7 @@ export default function GoogleSignIn({ api, endpoint, mode = "login", payload = 
     setup();
     return () => {
       cancelled = true;
+      controller.abort();
       if (activeSignIn === handleCredential) activeSignIn = undefined;
     };
   }, [api, endpoint, mode]);
