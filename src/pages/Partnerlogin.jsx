@@ -1,3 +1,4 @@
+import GoogleSignIn from "../components/GoogleSignIn";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api.js"
@@ -112,6 +113,7 @@ export default function PartnerLogin() {
           )}
 
 
+          <GoogleSignIn api={api} endpoint="/partner/auth" disabled={loading} onError={setError} onSuccess={(data) => { setSession(data); navigate("/partner/dashboard", { replace: true }); }} />
           <form onSubmit={handleSubmit}>
 
             {/* Email */}

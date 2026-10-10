@@ -1,3 +1,4 @@
+import GoogleSignIn from "../components/GoogleSignIn";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import customerPortalApi from "../services/resellerCustomerPortalApi";
@@ -37,7 +38,8 @@ export default function CustomerPortalLogin() {
         {error && <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
 
         {linkMessage && <p role="status" className="mb-4 text-sm text-green-700">{linkMessage}</p>}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <GoogleSignIn api={customerPortalApi} endpoint="/public/reseller-customers" disabled={submitting} onError={setError} onSuccess={(data) => { localStorage.setItem("customerPortalToken", data.data.token || "cookie"); navigate("/reseller/customer/dashboard", { replace: true }); }} />
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
             <input

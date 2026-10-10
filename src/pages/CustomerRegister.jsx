@@ -1,5 +1,7 @@
+import GoogleSignIn from "../components/GoogleSignIn";
+import { useCustomerAuth } from "../context/CustomerAuthContext";
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { CheckCircle2, Loader2, Lock } from "lucide-react";
 import customerApi from "../services/customerApi.js";
 import Logo from "../components/ui/Logo";
@@ -13,6 +15,8 @@ const inputClass =
   "w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition";
 
 export default function CustomerRegister() {
+  const navigate = useNavigate();
+  const { setSession } = useCustomerAuth();
   const [searchParams] = useSearchParams();
   const codeFromLink = searchParams.get("ref") || "";
 
@@ -227,6 +231,8 @@ export default function CustomerRegister() {
             <div className="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>
           )}
 
+          <p className="text-sm text-slate-500">Enter your referral code and company details below to register with Google.</p>
+          <GoogleSignIn api={customerApi} endpoint="/public/customers" mode="register" payload={{ ...form, referralCode: form.referralCode.trim(), password: undefined, confirmPassword: undefined }} disabled={loading} onError={setError} onSuccess={(data) => { setSession(data.data); navigate("/customer/dashboard", { replace: true }); }} />
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Referral Code *</label>

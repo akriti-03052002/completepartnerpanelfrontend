@@ -1,3 +1,4 @@
+import GoogleSignIn from "../components/GoogleSignIn";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import customerApi from "../services/customerApi.js";
@@ -57,6 +58,7 @@ export default function CustomerLogin() {
             <div className="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}<Link to="/customer/forgot-password" className="block mt-2 font-semibold underline">Resend verification or reset password</Link></div>
           )}
 
+          <GoogleSignIn api={customerApi} endpoint="/public/customers" disabled={loading} onError={setError} onSuccess={(data) => { setSession(data.data); navigate("/customer/dashboard", { replace: true }); }} />
           <form onSubmit={handleSubmit}>
             <div className="mb-5">
               <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>

@@ -1,5 +1,6 @@
+import GoogleSignIn from "../components/GoogleSignIn";
 import { useEffect, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
 import api from "../services/resellerCustomerPortalApi";
 import Logo from "../components/ui/Logo";
@@ -17,6 +18,7 @@ import PhoneInput from "../components/ui/PhoneInput";
    Customers page and takes it from there.
 ============================================================ */
 export default function CustomerReferralRegister() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const codeFromLink = searchParams.get("ref") || "";
 
@@ -94,6 +96,8 @@ export default function CustomerReferralRegister() {
         )}
         {error && <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
 
+        <p className="text-sm text-slate-500">Enter your referral code and company name below to register with Google.</p>
+        <GoogleSignIn api={api} endpoint="/public/reseller-customers" mode="register" payload={{ ...form, referralCode: referralCode.trim() }} disabled={submitting} onError={setError} onSuccess={(data) => { localStorage.setItem("customerPortalToken", data.data.token || "cookie"); navigate("/reseller/customer/dashboard", { replace: true }); }} />
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">Referral Code *</label>

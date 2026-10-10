@@ -1,3 +1,4 @@
+import GoogleSignIn from "../components/GoogleSignIn";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
@@ -217,6 +218,10 @@ export default function PartnerRegister() {
 
         {/* Form */}
 
+        <div className="bg-white rounded-2xl px-6 py-1 border border-slate-200 mb-4">
+          <p className="text-sm text-slate-500 mt-4">Choose your partner type and enter your phone number below, then sign up with Google.</p>
+          <GoogleSignIn api={api} endpoint="/partner/auth" mode="register" payload={{ partnerType: formData.partnerType, contactName: formData.contactName, phone: formData.phone }} disabled={loading} onError={setError} onSuccess={(data) => { setSession(data); navigate("/partner/dashboard", { replace: true }); }} />
+        </div>
         <form
           onSubmit={handleSubmit}
           className="bg-white border border-slate-200 rounded-3xl shadow-sm p-8"
