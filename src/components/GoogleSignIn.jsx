@@ -16,7 +16,7 @@ function initializeGoogle(clientId) {
     nonce: googleNonce,
     ux_mode: "popup",
     auto_select: false,
-    use_fedcm_for_button: false,
+    use_fedcm_for_button: true,
     button_auto_select: false,
     callback: (response) => activeSignIn?.(response)
   });
