@@ -15,6 +15,7 @@ function initializeGoogle(clientId) {
     client_id: clientId,
     nonce: googleNonce,
     auto_select: false,
+    button_auto_select: false,
     callback: (response) => activeSignIn?.(response)
   });
   initializedClientId = clientId;
@@ -74,7 +75,8 @@ export default function GoogleSignIn({ api, endpoint, mode = "login", payload = 
         activeSignIn = handleCredential;
         container.current.replaceChildren();
         window.google.accounts.id.renderButton(container.current, {
-          theme: "outline", size: "large", text: mode === "register" ? "signup_with" : "signin_with",
+          // Google's medium button disables personalized name/email rendering.
+          theme: "outline", size: "medium", text: mode === "register" ? "signup_with" : "signin_with",
           shape: "pill", width: Math.min(container.current.offsetWidth || 300, 400)
         });
         setStatus("");
