@@ -88,7 +88,7 @@ export default function PartnerRegister() {
     try {
       await api.post("/partner/auth/send-otp", { email: formData.email });
       setOtpSent(true);
-      setOtpMessage(`OTP sent to ${formData.email}.`);
+      setOtpMessage(`OTP sent to ${formData.email}. Check your inbox and spam folder.`);
     } catch (err) {
       setOtpError(err.response?.data?.message || "Couldn't send the OTP. Try again.");
     } finally {
@@ -302,14 +302,14 @@ export default function PartnerRegister() {
                   Email *
                 </label>
 
-                <div className="flex gap-2">
+                <div className="flex flex-col items-start gap-2">
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleEmailChange}
                     placeholder="name@company.com"
-                    className={`${inputClass} flex-1`}
+                    className={inputClass}
                     disabled={emailVerified}
                     required
                   />
@@ -331,7 +331,7 @@ export default function PartnerRegister() {
                 </div>
 
                 {otpError && <p className="text-xs text-brand-red mt-1.5">{otpError}</p>}
-                {!otpError && otpMessage && <p className="text-xs text-green-600 mt-1.5">{otpMessage}</p>}
+                {!otpError && otpMessage && <p role="status" className="text-xs text-green-600 mt-1.5 break-words">{otpMessage}</p>}
 
                 {otpSent && !emailVerified && (
                   <div className="flex gap-2 mt-2">
