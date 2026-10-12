@@ -4,6 +4,13 @@ import Card from "../ui/Card";
 const count = (rows = {}) => Object.values(rows).reduce((n, row) => n + (row.count || 0), 0);
 const total = (rows = {}) => Object.values(rows).reduce((n, row) => n + (row.amount || 0), 0);
 const money = (n) => `INR ${Number(n || 0).toLocaleString("en-IN")}`;
+const statusRows = (groups) => Object.entries(groups).map(([label, row]) => ({
+  label,
+  value: row.count,
+  color: ["active", "approved", "verified", "won"].includes(label) ? "bg-emerald-500"
+    : ["rejected", "lost", "suspended", "cancelled", "expired"].includes(label) ? "bg-red-400"
+    : ["pending", "under_review", "trial", "allocated", "pending_activation"].includes(label) ? "bg-amber-400" : "bg-blue-500"
+}));
 export default function BusinessOverview({ type, summary = {}, socialAccounts }) {
   const { hasPermission } = usePartnerAuth();
   let tiles, note, business = 0, completed;
@@ -46,13 +53,13 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
   const great = type === "influencer" ? completed >= 10 : business >= 100000;
   const rating = great ? "\u{1F31F} Great contribution" : completed || business ? "\u{1F4C8} Your business is growing" : "\u{1F331} Your journey is starting";
   let chart = null;
-  if (type === "affiliate" && hasPermission("referrals:view") && summary.leads) chart = { title: "Deal progress", note: "Number of deals in each recorded status; won-deal value is separate.", rows: Object.entries(summary.leads).map(([label, row]) => ({ label, value: row.count })) };
-  if (type === "influencer" && summary.posts) chart = { title: "Content review progress", note: "Submitted posts and reels by review status. Approval does not mean payment is complete.", rows: Object.entries(summary.posts).map(([label, row]) => ({ label, value: row.count })) };
-  if (type === "vendor" && hasPermission("customers:view") && summary.customers) chart = { title: "Customer account status", note: "Your linked customers by current account status, rather than commission status.", rows: Object.entries(summary.customers).map(([label, row]) => ({ label, value: row.count })) };
+  if (type === "affiliate" && hasPermission("referrals:view") && summary.leads) chart = { title: "Deal progress", total: count(summary.leads), totalLabel: "Total deals", note: "Share of your deals in each status. Deal value is separate.", rows: statusRows(summary.leads) };
+  if (type === "influencer" && summary.posts) chart = { title: "Content review progress", total: count(summary.posts), totalLabel: "Total submissions", note: "Share of submitted posts and reels in each review status. Approved does not mean paid.", rows: statusRows(summary.posts) };
+  if (type === "vendor" && hasPermission("customers:view") && summary.customers) chart = { title: "Customer account status", total: count(summary.customers), totalLabel: "Total customers", note: "Share of your customers in each account status.", rows: statusRows(summary.customers) };
   if (type === "reseller" && hasPermission("reseller:inventory:view") && summary.inventory) {
     const bought = Number(summary.inventory.totalPurchasedLicenses) || 0;
     const assigned = Number(summary.inventory.totalAllocatedLicenses) || 0;
-    chart = { title: "Licence allocation", note: "Assigned licences reserve customer capacity. They do not mean a screen is active.", rows: [{ label: "Ready to assign", value: Math.max(0, bought - assigned) }, { label: "Assigned to customers", value: assigned }] };
+    chart = { title: "Licence allocation", total: bought, totalLabel: "Bought licences", note: "Each bar shows a share of your bought licences. Assigned licences are reserved for customers, not necessarily active screens.", rows: [{ label: "Ready to assign", value: Math.max(0, bought - assigned), color: "bg-emerald-500" }, { label: "Assigned to customers", value: assigned, color: "bg-blue-500" }] };
   }
   const secondary = type === "reseller" ? ["Registered screens", "Active screens", "Active customers", "Pending customers", "Suspended customers", "Cancelled customers"] : [];
   const renderTile = ([title, value]) => <div key={title} className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">{title}</p><p className="text-xl font-bold mt-1 break-words">{value}</p></div>;
