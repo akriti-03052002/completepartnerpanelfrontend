@@ -1,3 +1,4 @@
+import CapacityVisual from "../../components/ui/CapacityVisual";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -114,6 +115,8 @@ export default function Dashboard() {
         <StatCard label="Registered Screens" value={registeredScreenCount} icon={Monitor} />
         <StatCard label="Available Screen Slots" value={Math.max(0, (Number(subscription.screenCount) || 0) - (Number(registeredScreenCount) || 0))} icon={Plus} />
       </div>
+
+      <CapacityVisual title="Your screen capacity" used={registeredScreenCount} capacity={subscription.screenCount} usedLabel="registered screens" note="Registration uses your screen allowance. This shows registered devices, not whether each screen is online." />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {QUICK_LINKS.map((item) => (
