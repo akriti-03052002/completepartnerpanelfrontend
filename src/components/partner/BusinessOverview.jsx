@@ -1,5 +1,5 @@
 import AllocationChart from "../ui/AllocationChart";
-import { Monitor, Zap, Users, Clock, PauseCircle, XCircle, Wallet, Megaphone, Package } from "lucide-react";
+import { Monitor, Zap, Users, Clock, PauseCircle, XCircle } from "lucide-react";
 import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import Card from "../ui/Card";
 const count = (rows = {}) => Object.values(rows).reduce((n, row) => n + (row.count || 0), 0);
@@ -8,6 +8,7 @@ const money = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
 const statusRows = (groups) => Object.entries(groups).map(([label, row]) => ({
   label,
   value: row.count,
+  emoji: ["active", "approved", "verified", "won"].includes(label) ? "✅" : ["rejected", "lost", "cancelled"].includes(label) ? "❌" : ["suspended", "on_hold"].includes(label) ? "⏸️" : label === "trial" ? "🎁" : "⏳",
   color: ["active", "approved", "verified", "won"].includes(label) ? "bg-emerald-500"
     : ["rejected", "lost", "suspended", "cancelled", "expired"].includes(label) ? "bg-red-400"
     : ["pending", "under_review", "trial", "allocated", "pending_activation"].includes(label) ? "bg-amber-400" : "bg-blue-500"
@@ -69,9 +70,9 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
   }
   const secondary = type === "reseller" ? ["Registered screens", "Active screens", "Active customers", "Pending customers", "Suspended customers", "Cancelled customers"] : [];
   const renderTile = ([title, value]) => {
-    const Icon = /screens/i.test(title) ? Monitor : /customers/i.test(title) ? Users : /posts|instagram|social/i.test(title) ? Megaphone : /licences|assign/i.test(title) ? Package : Wallet;
+    const emoji = /screens/i.test(title) ? "🖥️" : /customers/i.test(title) ? "👥" : /posts|instagram|social/i.test(title) ? "🎬" : /licences|assign/i.test(title) ? "📦" : /not paid|to pay/i.test(title) ? "⏳" : /paid/i.test(title) ? "💸" : "💰";
     const colour = /paid to you|available/i.test(title) ? "bg-emerald-50 text-emerald-600" : /not paid|to pay/i.test(title) ? "bg-amber-50 text-amber-600" : "bg-blue-50 text-blue-600";
-    return <div key={title} className="rounded-xl bg-slate-50 p-4"><div className="flex items-start justify-between gap-2"><p className="text-xs text-slate-500">{title}</p><span className={`rounded-lg p-2 shrink-0 ${colour}`}><Icon size={17} aria-hidden="true" /></span></div><p className="text-xl font-bold mt-1 break-words">{value}</p></div>;
+    return <div key={title} className="rounded-xl bg-slate-50 p-4"><div className="flex items-start justify-between gap-2"><p className="text-xs text-slate-500">{title}</p><span aria-hidden="true" className={`rounded-lg p-2 shrink-0 text-xl leading-none ${colour}`}>{emoji}</span></div><p className="text-xl font-bold mt-1 break-words">{value}</p></div>;
   };
   const breakdownStyle = {
     "Registered screens": { icon: Monitor, color: "bg-blue-50 text-blue-600" },
@@ -82,7 +83,7 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
     "Cancelled customers": { icon: XCircle, color: "bg-red-50 text-red-600" }
   };
   return <Card className="p-5 space-y-4">
-    <div><h2 className="font-semibold text-lg">Your business overview</h2><p className="text-xs text-slate-500 mt-1">Totals for your partner account since you joined.{type !== "reseller" && hasPermission("commissions:view") ? " Recorded earnings include amounts waiting for approval." : ""}</p></div>
+    <div><h2 className="font-semibold text-lg"><span aria-hidden="true" className="mr-2">{{ vendor: "🖥️", affiliate: "🤝", influencer: "🎬", reseller: "📦" }[type]}</span>Your business overview</h2><p className="text-xs text-slate-500 mt-1">Totals for your partner account since you joined.{type !== "reseller" && hasPermission("commissions:view") ? " Recorded earnings include amounts waiting for approval." : ""}</p></div>
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{tiles.filter(([title]) => !secondary.includes(title)).map(renderTile)}</div>
     {secondary.length > 0 && <section aria-label="Customer and screen breakdown">
       <h3 className="text-sm font-semibold text-slate-700 mb-3">Customers & screens</h3>

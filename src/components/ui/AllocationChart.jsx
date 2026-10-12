@@ -20,7 +20,7 @@ export default function AllocationChart({ title, note, rows = [], total = 0, tot
       </div>
       <dl className="space-y-3">{values.map((row, index) => <div key={row.label} className="flex items-center gap-3 rounded-xl bg-slate-50 p-4">
         <span aria-hidden="true" className="h-3 w-3 shrink-0 rounded-full" style={{ background: colour(row, index) }} />
-        <dt className="flex-1 text-sm text-slate-600">{statusLabel(row.label)}</dt>
+        <dt className="flex-1 text-sm text-slate-600">{row.emoji && <span aria-hidden="true" className="mr-2">{row.emoji}</span>}{statusLabel(row.label)}</dt>
         <dd className="text-right"><span className="block text-lg font-bold tabular-nums text-slate-900">{row.value.toLocaleString("en-IN")}</span><span className="text-xs text-slate-500">{total > 0 ? Math.round(row.value / total * 100) : 0}%</span></dd>
       </div>)}</dl>
     </div>
