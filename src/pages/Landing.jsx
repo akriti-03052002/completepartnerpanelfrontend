@@ -108,7 +108,6 @@ export default function Landing() {
               <div className="bg-white p-6 sm:p-9">
                 <h4 className="text-sm font-semibold">What you’ll do</h4>
                 <ul className="mt-5 space-y-4">{role.details.map(detail => <li key={detail} className="flex items-start gap-3 text-sm text-slate-600"><Check size={16} className="mt-0.5 shrink-0 text-brand-red" />{detail}</li>)}</ul>
-                <div className="mt-7 border-t border-slate-100 pt-5"><p className="text-xs text-slate-500 mb-3">In your panel</p><div className="flex flex-wrap gap-2">{role.tools.map(tool => <span key={tool} className="rounded-lg bg-slate-50 border border-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600">{tool}</span>)}</div></div>
               </div>
             </div>
           </div>
