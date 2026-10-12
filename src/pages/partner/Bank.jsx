@@ -130,7 +130,7 @@ export default function Bank() {
       {!editing && account && (
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <Badge status={account.verification.status} />
+            <Badge status={account.verification.status} verification />
             <Button variant="outline" onClick={() => setEditing(true)} disabled={Boolean(account.pendingChange)}>
               {account.pendingChange ? "Change Pending Review" : "Update"}
             </Button>

@@ -67,15 +67,15 @@ export default function Dashboard() {
         <div className="flex gap-4 flex-wrap">
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-medium text-slate-400">Partner Status</span>
-            <Badge status={partnerStatus} />
+            <Badge status={partnerStatus} verification />
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-medium text-slate-400">KYC Verification</span>
-            <Badge status={kycStatus} />
+            <Badge status={kycStatus} verification />
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-medium text-slate-400">Bank Status</span>
-            <Badge status={bankStatus} />
+            <Badge status={bankStatus} verification />
           </div>
         </div>
       </div>

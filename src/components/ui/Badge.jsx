@@ -13,12 +13,24 @@ const STATUS_TONE = {
   not_submitted: "neutral", inactive: "neutral", new: "info", qualified: "info", processing: "info", trial: "info"
 };
 
-export default function Badge({ status, children, tone }) {
+const VERIFICATION_LABELS = {
+  not_submitted: "Pending",
+  draft: "Pending",
+  pending: "Waiting for approval",
+  pending_verification: "Waiting for approval",
+  under_review: "Waiting for approval",
+  verified: "Approved",
+  active: "Approved",
+  approved: "Approved",
+  rejected: "Rejected"
+};
+
+export default function Badge({ status, children, tone, verification = false }) {
   const resolvedTone = tone || STATUS_TONE[status] || "neutral";
 
   return (
     <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${TONES[resolvedTone]}`}>
-      {children || String(status || "").replace(/_/g, " ")}
+      {children || (verification && VERIFICATION_LABELS[status]) || (status === "draft" ? "Pending" : String(status || "").replace(/_/g, " "))}
     </span>
   );
 }

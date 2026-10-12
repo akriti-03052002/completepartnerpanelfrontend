@@ -5,7 +5,7 @@ import { partnerSectionPath } from "./partnerSections";
 const money = (n) => `INR ${Number(n || 0).toLocaleString("en-IN")}`;
 const amount = (rows = {}) => Object.values(rows).reduce((n, row) => n + (row.amount || 0), 0);
 const count = (rows = {}) => Object.values(rows).reduce((n, row) => n + (row.count || 0), 0);
-const label = (text = "") => text.replaceAll("_", " ");
+const label = (text = "") => text === "draft" ? "Pending" : text.replaceAll("_", " ");
 export default function PartnerProfileSummary({ partner, documents = [], requiredDocumentTypes = [], bankAccount, summary = {}, compact = false }) {
   const type = partner.partnerType;
   const path = (section) => partnerSectionPath(partner._id, section);

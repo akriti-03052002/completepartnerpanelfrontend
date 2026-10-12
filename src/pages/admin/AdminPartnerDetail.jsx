@@ -54,7 +54,7 @@ function PartnerStatusControl({ selectedStatus, onChange, onApply, busy, error, 
       <p className="text-sm text-slate-500 mb-4">{canEdit ? "Choose a status, then save the change." : "Only a super admin or KYC reviewer can change this status."}</p>
       <div className="flex flex-col sm:flex-row gap-3">
         <Select aria-label="Partner status" value={selectedStatus} onChange={(e) => onChange(e.target.value)} className="flex-1" disabled={busy || !canEdit}>
-          {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
+          {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s === "draft" ? "Pending" : s.replace(/_/g, " ")}</option>)}
         </Select>
         {canEdit && <Button onClick={onApply} loading={busy}>Save status</Button>}
       </div>

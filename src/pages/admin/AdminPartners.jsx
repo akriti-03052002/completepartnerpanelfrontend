@@ -143,7 +143,7 @@ export default function AdminPartners() {
           setSearchParams(next);
           setPage(1);
         }} className="sm:w-56">
-          {STATUSES.map((s) => <option key={s} value={s}>{s ? s.replace(/_/g, " ") : "All statuses"}</option>)}
+          {STATUSES.map((s) => <option key={s} value={s}>{s === "draft" ? "Pending" : s ? s.replace(/_/g, " ") : "All statuses"}</option>)}
         </Select>
         <Select value={verificationStatus} onChange={(e) => {
           const next = new URLSearchParams(searchParams);

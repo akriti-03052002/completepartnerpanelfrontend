@@ -163,7 +163,7 @@ export default function Documents() {
                       <p className="text-xs text-slate-400">Optional</p>
                     ) : null}
                   </div>
-                  {(!type.systemGenerated || doc) && <Badge status={status} />}
+                  {(!type.systemGenerated || doc) && <Badge status={status} verification />}
                 </div>
 
                 {doc && (
