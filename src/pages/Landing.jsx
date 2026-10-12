@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   LayoutDashboard, Wallet, ShieldCheck, ArrowRight,
-  Monitor, MapPin, Activity, Radio, Check, ShoppingBag, Share2, Megaphone, Users2, X
+  Monitor, Check, ShoppingBag, Share2, Megaphone, Users2, X
 } from "lucide-react";
 import Logo from "../components/ui/Logo";
 
@@ -14,8 +14,8 @@ const FEATURES = [
   },
   {
     icon: Users2,
-    title: "Choose your role",
-    description: "Install SpotX, sell licenses, refer businesses or create content."
+    title: "Tools for your role",
+    description: "See the customers, licenses, referrals or campaigns linked to your work."
   },
   {
     icon: Wallet,
@@ -29,11 +29,11 @@ const FEATURES = [
   }
 ];
 
-const STATS = [
-  { icon: Monitor, value: "1,521+", label: "Screens managed" },
-  { icon: MapPin, value: "70+", label: "Business locations" },
-  { icon: Activity, value: "99.9%", label: "Platform uptime" },
-  { icon: Radio, value: "24/7", label: "Network monitoring" }
+const PANEL_TOOLS = [
+  { icon: LayoutDashboard, title: "Your dashboard", label: "See your partner activity" },
+  { icon: ShieldCheck, title: "Documents & approval", label: "Submit and check your details" },
+  { icon: Users2, title: "Your partner work", label: "Tools for your chosen role" },
+  { icon: Wallet, title: "Payments & bills", label: "Track earnings or license bills" }
 ];
 
 const PARTNER_TYPES = [
@@ -94,9 +94,9 @@ export default function Landing() {
     <div className="min-h-screen bg-white">
       <header className="border-b border-slate-100">
         <div className="w-full px-5 sm:px-8 h-20 flex items-center justify-between">
-          <Link to="/" aria-label="SpotX home"><Logo size="md" plain /></Link>
+          <Link to="/" aria-label="SpotX Partner Panel home" className="flex items-center gap-3"><Logo size="md" plain /><span className="border-l border-slate-200 pl-3 text-xs sm:text-sm font-semibold text-slate-600">Partner Panel</span></Link>
           <Link to="/partner/login" className="text-sm font-semibold text-slate-700 hover:text-brand-black transition">
-            Sign in
+            Partner sign in
           </Link>
         </div>
       </header>
@@ -107,28 +107,27 @@ export default function Landing() {
         <div className="relative max-w-6xl mx-auto grid lg:grid-cols-2 items-center gap-14 lg:gap-16">
         <div>
         <span className="inline-block px-3 py-1 rounded-full bg-brand-red/10 text-brand-red text-xs font-semibold tracking-wide uppercase mb-6">
-          SpotX Partner Program
+          SpotX Partner Panel
         </span>
 
         <h1 className="font-heading text-4xl sm:text-5xl font-extrabold text-brand-black tracking-tight leading-tight">
-          Your next opportunity.<br />
-          <span className="text-brand-red">With SpotX.</span>
+          Your SpotX partnership.<br />
+          <span className="text-brand-red">All in one panel.</span>
         </h1>
 
         <p className="text-slate-600 text-base sm:text-lg leading-relaxed mt-6 max-w-lg">
-          SpotX helps businesses show videos, menus and offers on their screens.
-          Join as a partner to install SpotX, sell licenses, refer businesses or promote it.
-          Use this panel to track your work and payments.
+          A workspace for SpotX vendors, resellers, affiliates and influencers.
+          Register here, submit your details and track your partner work and payments.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 mt-8">
-          <Link
-            to="#partner-roles"
+          <a
+            href="#partner-roles"
             className="inline-flex items-center justify-center gap-2 bg-brand-black text-white px-8 py-3.5 rounded-xl font-semibold hover:bg-charcoal transition"
           >
             Choose your role
             <ArrowRight size={18} />
-          </Link>
+          </a>
           <Link
             to="/partner/login"
             className="inline-flex items-center justify-center gap-2 border border-slate-200 text-slate-700 px-8 py-3.5 rounded-xl font-semibold hover:bg-slate-50 transition"
@@ -136,21 +135,21 @@ export default function Landing() {
             Sign In
           </Link>
         </div>
-        <p className="text-xs text-slate-500 mt-5">Install · Sell · Refer · Promote</p>
+        <p className="text-xs text-slate-500 mt-5">Already a partner? Sign in to open your dashboard.</p>
         </div>
-        <div className="landing-scene relative mx-auto w-full max-w-lg" aria-label="Ways to partner with SpotX">
+        <div className="landing-scene relative mx-auto w-full max-w-lg" aria-label="Overview of the SpotX Partner Panel">
           <div className="landing-orbit" aria-hidden="true" />
           <div className="landing-screen relative rounded-3xl bg-white border border-slate-200 p-4 shadow-2xl shadow-slate-900/10">
-            <div className="flex items-center justify-between px-2 pb-4"><Logo plain size="sm" /><span className="text-xs text-slate-400">Partner program</span></div>
+            <div className="flex items-center justify-between px-2 pb-4"><Logo plain size="sm" /><span className="text-xs text-slate-400">Partner Panel</span></div>
             <div className="rounded-2xl bg-slate-950 p-6 sm:p-8 overflow-hidden relative min-h-64">
               <div className="landing-screen-glow" aria-hidden="true" />
               <div className="relative text-white">
-                <span className="text-[10px] uppercase tracking-[.2em] text-brand-yellow">Partner with SpotX</span>
-                <p className="font-heading font-bold text-3xl sm:text-4xl mt-4 leading-tight">Your role.<br />Your opportunity.</p>
+                <span className="text-[10px] uppercase tracking-[.2em] text-brand-yellow">Your partner workspace</span>
+                <p className="font-heading font-bold text-3xl sm:text-4xl mt-4 leading-tight">Your work.<br />Your progress.</p>
                 <div className="grid grid-cols-2 gap-2 mt-6">
                   {PARTNER_TYPES.map((type, index) => <div key={type.name} className={`landing-content-tag landing-tag-${index % 3} px-3 py-3 rounded-lg border border-white/15 bg-white/10`}>
                     <div className="flex items-center gap-2 text-xs font-semibold"><type.icon size={14} className="text-brand-yellow" />{type.name}</div>
-                    <p className="text-[11px] text-slate-300 mt-1">{["Install SpotX", "Sell licenses", "Refer businesses", "Promote SpotX"][index]}</p>
+                    <p className="text-[11px] text-slate-300 mt-1">{["Track earnings", "Assign licenses", "Track referrals", "Track campaigns"][index]}</p>
                   </div>)}
                 </div>
               </div>
@@ -165,10 +164,10 @@ export default function Landing() {
 
       <section className="border-y border-slate-100 bg-brand-black">
         <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-2 sm:grid-cols-4 gap-8">
-          {STATS.map((s) => (
-            <div key={s.label} className="text-center">
+          {PANEL_TOOLS.map((s) => (
+            <div key={s.title} className="text-center">
               <s.icon size={20} className="mx-auto mb-2 text-brand-yellow" />
-              <div className="font-heading text-2xl font-extrabold text-white">{s.value}</div>
+              <div className="font-heading text-sm sm:text-base font-bold text-white">{s.title}</div>
               <div className="text-xs text-slate-400 mt-1">{s.label}</div>
             </div>
           ))}
