@@ -62,6 +62,12 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
     chart = { title: "Licence allocation", total: bought, totalLabel: "Bought licences", note: "Each bar shows a share of your bought licences. Assigned licences are reserved for customers, not necessarily active screens.", rows: [{ label: "Ready to assign", value: Math.max(0, bought - assigned), color: "bg-emerald-500" }, { label: "Assigned to customers", value: assigned, color: "bg-blue-500" }] };
     tiles = tiles.filter(([title]) => !["Bought licences", "Assigned to customers", "Ready to assign"].includes(title));
   }
+  if (chart && type !== "reseller") {
+    const repeated = type === "vendor" ? ["Your customers", "Active customers"]
+      : type === "affiliate" ? ["Leads you referred", "Won deals", "Deals in progress"]
+      : ["Posts and reels submitted", "Approved content", "Waiting for SPOTX"];
+    tiles = tiles.filter(([title]) => !repeated.includes(title));
+  }
   const secondary = type === "reseller" ? ["Registered screens", "Active screens", "Active customers", "Pending customers", "Suspended customers", "Cancelled customers"] : [];
   const renderTile = ([title, value]) => <div key={title} className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">{title}</p><p className="text-xl font-bold mt-1 break-words">{value}</p></div>;
   return <Card className="p-5 space-y-4"><div><h2 className="font-semibold text-lg">Your business overview</h2><p className="text-sm mt-1">{rating}</p><p className="text-xs text-slate-500 mt-1">Lifetime totals for your partner account only. Great contribution means {type === "influencer" ? "10 approved posts/reels" : "INR 100,000 of recorded business"} or more.</p></div><div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{tiles.filter(([title]) => !secondary.includes(title)).map(renderTile)}</div>{secondary.length > 0 && <details><summary className="cursor-pointer text-sm font-semibold text-slate-700">Show customer and screen breakdown</summary><div className="mt-3 grid grid-cols-2 lg:grid-cols-3 gap-3">{tiles.filter(([title]) => secondary.includes(title)).map(renderTile)}</div></details>}{chart && <StatusChart {...chart} />}<p className="text-sm text-slate-500">{note}</p></Card>;

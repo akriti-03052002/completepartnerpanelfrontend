@@ -10,6 +10,10 @@ import Badge from "../../components/ui/Badge";
 import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import ResellerDashboard from "./reseller/ResellerDashboard";
 
+const trendMonth = period => new Date(`${period}-01T00:00:00Z`).toLocaleDateString("en-IN", { month: "short", year: "2-digit", timeZone: "UTC" });
+const trendMoney = value => `₹${Number(value || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+const trendTick = value => Number(value) >= 100000 ? `₹${Number((value / 100000).toFixed(1))}L` : Number(value) >= 1000 ? `₹${Number((value / 1000).toFixed(1))}k` : `₹${value}`;
+
 export default function Dashboard() {
   const { partner, hasPermission } = usePartnerAuth();
   const partnerType = partner?.partnerType?.trim().toLowerCase();
@@ -96,19 +100,22 @@ export default function Dashboard() {
             <h2 className="font-semibold text-slate-900">{earningsTrendLabel}</h2>
           </div>
 
-          {commissionTrend.length === 0 ? (
+          <p className="text-xs text-slate-500 mb-4">Monthly recorded earnings in rupees · Last 12 months. Includes pending approval; excludes cancelled earnings.</p>
+          <div className="flex flex-wrap justify-between gap-2 text-sm mb-4"><p className="text-slate-500">Recorded in this period: <strong className="text-slate-900">{trendMoney(commissionTrend.reduce((sum, row) => sum + Number(row.total || 0), 0))}</strong></p><p className="text-xs text-slate-400">Current month is still in progress</p></div>
+          {!commissionTrend.some(row => Number(row.total) !== 0) ? (
             <p className="text-sm text-slate-400 py-12 text-center">No commission history yet.</p>
           ) : (
             <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={commissionTrend}>
+              <LineChart data={commissionTrend} margin={{ top: 12, right: 12, bottom: 12, left: 6 }} accessibilityLayer>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="period" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Line type="monotone" dataKey="total" stroke="#EC2027" strokeWidth={2} dot={false} />
+                <XAxis dataKey="period" tickFormatter={trendMonth} tick={{ fontSize: 11 }} minTickGap={20} tickLine={false} axisLine={false} />
+                <YAxis tickFormatter={trendTick} tick={{ fontSize: 11 }} width={65} tickLine={false} axisLine={false} domain={[0, "auto"]} />
+                <Tooltip labelFormatter={trendMonth} formatter={value => [trendMoney(value), "Recorded earnings"]} contentStyle={{ borderRadius: 12, borderColor: "#e2e8f0" }} />
+                <Line type="linear" name="Recorded earnings" dataKey="total" stroke="#EC2027" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
           )}
+          <p className="text-xs text-slate-500 mt-3">Grouped by when earnings were recorded, not when they were paid. Months without earnings show zero.</p>
         </Card>}
 
         <Card className="p-6">
