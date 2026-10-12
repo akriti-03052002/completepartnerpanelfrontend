@@ -1,4 +1,5 @@
 import GoogleSignIn from "../components/GoogleSignIn";
+import { NAME_INPUT_PROPS, validateRegistration } from "../utils/registrationValidation";
 import { useEffect, useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
@@ -45,6 +46,9 @@ export default function CustomerReferralRegister() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    const errors = validateRegistration({ ...form, referralCode }, { reseller: true });
+    if (Object.keys(errors).length) { setError(Object.values(errors)[0]); return; }
 
     if (!referralCode.trim()) {
       setError("Enter the referral code your reseller gave you.");
@@ -123,6 +127,7 @@ export default function CustomerReferralRegister() {
             <label className="block text-sm font-medium text-slate-700 mb-2">Contact Name</label>
             <input
               name="name"
+              {...NAME_INPUT_PROPS}
               value={form.name}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition"

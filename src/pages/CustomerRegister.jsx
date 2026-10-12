@@ -1,4 +1,5 @@
 import GoogleSignIn from "../components/GoogleSignIn";
+import { NAME_INPUT_PROPS, validateRegistration } from "../utils/registrationValidation";
 import { useCustomerAuth } from "../context/CustomerAuthContext";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -165,6 +166,9 @@ export default function CustomerRegister() {
     e.preventDefault();
     setError("");
 
+    const errors = validateRegistration(form);
+    if (Object.keys(errors).length) { setError(Object.values(errors)[0]); return; }
+
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -268,7 +272,7 @@ export default function CustomerRegister() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Contact Name</label>
-              <input type="text" name="contactName" value={form.contactName} onChange={handleChange} className={inputClass} />
+              <input type="text" name="contactName" {...NAME_INPUT_PROPS} value={form.contactName} onChange={handleChange} className={inputClass} />
             </div>
 
             <div>

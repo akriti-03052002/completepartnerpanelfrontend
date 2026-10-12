@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import { validateRegistration } from "../utils/registrationValidation";
 
 const storageKey = "spotx.google.redirect";
 const pendingReturns = new Map();
@@ -53,6 +54,10 @@ export default function GoogleSignIn({ api, endpoint, mode = "login", payload = 
   const returning = new URLSearchParams(window.location.search).get("google_return") === "1";
   const start = async () => {
     if (starting.current || disabled || returning) return;
+    if (mode === "register") {
+      const errors = validateRegistration(payload, { google: true, partner: endpoint === "/partner/auth", reseller: endpoint === "/public/reseller-customers" });
+      if (Object.keys(errors).length) { onError?.(Object.values(errors)[0]); return; }
+    }
     starting.current = true;
     setBusy(true);
     setStatus("Opening Google...");

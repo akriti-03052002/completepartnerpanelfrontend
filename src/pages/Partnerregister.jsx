@@ -1,4 +1,5 @@
 import GoogleSignIn from "../components/GoogleSignIn";
+import { NAME_INPUT_PROPS, validateRegistration } from "../utils/registrationValidation";
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
@@ -128,6 +129,9 @@ export default function PartnerRegister() {
 
     setError("");
     setSuccess("");
+
+    const errors = validateRegistration(formData, { partner: true });
+    if (Object.keys(errors).length) { setError(Object.values(errors)[0]); return; }
 
     if (!emailVerified) {
       setError("Please verify your email with the OTP before continuing.");
@@ -291,6 +295,7 @@ export default function PartnerRegister() {
                 <input
                   type="text"
                   name="contactName"
+                  {...NAME_INPUT_PROPS}
                   value={formData.contactName}
                   onChange={handleChange}
                   placeholder="Full name"
