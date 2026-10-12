@@ -64,13 +64,16 @@ export default function Dashboard() {
     : ["not_submitted", "rejected"].includes(bankStatus) ? { title: "Complete bank verification", note: "Add or correct your bank details so you can receive payments.", to: "/partner/bank", action: "Open bank details" }
     : partnerStatus !== "active" ? { title: "Check your verification progress", note: "Review your account status, document checks and bank verification below.", to: "/partner/documents", action: "View verification" }
     : { title: "Your account is active", note: "Choose a task below to manage your business.", to: partnerType === "influencer" ? "/partner/post-reel" : partnerType === "affiliate" ? "/partner/deals" : "/partner/customers", action: partnerType === "influencer" ? "Manage posts and reels" : partnerType === "affiliate" ? "Manage leads" : "Manage customers" };
-  const showActiveTaskBelow = nextStep.title === "Your account is active";
+  const showActiveTask = nextStep.title === "Your account is active";
   const nextStepAllowed = (nextStep.to === "/partner/profile" ? hasPermission("profile:update") : nextStep.to === "/partner/documents" ? hasPermission("documents:view") : nextStep.to === "/partner/bank" ? hasPermission("bank:view") : nextStep.to === "/partner/deals" ? hasPermission("referrals:view") : nextStep.to === "/partner/customers" ? hasPermission("customers:view") : hasPermission("profile:view"));
   return (
     <div className="space-y-6">
-      <PartnerCompletion nextStep={showActiveTaskBelow ? undefined : { ...nextStep, allowed: nextStepAllowed }} />
+      <PartnerCompletion nextStep={showActiveTask ? undefined : { ...nextStep, allowed: nextStepAllowed }} />
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+        <div className="flex items-center flex-wrap gap-3">
+          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+          {showActiveTask && nextStepAllowed && <Link to={nextStep.to} className="inline-flex min-h-10 items-center rounded-lg bg-brand-red px-4 py-2 text-sm font-semibold text-white hover:opacity-90">{nextStep.action}</Link>}
+        </div>
         <div className="flex gap-4 flex-wrap">
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-medium text-slate-400">Partner Status</span>
@@ -135,10 +138,7 @@ export default function Dashboard() {
           </div>
         </Card>
       </div>
-      {showActiveTaskBelow && <Card className="p-5 flex flex-wrap items-center justify-between gap-4">
-        <div><h2 className="font-semibold">{nextStep.title}</h2><p className="text-sm text-slate-500 mt-1">Choose a task to manage your business.</p></div>
-        {nextStepAllowed && <Link to={nextStep.to} className="rounded-lg bg-brand-red text-white px-4 py-2 text-sm font-semibold">{nextStep.action}</Link>}
-      </Card>}
+
     </div>
   );
 }
