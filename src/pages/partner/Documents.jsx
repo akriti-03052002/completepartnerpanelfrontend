@@ -123,7 +123,7 @@ export default function Documents() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">KYC Documents</h1>
+        <h1 className="text-2xl font-bold text-slate-900">KYC Verification</h1>
         <p className="text-sm text-slate-500 mt-1">
           Only the partner owner can upload or view KYC documents. SPOTX reviews each one before your account is verified.
           {partnerType && <> Required documents are tailored to your partner type (<span className="font-medium text-slate-600 capitalize">{partnerType}</span>).</>}

@@ -1,4 +1,6 @@
 import PageLocation from "../components/ui/PageLocation";
+import PartnerCompletion from "../components/partner/PartnerCompletion";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import PageGuide from "../components/ui/PageGuide";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, useLocation, Link } from "react-router-dom";
@@ -37,7 +39,7 @@ const NAV_ITEMS = [
   { to: "/partner/customers", label: "Customers", icon: Building2, permission: "customers:view", partnerTypes: ["vendor"], locked: true },
 
   { to: "/partner/team", label: "Team", icon: UserCog, permission: "team:view", partnerTypes: ["affiliate", "vendor", "reseller"], locked: true },
-  { to: "/partner/documents", label: "Identity Documents", icon: FileText, permission: "documents:view", partnerTypes: ALL_PARTNER_TYPES },
+  { to: "/partner/documents", label: "KYC Verification", icon: FileText, permission: "documents:view", partnerTypes: ALL_PARTNER_TYPES },
   { to: "/partner/bank", label: "Bank Account", icon: Landmark, permission: "bank:view", partnerTypes: ALL_PARTNER_TYPES },
   { to: "/partner/notifications", label: "Notifications", icon: Bell, permission: "notifications:view", partnerTypes: ALL_PARTNER_TYPES },
   { to: "/partner/profile", label: "Profile", icon: UserCircle, permission: "profile:view", partnerTypes: ALL_PARTNER_TYPES }
@@ -46,10 +48,10 @@ const NAV_ITEMS = [
 export default function PartnerLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { partner, user, hasPermission, logout } = usePartnerAuth();
+  const { partner, user, hasPermission, logout, syncSession } = usePartnerAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const [isVerified, setIsVerified] = useState(partner?.status === "active");
+  const isVerified = partner?.status === "active";
 
   // This layout stays mounted across every /partner/* navigation, so a
   // one-time fetch on mount would go stale the moment an admin verifies the
@@ -57,20 +59,18 @@ export default function PartnerLayout() {
   // page reload. Re-checking on every navigation and whenever the tab
   // regains focus keeps it honest without needing a hard refresh.
   useEffect(() => {
-    api.get("/partner/profile")
-      .then((res) => setIsVerified(res.data.data.partner.status === "active"))
+    const controller = new AbortController();
+    api.get("/partner/profile", { signal: controller.signal })
+      .then((res) => { if (!controller.signal.aborted) syncSession(res.data.data); })
       .catch(() => {});
-  }, [location.pathname]);
+    return () => controller.abort();
+  }, [location.pathname, syncSession]);
 
-  useEffect(() => {
-    const onFocus = () => {
-      api.get("/partner/profile")
-        .then((res) => setIsVerified(res.data.data.partner.status === "active"))
-        .catch(() => {});
-    };
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, []);
+  useAutoRefresh(async () => {
+    if (!localStorage.getItem("partnerToken")) return;
+    const response = await api.get("/partner/profile");
+    syncSession(response.data.data);
+  });
 
   const handleLogout = async () => {
     try { await logout(); } catch (error) { window.alert(error.message); return; }
@@ -191,6 +191,7 @@ export default function PartnerLayout() {
 
         <main id="partner-main" tabIndex={-1} className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6 outline-none">
           <PageLocation />
+          {allowed && hasPermission("profile:view") && location.pathname.replace(/\/$/, "") === "/partner/dashboard" && <PartnerCompletion />}
           {allowed ? <Outlet /> : <div role="alert" className="rounded-xl bg-white p-6"><h1 className="font-semibold">Access restricted</h1><p className="text-sm text-slate-500 mt-2">Your role cannot open this page. Choose an available page from the menu.</p></div>}
         </main>
       </div>

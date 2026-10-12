@@ -33,6 +33,21 @@ export function PartnerAuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const syncSession = useCallback((data) => {
+    // Background responses must not restore a session after logout.
+    if (!localStorage.getItem("partnerToken") || !data?.partner || !data?.user) return;
+    const stored = readStored("partner");
+    if (String(stored?._id || stored?.id) !== String(data.partner._id || data.partner.id)) return;
+    if (JSON.stringify(stored) !== JSON.stringify(data.partner)) {
+      localStorage.setItem("partner", JSON.stringify(data.partner));
+      setPartner(data.partner);
+    }
+    if (JSON.stringify(readStored("partnerUser")) !== JSON.stringify(data.user)) {
+      localStorage.setItem("partnerUser", JSON.stringify(data.user));
+      setUser(data.user);
+    }
+  }, []);
+
   const hasPermission = useCallback(
     (permission) => {
       if (!user) return false;
@@ -43,7 +58,7 @@ export function PartnerAuthProvider({ children }) {
   );
 
   return (
-    <PartnerAuthContext.Provider value={{ partner, user, setSession, logout, hasPermission }}>
+    <PartnerAuthContext.Provider value={{ partner, user, setSession, syncSession, logout, hasPermission }}>
       {children}
     </PartnerAuthContext.Provider>
   );

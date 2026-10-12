@@ -46,7 +46,8 @@ export default function Dashboard() {
   if (error) return <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error} <button onClick={() => { setLoading(true); setRetry(v => v + 1); }} className="font-semibold underline">Try again</button></div>;
   if (!data) return null;
 
-  const { partnerStatus, partnerRejectionReason, kycStatus, bankStatus, profileComplete, recentActivity, commissionTrend } = data;
+  const { partnerRejectionReason, kycStatus, bankStatus, profileComplete, recentActivity, commissionTrend } = data;
+  const partnerStatus = partner?.status || data.partnerStatus;
   const earningsTrendLabel = partnerType === "influencer"
     ? "Content Earnings Trend"
     : partnerType === "affiliate"
@@ -54,7 +55,7 @@ export default function Dashboard() {
       : "Commission Trend";
 
   const nextStep = !profileComplete ? { title: "Complete your profile", note: "Add your business and contact details to get started.", to: "/partner/profile", action: "Complete profile" }
-    : ["not_submitted", "rejected"].includes(kycStatus) ? { title: "Upload identity documents", note: kycStatus === "rejected" ? "Open your documents to see what needs correcting." : "Upload the required documents for verification.", to: "/partner/documents", action: "Open documents" }
+    : ["not_submitted", "rejected"].includes(kycStatus) ? { title: "Complete KYC verification", note: kycStatus === "rejected" ? "Open your documents to see what needs correcting." : "Upload the required documents for verification.", to: "/partner/documents", action: "Open documents" }
     : ["not_submitted", "rejected"].includes(bankStatus) ? { title: "Complete bank verification", note: "Add or correct your bank details so you can receive payments.", to: "/partner/bank", action: "Open bank details" }
     : partnerStatus !== "active" ? { title: "Check your verification progress", note: "Review your account status, document checks and bank verification below.", to: "/partner/documents", action: "View verification" }
     : { title: "Your account is active", note: "Choose a task below to manage your business.", to: partnerType === "influencer" ? "/partner/post-reel" : partnerType === "affiliate" ? "/partner/deals" : "/partner/customers", action: partnerType === "influencer" ? "Manage posts and reels" : partnerType === "affiliate" ? "Manage leads" : "Manage customers" };
@@ -69,7 +70,7 @@ export default function Dashboard() {
             <Badge status={partnerStatus} />
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-medium text-slate-400">Identity verification</span>
+            <span className="text-xs font-medium text-slate-400">KYC Verification</span>
             <Badge status={kycStatus} />
           </div>
           <div className="flex items-center gap-1.5">

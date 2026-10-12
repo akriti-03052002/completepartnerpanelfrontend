@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const labels = {
   partners: "Partners", reseller: "Reseller", customers: "Customers", screens: "Screens",
-  documents: "Documents", bank: "Bank account", profile: "Profile", details: "Profile details",
+  documents: "KYC Verification", bank: "Bank account", profile: "Profile", details: "Profile details",
   billing: "Billing", subscription: "Subscription", commissions: "Earnings", settlements: "Payments",
   "licence-payments": "Licence payments", inventory: "Screen licences", buy: "Request licences",
   "social-media": "Social media", "post-reel": "Posts & reels", team: "Team", activity: "Activity",
