@@ -23,13 +23,6 @@ const DURATIONS = [
 const money = (n, currency = "INR") =>
   `${currency === "INR" ? "₹" : currency + " "}${(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
 
-const isToday = (date) => {
-  if (!date) return false;
-  const d = new Date(date);
-  const now = new Date();
-  return d.toDateString() === now.toDateString();
-};
-
 const timeAgo = (date) => {
   if (!date) return "";
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -51,6 +44,7 @@ export default function Settlements() {
   const [settlements, setSettlements] = useState([]);
   const [meta, setMeta] = useState({});
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [lastFetchedAt, setLastFetchedAt] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [duration, setDuration] = useState("all");
@@ -64,7 +58,8 @@ export default function Settlements() {
   const load = () => {
     setLoading(true);
     return api.get("/partner/settlements")
-      .then((res) => { setSettlements(res.data.data); setMeta(res.data.meta || {}); setLastFetchedAt(new Date()); })
+      .then((res) => { setSettlements(res.data.data); setMeta(res.data.meta || {}); setLastFetchedAt(new Date()); setLoadError(""); })
+      .catch(() => setLoadError("Could not load settlement figures. Please try again."))
       .finally(() => setLoading(false));
   };
 
@@ -73,8 +68,9 @@ export default function Settlements() {
       .then((res) => {
         setSettlements(res.data.data);
         setMeta(res.data.meta || {});
-        setLastFetchedAt(new Date());
+        setLastFetchedAt(new Date()); setLoadError("");
       })
+      .catch(() => setLoadError("Could not load settlement figures. Please try again."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -83,8 +79,8 @@ export default function Settlements() {
   // shows up without a manual refresh.
   useAutoRefresh(() => {
     api.get("/partner/settlements")
-      .then((res) => { setSettlements(res.data.data); setMeta(res.data.meta || {}); setLastFetchedAt(new Date()); })
-      .catch(() => {});
+      .then((res) => { setSettlements(res.data.data); setMeta(res.data.meta || {}); setLastFetchedAt(new Date()); setLoadError(""); })
+      .catch(() => setLoadError("Settlement refresh failed. Showing previously loaded figures."));
   });
 
   const loadBillForActive = () => api.get(`/partner/settlements/${activeId}/bill`).then((res) => setBill(res.data.data));
@@ -115,10 +111,9 @@ export default function Settlements() {
     [settlements]
   );
 
-  const todaysSettlement = useMemo(
-    () => settlements.find((s) => isToday(s.payment?.paidAt)),
-    [settlements]
-  );
+  const currentAmount = settlements.filter(item => ["draft", "pending_approval", "approved", "processing"].includes(item.status)).reduce((sum, item) => sum + (Number(item.amount?.net) || 0), 0);
+  const heldAmount = settlements.filter(item => item.status === "on_hold").reduce((sum, item) => sum + (Number(item.amount?.net) || 0), 0);
+  const failedAmount = settlements.filter(item => item.status === "failed").reduce((sum, item) => sum + (Number(item.amount?.net) || 0), 0);
 
   const holdReason = useMemo(() => {
     if (!meta.availableBalance) return null;
@@ -139,16 +134,11 @@ export default function Settlements() {
     return parts.length ? parts.join(" · ") : null;
   }, [meta]);
 
-  const upcomingAmount = useMemo(
-    () => settlements
-      .filter((s) => !["paid", "failed", "cancelled"].includes(s.status))
-      .reduce((sum, s) => sum + (s.amount?.net || 0), 0),
-    [settlements]
-  );
+  const upcomingAmount = Number(meta.approvedAwaitingBatchAmount) || 0;
 
   const nextSettlementInfo = useMemo(() => {
     if (meta.nextSettlementDate) {
-      return { primary: money(upcomingAmount, meta.currency), secondary: `On ${new Date(meta.nextSettlementDate).toLocaleDateString()}`, footnote: "Final amount may vary" };
+      return { primary: money(upcomingAmount, meta.currency), secondary: `On ${new Date(meta.nextSettlementDate).toLocaleDateString()}`, footnote: "Approved earnings not yet included in a settlement. Scheduled date is an estimate, not a confirmed payment." };
     }
     if (!meta.hasSettlementSetting) {
       return { primary: "Not configured", secondary: "Contact SPOTX support" };
@@ -193,6 +183,8 @@ export default function Settlements() {
         </button>
       </div>
 
+      {loadError && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{loadError} <button type="button" onClick={load} className="font-semibold underline">Try again</button></div>}
+      {(!lastFetchedAt && (loading || loadError)) ? <p className="text-sm text-slate-500">Settlement overview is unavailable until data loads.</p> : <>
       <Card className="p-6">
         <div className="flex flex-col lg:flex-row lg:items-start divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
           <OverviewItem
@@ -205,8 +197,9 @@ export default function Settlements() {
           <OverviewItem
             icon={History}
             iconTone="bg-emerald-50 text-emerald-600"
-            label="Today's settlement"
-            primary={todaysSettlement ? money(todaysSettlement.amount.net, todaysSettlement.amount.currency) : "No settlement"}
+            label="Current settlements"
+            primary={money(currentAmount, meta.currency)}
+            secondary="Created batches awaiting approval or payment"
           />
           <OverviewItem
             icon={CalendarClock}
@@ -217,7 +210,7 @@ export default function Settlements() {
             footnote={nextSettlementInfo.footnote}
           />
           <div className="pt-4 lg:pt-0 lg:pl-6 lg:max-w-xs">
-            <p className="text-sm text-slate-500 underline decoration-slate-300 underline-offset-4">Available balance</p>
+            <p className="text-sm text-slate-500 underline decoration-slate-300 underline-offset-4">Total still to receive</p>
             <p className="text-3xl font-bold text-slate-900 mt-2">{money(meta.availableBalance, meta.currency)}</p>
             {holdReason && (
               <p className="text-xs text-amber-700 mt-2 flex items-start gap-1.5">
@@ -228,6 +221,16 @@ export default function Settlements() {
           </div>
         </div>
       </Card>
+
+      <Card className="p-5">
+        <h2 className="font-semibold text-slate-900">Unpaid earnings breakdown</h2>
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[["Awaiting earnings approval", meta.pendingApprovalAmount || 0, "Not yet approved for a settlement."], ["On hold", heldAmount, "Held batches need the issue or required bill resolved."], ["Ready for next batch", upcomingAmount, "Approved earnings not included in current batches."], ["Failed payments", failedAmount, "Unpaid; SPOTX must review or retry the payment."]].map(([label, amount, note]) => <div key={label}><p className="text-sm text-slate-600">{label}</p><p className="mt-1 text-xl font-semibold">{money(amount, meta.currency)}</p><p className="mt-1 text-xs text-slate-500">{note}</p></div>)}
+        </div>
+        <p className="mt-4 text-xs text-slate-500">Total still to receive includes current batches, held and failed batches, and unbatched earnings awaiting approval or the next batch. These amounts are separate and counted once. Figures exclude any GST added through a verified payout bill.</p>
+      </Card>
+
+      </>}
 
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
