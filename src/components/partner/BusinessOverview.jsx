@@ -1,4 +1,5 @@
 import StatusChart from "../ui/StatusChart";
+import { Monitor, Zap, Users, Clock, PauseCircle, XCircle } from "lucide-react";
 import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import Card from "../ui/Card";
 const count = (rows = {}) => Object.values(rows).reduce((n, row) => n + (row.count || 0), 0);
@@ -70,5 +71,29 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
   }
   const secondary = type === "reseller" ? ["Registered screens", "Active screens", "Active customers", "Pending customers", "Suspended customers", "Cancelled customers"] : [];
   const renderTile = ([title, value]) => <div key={title} className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">{title}</p><p className="text-xl font-bold mt-1 break-words">{value}</p></div>;
-  return <Card className="p-5 space-y-4"><div><h2 className="font-semibold text-lg">Your business overview</h2><p className="text-sm mt-1">{rating}</p><p className="text-xs text-slate-500 mt-1">Lifetime totals for your partner account only. Great contribution means {type === "influencer" ? "10 approved posts/reels" : "INR 100,000 of recorded business"} or more.</p></div><div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{tiles.filter(([title]) => !secondary.includes(title)).map(renderTile)}</div>{secondary.length > 0 && <details><summary className="cursor-pointer text-sm font-semibold text-slate-700">Show customer and screen breakdown</summary><div className="mt-3 grid grid-cols-2 lg:grid-cols-3 gap-3">{tiles.filter(([title]) => secondary.includes(title)).map(renderTile)}</div></details>}{chart && <StatusChart {...chart} />}<p className="text-sm text-slate-500">{note}</p></Card>;
+  const breakdownStyle = {
+    "Registered screens": { icon: Monitor, color: "bg-blue-50 text-blue-600" },
+    "Active screens": { icon: Zap, color: "bg-emerald-50 text-emerald-600" },
+    "Active customers": { icon: Users, color: "bg-emerald-50 text-emerald-600" },
+    "Pending customers": { icon: Clock, color: "bg-amber-50 text-amber-600" },
+    "Suspended customers": { icon: PauseCircle, color: "bg-orange-50 text-orange-600" },
+    "Cancelled customers": { icon: XCircle, color: "bg-red-50 text-red-600" }
+  };
+  return <Card className="p-5 space-y-4">
+    <div><h2 className="font-semibold text-lg">Your business overview</h2><p className="text-sm mt-1">{rating}</p><p className="text-xs text-slate-500 mt-1">Lifetime totals for your partner account only. Great contribution means {type === "influencer" ? "10 approved posts/reels" : "INR 100,000 of recorded business"} or more.</p></div>
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{tiles.filter(([title]) => !secondary.includes(title)).map(renderTile)}</div>
+    {secondary.length > 0 && <section aria-label="Customer and screen breakdown">
+      <h3 className="text-sm font-semibold text-slate-700 mb-3">Customers & screens</h3>
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">{tiles.filter(([title]) => secondary.includes(title)).map(([title, value]) => {
+        const style = breakdownStyle[title];
+        const Icon = style.icon;
+        return <div key={title} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3 sm:p-4">
+          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${style.color}`}><Icon size={20} aria-hidden="true" /></span>
+          <div className="min-w-0"><p className="text-xl font-bold tabular-nums">{value}</p><p className="text-xs text-slate-500 mt-1">{title}</p></div>
+        </div>;
+      })}</div>
+    </section>}
+    {chart && <StatusChart {...chart} />}
+    <p className="text-sm text-slate-500">{note}</p>
+  </Card>;
 }
