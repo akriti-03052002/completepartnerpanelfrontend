@@ -187,41 +187,16 @@ export default function Settlements() {
       {(!lastFetchedAt && (loading || loadError)) ? <p className="text-sm text-slate-500">Settlement overview is unavailable until data loads.</p> : <>
       <Card className="p-6">
         <div className="flex flex-col lg:flex-row lg:items-start divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
-          <OverviewItem
-            icon={CheckCircle2}
-            iconTone="bg-emerald-50 text-emerald-600"
-            label="Previous settlement"
-            primary={previousSettlement ? money(previousSettlement.amount.net, previousSettlement.amount.currency) : "No settlement"}
-            secondary={previousSettlement?.payment?.paidAt ? new Date(previousSettlement.payment.paidAt).toLocaleDateString() : null}
-          />
-          <OverviewItem
-            icon={History}
-            iconTone="bg-emerald-50 text-emerald-600"
-            label="Current settlements"
-            primary={money(currentAmount, meta.currency)}
-            secondary="Created batches awaiting approval or payment"
-          />
-          <OverviewItem
-            icon={CalendarClock}
-            iconTone="bg-slate-100 text-slate-500"
-            label="Next settlement"
-            primary={nextSettlementInfo.primary}
-            secondary={nextSettlementInfo.secondary}
-            footnote={nextSettlementInfo.footnote}
-          />
+          <OverviewItem icon={CheckCircle2} iconTone="bg-emerald-50 text-emerald-600" label="Previous settlement" primary={previousSettlement ? money(previousSettlement.amount.net, previousSettlement.amount.currency) : "No settlement"} secondary={previousSettlement?.payment?.paidAt ? new Date(previousSettlement.payment.paidAt).toLocaleDateString() : null} />
+          <OverviewItem icon={History} iconTone="bg-emerald-50 text-emerald-600" label="Current settlements" primary={money(currentAmount, meta.currency)} secondary="Created batches awaiting approval or payment" />
+          <OverviewItem icon={CalendarClock} iconTone="bg-slate-100 text-slate-500" label="Next settlement" primary={nextSettlementInfo.primary} secondary={nextSettlementInfo.secondary} footnote={nextSettlementInfo.footnote} />
           <div className="pt-4 lg:pt-0 lg:pl-6 lg:max-w-xs">
             <p className="text-sm text-slate-500 underline decoration-slate-300 underline-offset-4">Total still to receive</p>
             <p className="text-3xl font-bold text-slate-900 mt-2">{money(meta.availableBalance, meta.currency)}</p>
-            {holdReason && (
-              <p className="text-xs text-amber-700 mt-2 flex items-start gap-1.5">
-                <Clock3 size={13} className="shrink-0 mt-0.5" />
-                <span>{holdReason}</span>
-              </p>
-            )}
+            {holdReason && <p className="text-xs text-amber-700 mt-2 flex items-start gap-1.5"><Clock3 size={13} className="shrink-0 mt-0.5" /><span>{holdReason}</span></p>}
           </div>
         </div>
       </Card>
-
       <Card className="p-5">
         <h2 className="font-semibold text-slate-900">Unpaid earnings breakdown</h2>
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -431,18 +406,15 @@ function BillSection({ bill, canSubmitBill, billRequired, settlementId, onBillSu
   );
 }
 
+
 function OverviewItem({ icon: Icon, iconTone, label, primary, secondary, footnote }) {
-  return (
-    <div className="pb-4 lg:pb-0 lg:pr-6 lg:first:pr-6">
-      <div className={`w-9 h-9 rounded-lg flex items-center justify-center mb-3 ${iconTone}`}>
-        <Icon size={16} />
-      </div>
-      <p className="text-sm font-medium text-slate-700">{label}</p>
-      {secondary && <p className="text-xs text-slate-400 mt-0.5">{secondary}</p>}
-      <p className="text-xl font-bold text-slate-900 mt-2">{primary}</p>
-      {footnote && <p className="text-xs text-slate-400 mt-0.5">{footnote}</p>}
-    </div>
-  );
+  return <div className="pb-4 lg:pb-0 lg:pr-6 lg:first:pr-6">
+    <div className={`w-9 h-9 rounded-lg flex items-center justify-center mb-3 ${iconTone}`}><Icon size={16} /></div>
+    <p className="text-sm font-medium text-slate-700">{label}</p>
+    {secondary && <p className="text-xs text-slate-400 mt-0.5">{secondary}</p>}
+    <p className="text-xl font-bold text-slate-900 mt-2">{primary}</p>
+    {footnote && <p className="text-xs text-slate-400 mt-0.5">{footnote}</p>}
+  </div>;
 }
 
 function FilterPill({ label, active, onClick }) {
