@@ -138,24 +138,27 @@ export default function Landing() {
         </div>
         <p className="text-xs text-slate-500 mt-5">Install · Sell · Refer · Promote</p>
         </div>
-        <div className="landing-scene relative mx-auto w-full max-w-lg" role="img" aria-label="Illustration of business screens showing menus, offers and videos with SpotX">
+        <div className="landing-scene relative mx-auto w-full max-w-lg" aria-label="Ways to partner with SpotX">
           <div className="landing-orbit" aria-hidden="true" />
           <div className="landing-screen relative rounded-3xl bg-white border border-slate-200 p-4 shadow-2xl shadow-slate-900/10">
-            <div className="flex items-center justify-between px-2 pb-4"><Logo plain size="sm" /><span className="text-xs text-slate-400">On your screens</span></div>
+            <div className="flex items-center justify-between px-2 pb-4"><Logo plain size="sm" /><span className="text-xs text-slate-400">Partner program</span></div>
             <div className="rounded-2xl bg-slate-950 p-6 sm:p-8 overflow-hidden relative min-h-64">
               <div className="landing-screen-glow" aria-hidden="true" />
               <div className="relative text-white">
-                <span className="text-[10px] uppercase tracking-[.2em] text-brand-yellow">Make every screen count</span>
-                <p className="font-heading font-bold text-3xl sm:text-4xl mt-4 leading-tight">Your content.<br />Every location.</p>
-                <div className="flex gap-2 mt-7">
-                  {["Menus", "Offers", "Videos"].map((label, index) => <span key={label} className={`landing-content-tag landing-tag-${index} text-xs px-3 py-2 rounded-lg border border-white/15 bg-white/10`}>{label}</span>)}
+                <span className="text-[10px] uppercase tracking-[.2em] text-brand-yellow">Partner with SpotX</span>
+                <p className="font-heading font-bold text-3xl sm:text-4xl mt-4 leading-tight">Your role.<br />Your opportunity.</p>
+                <div className="grid grid-cols-2 gap-2 mt-6">
+                  {PARTNER_TYPES.map((type, index) => <div key={type.name} className={`landing-content-tag landing-tag-${index % 3} px-3 py-3 rounded-lg border border-white/15 bg-white/10`}>
+                    <div className="flex items-center gap-2 text-xs font-semibold"><type.icon size={14} className="text-brand-yellow" />{type.name}</div>
+                    <p className="text-[11px] text-slate-300 mt-1">{["Install SpotX", "Sell licenses", "Refer businesses", "Promote SpotX"][index]}</p>
+                  </div>)}
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 pt-4 px-2"><Monitor size={14} className="text-slate-400" /><span className="text-xs text-slate-500">Powered by SpotX</span><div className="ml-auto flex gap-1.5" aria-hidden="true"><i className="w-1.5 h-1.5 rounded-full bg-brand-red" /><i className="w-1.5 h-1.5 rounded-full bg-slate-200" /><i className="w-1.5 h-1.5 rounded-full bg-slate-200" /></div></div>
+            <div className="flex items-center gap-2 pt-4 px-2"><LayoutDashboard size={14} className="text-slate-400" /><span className="text-xs text-slate-500">Track your work and payments</span><div className="ml-auto flex gap-1.5" aria-hidden="true"><i className="w-1.5 h-1.5 rounded-full bg-brand-red" /><i className="w-1.5 h-1.5 rounded-full bg-slate-200" /><i className="w-1.5 h-1.5 rounded-full bg-slate-200" /></div></div>
           </div>
-          <div className="landing-float-card absolute -top-5 -right-2 sm:-right-6 flex items-center gap-2 bg-white border border-slate-100 rounded-xl px-4 py-3 shadow-lg shadow-slate-900/5 text-sm font-medium"><Monitor size={17} className="text-brand-red" />Install SpotX</div>
-          <div className="landing-float-card landing-float-delayed absolute -bottom-5 -left-2 sm:-left-6 flex items-center gap-2 bg-white border border-slate-100 rounded-xl px-4 py-3 shadow-lg shadow-slate-900/5 text-sm font-medium"><Share2 size={17} className="text-brand-red" />Grow together</div>
+          <div className="landing-float-card absolute -top-5 -right-2 sm:-right-6 flex items-center gap-2 bg-white border border-slate-100 rounded-xl px-4 py-3 shadow-lg shadow-slate-900/5 text-sm font-medium"><Users2 size={17} className="text-brand-red" />Choose your role</div>
+          <div className="landing-float-card landing-float-delayed absolute -bottom-5 -left-2 sm:-left-6 flex items-center gap-2 bg-white border border-slate-100 rounded-xl px-4 py-3 shadow-lg shadow-slate-900/5 text-sm font-medium"><LayoutDashboard size={17} className="text-brand-red" />Your partner dashboard</div>
         </div>
         </div>
       </section>
