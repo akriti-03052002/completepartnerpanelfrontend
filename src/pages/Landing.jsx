@@ -113,7 +113,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="px-5 sm:px-8 py-14 sm:py-16" aria-labelledby="start-heading">
+        <section id="getting-started" className="px-5 sm:px-8 py-14 sm:py-16 scroll-mt-6" aria-labelledby="start-heading">
           <div className="mx-auto max-w-6xl"><div className="mb-8"><p className="text-xs font-semibold uppercase tracking-widest text-brand-red">Getting started</p><h2 id="start-heading" className="mt-2 text-3xl font-bold tracking-tight">From registration to your dashboard.</h2></div>
             <div className="grid sm:grid-cols-3 gap-7">{STEPS.map(step => <div key={step.number} className="border-t border-slate-300 pt-5"><span className="text-xs font-semibold text-brand-red">{step.number}</span><h3 className="mt-3 text-base font-semibold">{step.title}</h3><p className="mt-2 text-sm leading-relaxed text-slate-500">{step.description}</p></div>)}</div>
             <div className="mt-10 flex flex-col sm:flex-row gap-5 sm:gap-8 rounded-2xl border border-slate-200 bg-white px-6 py-5">
@@ -123,8 +123,37 @@ export default function Landing() {
         </section>
       </main>
 
-      <footer className="border-t border-slate-200 bg-white px-5 sm:px-8 py-7">
-        <div className="mx-auto max-w-6xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"><div><p className="text-sm font-semibold">SpotX Partner Panel</p><p className="text-xs text-slate-500 mt-1">© {new Date().getFullYear()} SpotX</p></div><a href="https://spotx.in" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-brand-red">Visit spotx.in <ArrowUpRight size={16} /></a></div>
+      <footer className="border-t border-slate-200 bg-white px-5 sm:px-8 pt-12 pb-6">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-[2fr_1fr_1fr_1.2fr] pb-10">
+            <div className="col-span-2 lg:col-span-1">
+              <Link to="/" aria-label="SpotX Partner Panel home"><Logo plain size="md" /></Link>
+              <p className="mt-4 text-sm font-semibold">SpotX Partner Panel</p>
+              <p className="mt-2 max-w-xs text-sm leading-relaxed text-slate-500">Your place to partner with SpotX, manage your work and track payments.</p>
+            </div>
+            <nav aria-label="Footer partner roles">
+              <h2 className="text-sm font-semibold mb-4">Partner roles</h2>
+              <ul className="space-y-3">{ROLES.map(item => <li key={item.id}><a href="#partner-roles" onClick={() => setSelectedRole(item.id)} className="text-sm text-slate-500 hover:text-brand-red transition-colors">{item.name}</a></li>)}</ul>
+            </nav>
+            <nav aria-label="Footer account links">
+              <h2 className="text-sm font-semibold mb-4">Get started</h2>
+              <ul className="space-y-3">
+                <li><Link to="/partner/register" className="text-sm text-slate-500 hover:text-brand-red transition-colors">Sign up</Link></li>
+                <li><Link to="/partner/login" className="text-sm text-slate-500 hover:text-brand-red transition-colors">Sign in</Link></li>
+                <li><a href="#getting-started" className="text-sm text-slate-500 hover:text-brand-red transition-colors">How to join</a></li>
+              </ul>
+            </nav>
+            <div className="col-span-2 lg:col-span-1">
+              <h2 className="text-sm font-semibold mb-4">Explore SpotX</h2>
+              <p className="text-sm leading-relaxed text-slate-500 mb-4">Learn more about SpotX on our main website.</p>
+              <a href="https://spotx.in" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-semibold hover:border-brand-red hover:text-brand-red transition-colors">Visit spotx.in <ArrowUpRight size={16} /></a>
+            </div>
+          </div>
+          <div className="border-t border-slate-100 pt-5 flex flex-col sm:flex-row gap-2 justify-between text-xs text-slate-500">
+            <p>© {new Date().getFullYear()} SpotX. All rights reserved.</p>
+            <p>For vendors, resellers, affiliates and influencers.</p>
+          </div>
+        </div>
       </footer>
     </div>
   );
