@@ -1,7 +1,7 @@
 import Card from "./Card";
 
 export default function StatCard({ label, value, icon: Icon, tone = "default" }) {
-  const iconTone = tone === "brand" ? "bg-brand-red/10 text-brand-red" : "bg-slate-100 text-slate-700";
+  const iconTone = { brand: "bg-brand-red/10 text-brand-red", blue: "bg-blue-50 text-blue-600", green: "bg-emerald-50 text-emerald-600", amber: "bg-amber-50 text-amber-600" }[tone] || "bg-slate-100 text-slate-700";
 
   return (
     <Card className="p-5 flex items-center justify-between">

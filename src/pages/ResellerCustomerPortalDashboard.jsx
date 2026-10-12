@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import customerPortalApi from "../services/resellerCustomerPortalApi";
 import Card from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
+import { Monitor, Zap, PauseCircle } from "lucide-react";
 
 // Minimal, read-only — this customer can see their own company info,
 // which reseller they're with, and their current screen counts. Nothing
@@ -45,14 +46,17 @@ export default function CustomerPortalDashboard() {
             <p className="text-sm font-semibold text-slate-900 mb-4">Your Screens</p>
             <div className="grid grid-cols-3 gap-4">
               <div>
+                <Monitor size={21} className="text-blue-500 mb-3" aria-hidden="true" />
                 <p className="text-2xl font-bold text-slate-900">{data.screens.allocated}</p>
                 <p className="text-xs text-slate-500 mt-1">Screen allowance</p>
               </div>
               <div>
+                <Zap size={21} className="text-emerald-500 mb-3" aria-hidden="true" />
                 <p className="text-2xl font-bold text-brand-red">{data.screens.active}</p>
                 <p className="text-xs text-slate-500 mt-1">Enabled screens</p>
               </div>
               <div>
+                <PauseCircle size={21} className="text-amber-500 mb-3" aria-hidden="true" />
                 <p className="text-2xl font-bold text-slate-900">{data.screens.suspended}</p>
                 <p className="text-xs text-slate-500 mt-1">Paused screens</p>
               </div>

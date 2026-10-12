@@ -9,6 +9,8 @@ import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
 import PromptModal from "../../components/ui/PromptModal";
 import { InvoiceAmount } from "../../components/ui/FinancialAmount";
+import { Users, PauseCircle, Monitor, Clock, AlertTriangle, CircleX } from "lucide-react";
+import AllocationChart from "../../components/ui/AllocationChart";
 
 export default function AdminResellerDashboard() {
   const { user } = useAdminAuth();
@@ -150,17 +152,19 @@ export default function AdminResellerDashboard() {
       )}
 
       <Card className="p-6">
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
-          <Stat label="Partners" value={summary?.totalPartners || 0} />
-          <Stat label="Suspended" value={summary?.suspendedPartners || 0} />
-          <Stat label="Purchased" value={summary?.totalPurchased || 0} />
-          <Stat label="Allocated" value={summary?.totalAllocated || 0} />
-          <Stat label="Active" value={summary?.totalActive || 0} />
-          <Stat label="Pending Inv." value={summary?.pendingInvoices || 0} />
-          <Stat label="Overdue Inv." value={summary?.overdueInvoices || 0} />
-          <Stat label="Failed Inv." value={summary?.failedInvoices || 0} />
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <Stat label="Partners" value={summary?.totalPartners || 0} icon={Users} colour="text-blue-500" />
+          <Stat label="Suspended partners" value={summary?.suspendedPartners || 0} icon={PauseCircle} colour="text-amber-500" />
+          <Stat label="Active screens" value={summary?.totalActive || 0} icon={Monitor} colour="text-emerald-500" />
+          <Stat label="Unpaid bills" value={summary?.pendingInvoices || 0} icon={Clock} colour="text-amber-500" />
+          <Stat label="Past due date" value={summary?.overdueInvoices || 0} icon={AlertTriangle} colour="text-orange-500" />
+          <Stat label="Payment failed" value={summary?.failedInvoices || 0} icon={CircleX} colour="text-red-500" />
         </div>
       </Card>
+      {summary && <AllocationChart title="Reseller licences" total={Number(summary.totalPurchased) || 0} totalLabel="Bought licences" rows={[
+        { label: "Ready to assign", value: Math.max(0, (Number(summary.totalPurchased) || 0) - (Number(summary.totalAllocated) || 0)) },
+        { label: "Assigned to customers", value: Number(summary.totalAllocated) || 0 }
+      ]} note="Across all resellers. Assigned licences are reserved for customers; they do not show whether screens are online." />}
 
       <Card>
         <Table
@@ -188,9 +192,10 @@ export default function AdminResellerDashboard() {
   );
 }
 
-function Stat({ label, value }) {
+function Stat({ label, value, icon: Icon, colour }) {
   return (
-    <div>
+    <div className="rounded-xl bg-slate-50 p-4">
+      {Icon && <Icon size={21} className={`mb-3 ${colour}`} aria-hidden="true" />}
       <p className="text-xl font-bold text-slate-900">{value}</p>
       <p className="text-xs text-slate-500 mt-1">{label}</p>
     </div>

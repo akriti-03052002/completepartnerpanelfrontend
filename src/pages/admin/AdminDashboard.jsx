@@ -1,7 +1,7 @@
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowDownLeft, ArrowUpRight, RefreshCw, Users, ShieldCheck, Landmark, Wallet, Receipt, ArrowRight, Activity, Clock, CircleX, PauseCircle, Megaphone, Store, Handshake } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, RefreshCw, Users, ShieldCheck, Landmark, Wallet, Receipt, ArrowRight, Activity, Clock, CircleX, PauseCircle, Megaphone, Store, Handshake, Monitor } from "lucide-react";
 import adminApi from "../../services/adminApi";
 import { loadBankChecks } from "../../services/loadBankChecks";
 import { loadIdentityChecks } from "../../services/loadIdentityChecks";
@@ -16,10 +16,11 @@ const count = (n) => (Number(n) || 0).toLocaleString("en-IN");
 
 // A headline number with what it means underneath.
 function Figure({ label, value, note, dot }) {
+  const Icon = label.includes("Resellers") ? Store : label.includes("Vendors") ? Monitor : label.includes("Affiliates") ? Handshake : Wallet;
   return (
     <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
       <p className="flex items-center gap-2 text-sm text-slate-500">
-        {dot && <span className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ backgroundColor: dot }} />}
+        <span className="rounded-lg p-2 shrink-0" style={{ background: dot ? `${dot}18` : "#f1f5f9", color: dot || "#475569" }}><Icon size={18} aria-hidden="true" /></span>
         {label}
       </p>
       <p className="text-3xl font-bold tracking-tight text-slate-900 mt-3 tabular-nums">{value}</p>

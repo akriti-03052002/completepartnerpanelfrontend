@@ -1,5 +1,5 @@
 import AllocationChart from "../ui/AllocationChart";
-import { Monitor, Zap, Users, Clock, PauseCircle, XCircle } from "lucide-react";
+import { Monitor, Zap, Users, Clock, PauseCircle, XCircle, Wallet, Megaphone, Package } from "lucide-react";
 import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import Card from "../ui/Card";
 const count = (rows = {}) => Object.values(rows).reduce((n, row) => n + (row.count || 0), 0);
@@ -68,7 +68,11 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
     tiles = tiles.filter(([title]) => !repeated.includes(title));
   }
   const secondary = type === "reseller" ? ["Registered screens", "Active screens", "Active customers", "Pending customers", "Suspended customers", "Cancelled customers"] : [];
-  const renderTile = ([title, value]) => <div key={title} className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">{title}</p><p className="text-xl font-bold mt-1 break-words">{value}</p></div>;
+  const renderTile = ([title, value]) => {
+    const Icon = /screens/i.test(title) ? Monitor : /customers/i.test(title) ? Users : /posts|instagram|social/i.test(title) ? Megaphone : /licences|assign/i.test(title) ? Package : Wallet;
+    const colour = /paid to you|available/i.test(title) ? "bg-emerald-50 text-emerald-600" : /not paid|to pay/i.test(title) ? "bg-amber-50 text-amber-600" : "bg-blue-50 text-blue-600";
+    return <div key={title} className="rounded-xl bg-slate-50 p-4"><div className="flex items-start justify-between gap-2"><p className="text-xs text-slate-500">{title}</p><span className={`rounded-lg p-2 shrink-0 ${colour}`}><Icon size={17} aria-hidden="true" /></span></div><p className="text-xl font-bold mt-1 break-words">{value}</p></div>;
+  };
   const breakdownStyle = {
     "Registered screens": { icon: Monitor, color: "bg-blue-50 text-blue-600" },
     "Active screens": { icon: Zap, color: "bg-emerald-50 text-emerald-600" },

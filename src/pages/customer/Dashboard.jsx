@@ -111,9 +111,9 @@ export default function Dashboard() {
           tone="brand"
         />
         <StatCard label="Current Plan" value={planLabel} icon={Tag} />
-        <StatCard label="Subscribed Screens" value={subscription.screenCount || 0} icon={CreditCard} />
-        <StatCard label="Registered Screens" value={registeredScreenCount} icon={Monitor} />
-        <StatCard label="Available Screen Slots" value={Math.max(0, (Number(subscription.screenCount) || 0) - (Number(registeredScreenCount) || 0))} icon={Plus} />
+        <StatCard label="Subscribed Screens" value={subscription.screenCount || 0} icon={CreditCard} tone="blue" />
+        <StatCard label="Registered Screens" value={registeredScreenCount} icon={Monitor} tone="blue" />
+        <StatCard label="Available Screen Slots" value={Math.max(0, (Number(subscription.screenCount) || 0) - (Number(registeredScreenCount) || 0))} icon={Plus} tone="green" />
       </div>
 
       <CapacityVisual title="Your screen capacity" used={registeredScreenCount} capacity={subscription.screenCount} usedLabel="registered screens" note="Registration uses your screen allowance. This shows registered devices, not whether each screen is online." />
