@@ -49,9 +49,7 @@ export default function ResellerCustomers() {
     retry: false
   });
   const referralCode = referral?.referralCode || partner?.referral?.referralCode;
-  const customerRegistrationUrl = referralCode
-    ? `${window.location.origin}/reseller/customer/register?ref=${encodeURIComponent(referralCode)}`
-    : "";
+
 
   const loading = customersLoading || allocationsLoading || inventoryLoading || prepaymentLoading;
 
@@ -154,18 +152,18 @@ export default function ResellerCustomers() {
 
       {referralCode && (
         <Card className="p-4">
-          <p className="text-sm font-semibold text-slate-900">Customer self-registration</p>
-          <p className="text-xs text-slate-500 mt-1">Share this link so customers can register and manage their own screens.</p>
+          <p className="text-sm font-semibold text-slate-900">Your customer referral code</p>
+          <p className="text-xs text-slate-500 mt-1">Share this code with customers to enter during registration.</p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <code className="text-sm bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">{referralCode}</code>
             <Button
               variant="outline"
               onClick={async () => {
-                if (await copyToClipboard(customerRegistrationUrl)) toast.success("Registration link copied.");
-                else window.prompt("Copy the registration link:", customerRegistrationUrl);
+                if (await copyToClipboard(referralCode)) toast.success("Referral code copied.");
+                else window.prompt("Copy the referral code:", referralCode);
               }}
             >
-              Copy registration link
+              Copy referral code
             </Button>
           </div>
         </Card>

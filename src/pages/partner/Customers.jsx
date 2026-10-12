@@ -202,11 +202,8 @@ export default function Customers() {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-heading text-2xl font-extrabold text-brand-black tracking-widest">{referralCode}</span>
             <CopyButton value={referralCode} />
-            <span className="text-slate-300 mx-1">|</span>
-            <span className="text-sm text-slate-500 truncate">{partner.referral.referralLink}</span>
-            <CopyButton value={partner.referral.referralLink} />
           </div>
-          <p className="text-xs text-slate-400 mt-2">Share this with customers — anyone who registers with it is automatically mapped to you.</p>
+          <p className="text-xs text-slate-500 mt-2">Share this code with customers to enter during registration and link their account to you.</p>
         </Card>
       )}
 
