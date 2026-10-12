@@ -57,8 +57,17 @@ input[aria-invalid="true"], select[aria-invalid="true"] { border-color: #dc2626;
 }
 
 .partner-intro-motion { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
-.partner-intro-motion span { position: absolute; width: 32rem; height: 32rem; border-radius: 50%; filter: blur(60px); animation: partner-ambient 14s ease-in-out infinite alternate; }
-.partner-intro-motion span:first-child { background: #fbe7de; top: -18rem; right: -3rem; }
-.partner-intro-motion span:last-child { background: #fff1c9; bottom: -24rem; left: 15%; animation-delay: -7s; }
-@keyframes partner-ambient { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-70px, 60px, 0); } }
-@media (prefers-reduced-motion: reduce) { .partner-intro-motion span { animation: none; } }
+.partner-intro-motion span { position: absolute; width: 34rem; height: 34rem; border-radius: 50%; filter: blur(55px); opacity: .65; animation: partner-ambient 12s ease-in-out infinite alternate; }
+.partner-intro-motion span:nth-child(1) { background: #ffcfc8; top: -15rem; right: -5rem; }
+.partner-intro-motion span:nth-child(2) { background: #ffe49b; bottom: -20rem; left: 15%; animation-delay: -6s; }
+.partner-intro-motion span:nth-child(3) { background: #ffece1; width: 22rem; height: 22rem; top: 20%; left: -10rem; animation-delay: -3s; }
+.partner-motion-grid { position: absolute; inset: 0; background-image: radial-gradient(#bd9a83 1px, transparent 1px); background-size: 32px 32px; opacity: .18; mask-image: linear-gradient(to right, transparent, black); animation: partner-grid-drift 16s linear infinite; }
+.partner-motion-ring { position: absolute; width: 42rem; height: 42rem; top: -8rem; right: -12rem; border: 1px solid #eabfaa80; border-radius: 50%; animation: partner-orbit 32s linear infinite; }
+.partner-motion-ring::after { content: ''; position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #ec2027; opacity: .5; top: 14%; left: 14%; box-shadow: 0 0 0 7px #ec202710; }
+.partner-motion-ring-secondary { width: 28rem; height: 28rem; top: auto; right: auto; bottom: -19rem; left: 5%; animation-direction: reverse; }
+.partner-motion-ring-secondary::after { background: #f8c623; opacity: .8; box-shadow: 0 0 0 7px #f8c62320; }
+@keyframes partner-ambient { from { transform: translate3d(-30px, -25px, 0) scale(.9); } to { transform: translate3d(100px, 70px, 0) scale(1.2); } }
+@keyframes partner-grid-drift { to { background-position: 32px 32px; } }
+@keyframes partner-orbit { to { transform: rotate(360deg); } }
+@media (max-width: 640px) { .partner-intro-motion span { width: 25rem; height: 25rem; filter: blur(40px); } .partner-motion-ring { right: -26rem; } }
+@media (prefers-reduced-motion: reduce) { .partner-intro-motion * { animation: none; } }

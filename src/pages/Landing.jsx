@@ -62,7 +62,7 @@ export default function Landing() {
 
       <main>
         <section className="partner-intro relative isolate overflow-hidden px-5 sm:px-8">
-          <div className="partner-intro-motion" aria-hidden="true"><span /><span /></div>
+          <div className="partner-intro-motion" aria-hidden="true"><span /><span /><span /><i className="partner-motion-ring" /><i className="partner-motion-ring partner-motion-ring-secondary" /><div className="partner-motion-grid" /></div>
           <div className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-16 py-14 sm:py-20">
             <div>
               <p className="mb-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-[.16em] text-brand-red"><span className="h-1.5 w-1.5 rounded-full bg-brand-red" />For SpotX partners</p>
