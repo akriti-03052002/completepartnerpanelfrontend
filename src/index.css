@@ -55,3 +55,13 @@ input[aria-invalid="true"], select[aria-invalid="true"] { border-color: #dc2626;
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Gentle movement behind the landing page; no animation on panel pages. */
+.landing-hero { background: #fffdf9; }
+.landing-motion { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
+.landing-motion span { position: absolute; width: 32rem; height: 32rem; border-radius: 50%; filter: blur(70px); opacity: .5; animation: landing-drift 18s ease-in-out infinite alternate; }
+.landing-motion span:nth-child(1) { background: #ffe4e6; top: -18rem; left: -10rem; }
+.landing-motion span:nth-child(2) { background: #fef3c7; right: -12rem; bottom: -18rem; animation-delay: -6s; }
+.landing-motion span:nth-child(3) { background: #fff1df; width: 20rem; height: 20rem; top: 25%; left: 40%; animation-delay: -12s; }
+@keyframes landing-drift { from { transform: translate3d(-2rem, -1rem, 0) scale(.95); } to { transform: translate3d(4rem, 3rem, 0) scale(1.1); } }
+@media (prefers-reduced-motion: reduce) { .landing-motion span { animation: none; } }

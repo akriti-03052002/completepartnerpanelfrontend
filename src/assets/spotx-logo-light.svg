@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="152" height="48" viewBox="0 0 152 48" role="img" aria-label="SpotX">
+  <text x="0" y="37" fill="#121212" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="800" letter-spacing="-2">Spot</text>
+  <path fill="#f8c623" d="M116 3h14l22 42h-14zM138 3h14l-22 42h-14z"/>
+  <path fill="#ec2027" d="M105 3h15l28 42h-15zM133 3h15l-28 42h-15z"/>
+</svg>

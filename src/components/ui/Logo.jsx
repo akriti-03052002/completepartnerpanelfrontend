@@ -1,4 +1,5 @@
 import spotxLogo from "../../assets/spotx-logo.png";
+import lightLogo from "../../assets/spotx-logo-light.svg";
 
 // The source asset's "Spot" wordmark is drawn white with only a hairline
 // outline — legible on a dark ground, invisible on a light one. On light
@@ -7,16 +8,16 @@ import spotxLogo from "../../assets/spotx-logo.png";
 const HEIGHTS = { sm: 26, md: 36, lg: 56 };
 const BADGE_PADDING = { sm: "px-2 py-1.5", md: "px-3 py-2", lg: "px-4 py-3" };
 
-export default function Logo({ size = "md", dark = false, className = "" }) {
+export default function Logo({ size = "md", dark = false, plain = false, className = "" }) {
   const img = (
     <img
-      src={spotxLogo}
+      src={plain ? lightLogo : spotxLogo}
       alt="SpotX"
       style={{ height: HEIGHTS[size], width: "auto" }}
     />
   );
 
-  if (dark) {
+  if (dark || plain) {
     return <span className={`inline-flex items-center ${className}`}>{img}</span>;
   }
 

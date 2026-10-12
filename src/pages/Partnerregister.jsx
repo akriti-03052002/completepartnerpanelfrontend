@@ -1,6 +1,6 @@
 import GoogleSignIn from "../components/GoogleSignIn";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import api from "../services/api.js"
 import { usePartnerAuth } from "../context/PartnerAuthContext";
@@ -9,6 +9,8 @@ import { COUNTRY_CODES } from "../data/countryCodes";
 
 export default function PartnerRegister() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestedType = searchParams.get("partnerType");
   const { setSession } = usePartnerAuth();
 
   const [loading, setLoading] = useState(false);
@@ -16,7 +18,7 @@ export default function PartnerRegister() {
   const [success, setSuccess] = useState("");
 
   const [formData, setFormData] = useState({
-    partnerType: "vendor",
+    partnerType: ["vendor", "reseller", "affiliate", "influencer"].includes(requestedType) ? requestedType : "vendor",
 
     contactName: "",
     email: "",

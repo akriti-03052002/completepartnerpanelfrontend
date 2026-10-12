@@ -6,30 +6,26 @@ import {
 } from "lucide-react";
 import Logo from "../components/ui/Logo";
 
-// What the Partner Panel actually gives every partner, regardless of
-// which of the 6 relationship types below they are — deliberately
-// generic, since "earn commission" isn't true for a Reseller (they pay
-// SPOTX for licenses, they don't earn a payout — see PARTNER_TYPES).
 const FEATURES = [
   {
     icon: LayoutDashboard,
-    title: "One Dashboard for Your Partnership",
-    description: "Everything about how you work with SPOTX — leads, deals, inventory, or billing, depending on your partner type — lives in one panel."
+    title: "Your work in one place",
+    description: "See your partner activity and progress in one dashboard."
   },
   {
     icon: Users2,
-    title: "A Relationship That Fits Your Business",
-    description: "Refer customers, resell licenses, run campaigns, or install and manage screens yourself — pick the model that matches how you actually work."
+    title: "Choose your role",
+    description: "Install SPOTX, sell licenses, refer businesses or create content."
   },
   {
     icon: Wallet,
-    title: "Transparent Money, Either Direction",
-    description: "Commission-based partners track every payout from pending to paid. Reseller partners see exactly what they owe SPOTX and when — no surprises either way."
+    title: "Track your payments",
+    description: "Check your earnings, or your license bills if you are a reseller."
   },
   {
     icon: ShieldCheck,
-    title: "Verified & Secure",
-    description: "KYC and bank details are encrypted and reviewed by SPOTX before any money moves in either direction."
+    title: "Get ready to start",
+    description: "Submit your documents and bank details for SPOTX to review."
   }
 ];
 
@@ -45,48 +41,48 @@ const PARTNER_TYPES = [
     name: "Vendor",
     icon: Monitor,
     direction: "SPOTX pays you",
-    blurb: "Install and manage screens for your own customers.",
+    blurb: "Install SPOTX on business screens and earn commission.",
     details: [
-      "You install and manage SPOTX screens for your own end customers.",
-      "SPOTX pays commission according to the terms assigned to your partnership.",
-      "SPOTX assigns commission terms individually for your partnership.",
-      "You track every commission from pending to paid, and every settlement, right in your dashboard."
+      "Install SPOTX on your customers' screens.",
+      "Help businesses start using SPOTX.",
+      "Earn commission under your agreement with SPOTX.",
+      "Track your earnings and payments in this panel."
     ]
   },
   {
     name: "Reseller",
     icon: ShoppingBag,
     direction: "You pay SPOTX",
-    blurb: "Buy SPOTX licenses in bulk, resell with your own hardware.",
+    blurb: "Buy SPOTX licenses and sell them with your screens.",
     details: [
-      "You buy SPOTX screen software licenses from SPOTX in bulk, in advance of having a customer lined up.",
-      "You sell each customer a screen and SPOTX software together as one bundled product — you source the hardware, SPOTX only sells you the license.",
-      "You're billed for every license you've purchased (monthly, quarterly, or yearly, per your agreement) — regardless of how many are allocated or in active use.",
-      "You set your own resale price to your customers — SPOTX has no visibility into that side of your business at all."
+      "Buy SPOTX software licenses in bulk.",
+      "Sell your own screens with SPOTX software at your chosen price.",
+      "Assign licenses to your customers in this panel.",
+      "Pay SPOTX for all purchased licenses, including unused ones, under your agreement."
     ]
   },
   {
     name: "Affiliate",
     icon: Share2,
     direction: "SPOTX pays you",
-    blurb: "Send us qualified leads, earn a fee per deal.",
+    blurb: "Refer businesses to SPOTX and earn for successful deals.",
     details: [
-      "You send SPOTX qualified leads for its digital signage platform.",
-      "SPOTX's own sales team takes it from there and closes the deal.",
-      "You earn a one-time fee for every lead that turns into a won deal.",
-      "An optional recurring add-on (10% for 6 months) can also be applied at SPOTX's discretion."
+      "Introduce businesses that need SPOTX.",
+      "The SPOTX sales team speaks to them and handles the deal.",
+      "Earn when your referral becomes a successful deal.",
+      "Track referrals and payments in this panel. Payment terms depend on your agreement."
     ]
   },
   {
     name: "Influencer",
     icon: Megaphone,
     direction: "SPOTX pays you",
-    blurb: "Drive awareness through your audience, earn per campaign.",
+    blurb: "Promote SPOTX through your content and earn for campaigns.",
     details: [
-      "You promote SPOTX to your audience through your own content and channels.",
-      "You earn a one-time fee per campaign, scaled to your reach.",
-      "An optional recurring add-on can also be applied, case-by-case, at SPOTX's discretion.",
-      "No screens to install or leads to chase — this is a pure awareness/reach relationship."
+      "Create content about SPOTX for your audience.",
+      "Work with SPOTX on agreed campaigns.",
+      "Earn campaign payments under your agreement.",
+      "Track your content and payments in this panel."
     ]
   },
 ];
@@ -97,31 +93,30 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-white">
       <header className="border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Logo size="sm" />
+        <div className="w-full px-5 sm:px-8 h-20 flex items-center justify-between">
+          <Link to="/" aria-label="SPOTX home"><Logo size="md" plain /></Link>
           <Link to="/partner/login" className="text-sm font-semibold text-slate-700 hover:text-brand-black transition">
-            Partner Sign In
+            Sign in
           </Link>
         </div>
       </header>
 
-      <section className="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center">
+      <section className="landing-hero relative isolate overflow-hidden px-6 pt-20 pb-20 text-center">
+        <div className="landing-motion" aria-hidden="true"><span /><span /><span /></div>
+        <div className="relative max-w-4xl mx-auto">
         <span className="inline-block px-3 py-1 rounded-full bg-brand-red/10 text-brand-red text-xs font-semibold tracking-wide uppercase mb-6">
           SPOTX Partner Program
         </span>
 
         <h1 className="font-heading text-4xl sm:text-5xl font-extrabold text-brand-black tracking-tight leading-tight">
-          One panel to manage <br className="hidden sm:block" />
-          your partnership with SPOTX
+          Grow with SPOTX.<br />
+          Choose how you partner with us.
         </h1>
 
         <p className="text-slate-500 text-lg mt-6 max-w-2xl mx-auto">
-          SPOTX is an enterprise-grade digital signage platform — businesses use it to manage
-          content, monitor screens, and run campaigns across every location from one dashboard.
-          The Partner Panel is where <strong className="text-slate-700 font-semibold">you</strong> manage your side of that
-          relationship: refer customers, resell licenses, run campaigns, or install and manage
-          screens yourself. Pick the partner type below that matches how you work — the panel
-          adapts to it automatically.
+          SPOTX helps businesses show videos, menus and offers on their screens.
+          Join as a partner to install SPOTX, sell licenses, refer businesses or promote it.
+          Use this panel to track your work and payments.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
@@ -139,6 +134,7 @@ export default function Landing() {
             Sign In
           </Link>
         </div>
+        </div>
       </section>
 
       <section className="border-y border-slate-100 bg-brand-black">
@@ -155,14 +151,13 @@ export default function Landing() {
 
       <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="text-center max-w-xl mx-auto mb-12">
-          <h2 className="font-heading text-2xl font-bold text-brand-black mb-2">Which kind of partner are you?</h2>
+          <h2 className="font-heading text-2xl font-bold text-brand-black mb-2">Choose your partner role</h2>
           <p className="text-sm text-slate-500">
-            The Partner Panel isn't one-size-fits-all — it gives each relationship type its own dashboard,
-            actions, and money flow. Find yours below.
+            Pick the work you want to do. Open a role to learn more.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {PARTNER_TYPES.map((type) => (
             <button
               key={type.name}
@@ -182,7 +177,7 @@ export default function Landing() {
         </div>
 
         <p className="text-center text-xs text-slate-400 mt-8">
-          Not sure which fits? Click a card above to see how it works, or choose your type when you register — an admin can help you switch later if needed.
+          Choose a role above to get started.
         </p>
       </section>
 
@@ -219,7 +214,7 @@ export default function Landing() {
 
             <div className="px-6 py-4 border-t border-slate-100 shrink-0">
               <Link
-                to="/partner/register"
+                to={`/partner/register?partnerType=${activeType.name.toLowerCase()}`}
                 className="inline-flex items-center justify-center gap-2 w-full bg-brand-black text-white px-6 py-3 rounded-xl font-semibold hover:bg-charcoal transition"
               >
                 Register as a {activeType.name}
@@ -245,7 +240,7 @@ export default function Landing() {
       </section>
 
       <footer className="max-w-6xl mx-auto px-6 py-8 text-center">
-        <p className="text-sm font-medium text-brand-black mb-1">Join a growing digital signage ecosystem.</p>
+        <a href="https://spotx.in" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-brand-black hover:text-brand-red">Visit our main website: spotx.in <span aria-hidden="true">↗</span></a>
         <p className="text-xs text-slate-400">© {new Date().getFullYear()} SPOTX. Partner Program.</p>
       </footer>
     </div>
