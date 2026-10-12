@@ -173,7 +173,7 @@ export default function Settlements() {
       {(!lastFetchedAt && (loading || loadError)) ? <p className="text-sm text-slate-500">Loading your payment summary?</p> : <>
       <Card className="p-5 sm:p-6">
         <div className="grid gap-6 sm:grid-cols-3">
-          <OverviewItem icon={CalendarClock} iconTone="bg-amber-50 text-amber-600" label="Not paid yet" primary={money(meta.availableBalance, meta.currency)} secondary="Includes earnings waiting for approval" />
+          <OverviewItem icon={CalendarClock} iconTone="bg-amber-50 text-amber-600" label="Earnings yet to receive" primary={money(meta.availableBalance, meta.currency)} secondary="Includes earnings waiting for approval" />
           <OverviewItem icon={CheckCircle2} iconTone="bg-emerald-50 text-emerald-600" label="Last payment" primary={previousSettlement ? money(previousSettlement.amount.net, previousSettlement.amount.currency) : "No payment yet"} secondary={previousSettlement?.payment?.paidAt ? new Date(previousSettlement.payment.paidAt).toLocaleDateString() : null} />
           <OverviewItem icon={CalendarClock} iconTone="bg-blue-50 text-blue-600" label="Next payment" primary={nextSettlementInfo.primary} secondary={nextSettlementInfo.secondary} footnote={nextSettlementInfo.footnote} />
         </div>

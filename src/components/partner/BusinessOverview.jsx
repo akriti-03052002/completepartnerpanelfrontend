@@ -48,8 +48,8 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
   if (type !== "reseller" && hasPermission("commissions:view")) {
     const earned = total(Object.fromEntries(Object.entries(summary.earnings || {}).filter(([s]) => s !== "cancelled")));
     const paid = summary.earnings?.settled?.amount || 0;
-    tiles.push(["Recorded earnings", money(earned)], ["Earnings marked paid", money(paid)], ["Earnings not yet paid", money(earned - paid)]);
-    note += " Earnings marked paid are before payment deductions such as TDS. Check Payments to You for the final payment amount.";
+    tiles.push(["Total earnings", money(earned)], ["Earnings received", money(paid)], ["Earnings yet to receive", money(earned - paid)]);
+    note += " Earnings received are before payment deductions such as TDS. Check Payments to You for the final payment amount.";
   }
   if (type === "reseller" && !hasPermission("reseller:billing:view")) tiles = tiles.filter(([label]) => !["Licence bills paid", "Licence bills to pay"].includes(label));
   if (type === "affiliate" && !hasPermission("referrals:view")) tiles = tiles.filter(([label]) => !["Leads you referred", "Won deals", "Deals in progress", "Value of confirmed deals"].includes(label));
@@ -71,8 +71,8 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
   }
   const secondary = type === "reseller" ? ["Registered screens", "Active screens", "Active customers", "Pending customers", "Suspended customers", "Cancelled customers"] : [];
   const renderTile = ([title, value]) => {
-    const emoji = /screens/i.test(title) ? "🖥️" : /customers/i.test(title) ? "👥" : /posts|instagram|social/i.test(title) ? "🎬" : /licences|assign/i.test(title) ? "📦" : /not paid|to pay/i.test(title) ? "⏳" : /paid/i.test(title) ? "💸" : "💰";
-    const colour = /paid to you|available/i.test(title) ? "bg-emerald-50 text-emerald-600" : /not paid|to pay/i.test(title) ? "bg-amber-50 text-amber-600" : "bg-blue-50 text-blue-600";
+    const emoji = /screens/i.test(title) ? "🖥️" : /customers/i.test(title) ? "👥" : /posts|instagram|social/i.test(title) ? "🎬" : /licences|assign/i.test(title) ? "📦" : /yet to receive|to pay/i.test(title) ? "⏳" : /paid|received/i.test(title) ? "💸" : "💰";
+    const colour = /received|available/i.test(title) ? "bg-emerald-50 text-emerald-600" : /yet to receive|to pay/i.test(title) ? "bg-amber-50 text-amber-600" : "bg-blue-50 text-blue-600";
     return <div key={title} className="rounded-xl bg-slate-50 p-4"><div className="flex items-start justify-between gap-2"><p className="text-xs text-slate-500">{title}</p><span aria-hidden="true" className={`rounded-lg p-2 shrink-0 text-xl leading-none ${colour}`}>{emoji}</span></div><p className="text-xl font-bold mt-1 break-words">{value}</p></div>;
   };
   const breakdownStyle = {
@@ -84,7 +84,7 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
     "Cancelled customers": { icon: XCircle, color: "bg-red-50 text-red-600" }
   };
   return <Card className="p-5 space-y-4">
-    <div><h2 className="font-semibold text-lg"><span aria-hidden="true" className="mr-2">{{ vendor: "🖥️", affiliate: "🤝", influencer: "🎬", reseller: "📦" }[type]}</span>Your business overview</h2><p className="text-xs text-slate-500 mt-1">Current customer and screen counts, with all recorded bills and earnings.{type !== "reseller" && hasPermission("commissions:view") ? " Recorded earnings include amounts waiting for approval." : ""}</p></div>
+    <div><h2 className="font-semibold text-lg"><span aria-hidden="true" className="mr-2">{{ vendor: "🖥️", affiliate: "🤝", influencer: "🎬", reseller: "📦" }[type]}</span>Your business overview</h2><p className="text-xs text-slate-500 mt-1">Current customer and screen counts, with all recorded bills and earnings.{type !== "reseller" && hasPermission("commissions:view") ? " Total earnings include amounts waiting for approval." : ""}</p></div>
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{tiles.filter(([title]) => !secondary.includes(title)).map(renderTile)}</div>
     {secondary.length > 0 && <section aria-label="Customer and screen breakdown">
       <h3 className="text-sm font-semibold text-slate-700 mb-3">Customers & screens</h3>

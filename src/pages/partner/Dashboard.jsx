@@ -1,7 +1,7 @@
+import PartnerCompletion from "../../components/partner/PartnerCompletion";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import BusinessOverview from "../../components/partner/BusinessOverview";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { TrendingUp, AlertCircle } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import api from "../../services/api";
@@ -65,7 +65,7 @@ export default function Dashboard() {
     : { title: "Your account is active", note: "Choose a task below to manage your business.", to: partnerType === "influencer" ? "/partner/post-reel" : partnerType === "affiliate" ? "/partner/deals" : "/partner/customers", action: partnerType === "influencer" ? "Manage posts and reels" : partnerType === "affiliate" ? "Manage leads" : "Manage customers" };
   return (
     <div className="space-y-6">
-      <Card className="p-5 flex flex-wrap items-center justify-between gap-4"><div><h2 className="font-semibold">{nextStep.title}</h2><p className="text-sm text-slate-500 mt-1">{nextStep.note}</p></div>{(nextStep.to === "/partner/profile" ? hasPermission("profile:update") : nextStep.to === "/partner/documents" ? hasPermission("documents:view") : nextStep.to === "/partner/bank" ? hasPermission("bank:view") : nextStep.to === "/partner/deals" ? hasPermission("referrals:view") : nextStep.to === "/partner/customers" ? hasPermission("customers:view") : hasPermission("profile:view")) && <Link to={nextStep.to} className="rounded-lg bg-brand-red text-white px-4 py-2 text-sm font-semibold">{nextStep.action}</Link>}</Card>
+      <PartnerCompletion nextStep={{ ...nextStep, allowed: (nextStep.to === "/partner/profile" ? hasPermission("profile:update") : nextStep.to === "/partner/documents" ? hasPermission("documents:view") : nextStep.to === "/partner/bank" ? hasPermission("bank:view") : nextStep.to === "/partner/deals" ? hasPermission("referrals:view") : nextStep.to === "/partner/customers" ? hasPermission("customers:view") : hasPermission("profile:view")) }} />
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
         <div className="flex gap-4 flex-wrap">
@@ -110,8 +110,8 @@ export default function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis dataKey="period" tickFormatter={trendMonth} tick={{ fontSize: 11 }} minTickGap={20} tickLine={false} axisLine={false} />
                 <YAxis tickFormatter={trendTick} tick={{ fontSize: 11 }} width={65} tickLine={false} axisLine={false} domain={[0, "auto"]} />
-                <Tooltip labelFormatter={trendMonth} formatter={value => [trendMoney(value), "Recorded earnings"]} contentStyle={{ borderRadius: 12, borderColor: "#e2e8f0" }} />
-                <Line type="linear" name="Recorded earnings" dataKey="total" stroke="#EC2027" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                <Tooltip labelFormatter={trendMonth} formatter={value => [trendMoney(value), "Total earnings"]} contentStyle={{ borderRadius: 12, borderColor: "#e2e8f0" }} />
+                <Line type="linear" name="Total earnings" dataKey="total" stroke="#EC2027" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
           )}
