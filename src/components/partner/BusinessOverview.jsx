@@ -5,7 +5,11 @@ import Card from "../ui/Card";
 const count = (rows = {}) => Object.values(rows).reduce((n, row) => n + (row.count || 0), 0);
 const total = (rows = {}) => Object.values(rows).reduce((n, row) => n + (row.amount || 0), 0);
 const money = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
-const statusRows = (groups) => Object.entries(groups).map(([label, row]) => ({
+// Aggregated API groups can arrive in a different order on each refresh.
+// Keep the legend and doughnut slices in the same order as values change.
+const STATUS_ORDER = ["active", "trial", "new", "pending", "allocated", "pending_activation", "contacted", "qualified", "demo_scheduled", "demo_completed", "proposal", "under_review", "approved", "verified", "won", "on_hold", "suspended", "expired", "lost", "rejected", "cancelled"];
+const statusRank = status => { const index = STATUS_ORDER.indexOf(status); return index < 0 ? STATUS_ORDER.length : index; };
+const statusRows = (groups) => Object.entries(groups).sort(([a], [b]) => statusRank(a) - statusRank(b) || a.localeCompare(b)).map(([label, row]) => ({
   label,
   value: row.count,
   emoji: ["active", "approved", "verified", "won"].includes(label) ? "✅" : ["rejected", "lost", "cancelled"].includes(label) ? "❌" : ["suspended", "on_hold"].includes(label) ? "⏸️" : label === "trial" ? "🎁" : "⏳",
