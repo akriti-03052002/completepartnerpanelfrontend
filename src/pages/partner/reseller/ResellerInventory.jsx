@@ -12,10 +12,10 @@ const TRANSACTION_LABEL = {
   release: "Licences returned",
   adjustment: "Balance changed",
   registration: "Screen registered",
-  activation: "Screen started",
+  activation: "Screen enabled",
   suspension: "Screen paused",
-  reactivation: "Screen restarted",
-  cancellation: "Screen cancelled"
+  reactivation: "Screen enabled again",
+  cancellation: "Customer licences released"
 };
 
 export default function ResellerInventory() {
@@ -60,7 +60,8 @@ export default function ResellerInventory() {
 
       <Card>
         <div className="p-4 border-b border-slate-100">
-          <p className="text-sm font-semibold text-slate-900">Transaction History</p>
+          <p className="text-sm font-semibold text-slate-900">Licence & screen changes</p>
+          <p className="text-xs text-slate-500 mt-1">The count after each change refers to the type shown next to it. It is not a money balance.</p>
         </div>
         <Table
           searchable
@@ -71,7 +72,7 @@ export default function ResellerInventory() {
             { key: "date", header: "Date", render: (t) => new Date(t.createdAt).toLocaleDateString() },
             { key: "type", header: "Transaction", render: (t) => TRANSACTION_LABEL[t.type] || t.type, filter: (t) => TRANSACTION_LABEL[t.type] || t.type },
             { key: "quantity", header: "Quantity", render: (t) => <span className={t.quantity >= 0 ? "text-emerald-600" : "text-red-600"}>{t.quantity >= 0 ? "+" : ""}{t.quantity}</span> },
-            { key: "balance", header: "Balance After", render: (t) => t.newBalance },
+            { key: "balance", header: "Count after change", render: (t) => <span>{t.newBalance} <span className="text-xs text-slate-500">{["purchase", "adjustment"].includes(t.type) ? "bought licences" : ["allocation", "release", "cancellation"].includes(t.type) ? "assigned licences" : t.type === "registration" ? "registered screens" : t.type === "reactivation" ? "paused screens" : "active screens"}</span></span> },
             { key: "reason", header: "Reason", render: (t) => <span className="text-slate-500">{t.reason || "—"}</span> }
           ]}
         />

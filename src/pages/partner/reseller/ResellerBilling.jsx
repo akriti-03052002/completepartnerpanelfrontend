@@ -208,7 +208,7 @@ export default function ResellerBilling() {
           <p className="text-xs text-slate-500 mt-2">Pending: an unpaid invoice. Overdue: its due date has passed. Upcoming: a bill expected within seven days; payment becomes available when its invoice is raised and online payment is enabled.</p>
           <label className="mt-3 flex min-h-11 items-center gap-2 text-sm text-slate-600"><input type="checkbox" checked={showAllDetails} onChange={event => setShowAllDetails(event.target.checked)} className="h-4 w-4" />Show tax, billing period and payment references</label>
           <Select label="Show bills" value={billView} onChange={(event) => setBillView(event.target.value)} className="mt-4 sm:w-64">
-            <option value="current">Pending</option>
+            <option value="current">Unpaid bills</option>
             <option value="upcoming">Upcoming</option>
             <option value="paid">Previous paid bills</option>
             <option value="all">All bills</option>
@@ -227,9 +227,9 @@ export default function ResellerBilling() {
               { key: "bill", header: "Bill", render: (i) => i.number ? `${i.number} of ${i.installmentsInTerm}` : "\u2014" },
               { key: "date", header: "Bill date", render: (i) => shortDate(i.billDate) },
               { key: "period", header: "Covers", render: (i) => `${shortDate(i.periodStart)} to ${shortDate(i.periodEnd)}` },
-              { key: "amount", header: "Amount", render: (i) => rupees(i.subtotal) },
+              { key: "amount", header: "Before tax", render: (i) => rupees(i.subtotal) },
               { key: "gst", header: "GST", render: (i) => `${rupees(i.taxAmount)} (${i.taxRatePercent}%)` },
-              { key: "total", header: "To pay", render: (i) => <span className="font-semibold">{rupees(i.total)}</span> },
+              { key: "total", header: "Bill total", render: (i) => <span className="font-semibold">{rupees(i.total)}</span> },
               { key: "invoice", header: "Invoice", render: (i) => i.invoiceNumber || "\u2014" },
               { key: "status", header: "Status", filter: (i) => i.status, render: (i) => i.status === "upcoming" ? <Badge tone="neutral">Upcoming</Badge> : <Badge status={i.status} /> },
               { key: "cheque", header: "Cheque", render: (i) => i.invoice?.cheque?.status || "—" },

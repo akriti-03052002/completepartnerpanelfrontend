@@ -31,11 +31,11 @@ export default function Commissions() {
       : partnerType === "affiliate"
         ? [{ key: "deal", header: "Deal", render: (r) => r.referralId?.customer?.companyName || "—" }]
         : []),
-    { key: "type", header: "How it is calculated", render: (r) => <Badge tone="neutral">{statusLabel(r.calculation?.commissionType) || "Earning"}</Badge>, filter: (r) => statusLabel(r.calculation?.commissionType) },
-    { key: "revenue", header: partnerType === "vendor" ? "Customer payment before tax" : "Sale amount", render: (r) => `₹${(r.transaction?.revenue || 0).toLocaleString("en-IN")}` },
+    { key: "type", header: "How it is calculated", render: (r) => <Badge tone="neutral">{partnerType === "influencer" ? "Fixed amount per post or reel" : statusLabel(r.calculation?.commissionType) || "Earning"}</Badge>, filter: (r) => partnerType === "influencer" ? "Fixed amount per post or reel" : statusLabel(r.calculation?.commissionType) },
+    ...(partnerType === "influencer" ? [] : [{ key: "revenue", header: partnerType === "vendor" ? "Customer payment used for calculation" : "Deal value used for calculation", render: (r) => `₹${(r.transaction?.revenue || 0).toLocaleString("en-IN")}` }]),
     { key: "net", header: partnerType === "affiliate" ? "Reward breakdown" : partnerType === "influencer" ? "Content payment breakdown" : "Commission breakdown", render: (r) => <CommissionAmount commission={r} currency={r.transaction?.currency || "INR"} /> },
     { key: "status", header: "Status", render: (r) => <Badge status={r.settlement?.status || "unknown"} />, filter: (r) => r.settlement?.status || "unknown" },
-    { key: "date", header: "Earned", render: (r) => new Date(r.createdAt).toLocaleDateString() }
+    { key: "date", header: "Recorded on", render: (r) => new Date(r.createdAt).toLocaleDateString() }
   ];
 
   return (
@@ -68,7 +68,7 @@ export default function Commissions() {
           <Table
             searchable
             searchPlaceholder="Search by customer, lead, amount or status"
-            empty={partnerType === "affiliate" ? "No referral rewards yet." : "No commissions earned yet."}
+            empty={partnerType === "affiliate" ? "No referral rewards yet." : partnerType === "influencer" ? "No content earnings recorded yet." : "No commissions recorded yet."}
             rows={commissions}
             columns={columns}
           />

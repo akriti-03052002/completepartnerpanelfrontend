@@ -1,6 +1,6 @@
 import InvoiceDownload from "../../components/ui/InvoiceDownload";
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, History, CalendarClock, RefreshCw, Search, Info, CalendarX2, X, Landmark, Clock3, FileText, Upload } from "lucide-react";
+import { CheckCircle2, CalendarClock, RefreshCw, Search, CalendarX2, X, Landmark, FileText, Upload } from "lucide-react";
 import api from "../../services/api";
 import Card from "../../components/ui/Card";
 import Table from "../../components/ui/Table";
@@ -10,7 +10,20 @@ import { CommissionAmount, SettlementAmount } from "../../components/ui/Financia
 import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 
-const STATUS_OPTIONS = ["draft", "pending_approval", "approved", "processing", "on_hold", "paid", "failed", "cancelled"];
+const STATUS_OPTIONS = [
+  { key: "waiting", label: "Waiting", statuses: ["draft", "pending_approval", "approved", "processing"] },
+  { key: "paid", label: "Paid", statuses: ["paid"] },
+  { key: "attention", label: "Needs attention", statuses: ["on_hold", "failed"] },
+  { key: "cancelled", label: "Cancelled", statuses: ["cancelled"] }
+];
+const FILTER_HELP = {
+  all: "All payments from SpotX to you. Open a payment to see its details.",
+  waiting: "These payments are waiting for SpotX approval or payment. Payment in progress means the payment has started but is not yet confirmed.",
+  paid: "These payments are recorded as completed. Open a payment to check the date and bank reference.",
+  attention: "These payments failed or are on hold. Open a payment to check the reason and whether you need to submit a bill.",
+  cancelled: "These payment records were cancelled. They are not completed payments."
+};
+const paymentStatus = status => ({ draft: "Waiting for approval", pending_approval: "Waiting for approval", approved: "Waiting for payment", processing: "Payment in progress", on_hold: "On hold", paid: "Paid", failed: "Payment failed", cancelled: "Cancelled" }[status] || status);
 
 const DURATIONS = [
   { key: "all", label: "All time", days: null },
@@ -37,10 +50,10 @@ export default function Settlements() {
   const { partner } = usePartnerAuth();
   const partnerType = partner?.partnerType?.toLowerCase();
   const earningLabel = partnerType === "affiliate"
-    ? "Net reward"
+    ? "Reward after deductions"
     : partnerType === "influencer"
-      ? "Net content earnings"
-      : "Net commission";
+      ? "Content earnings after deductions"
+      : "Commission after deductions";
   const [settlements, setSettlements] = useState([]);
   const [meta, setMeta] = useState({});
   const [loading, setLoading] = useState(true);
@@ -80,7 +93,7 @@ export default function Settlements() {
   useAutoRefresh(() => {
     api.get("/partner/settlements")
       .then((res) => { setSettlements(res.data.data); setMeta(res.data.meta || {}); setLastFetchedAt(new Date()); setLoadError(""); })
-      .catch(() => setLoadError("Settlement refresh failed. Showing previously loaded figures."));
+      .catch(() => setLoadError("Could not refresh payments. Showing the last update."));
   });
 
   const loadBillForActive = () => api.get(`/partner/settlements/${activeId}/bill`).then((res) => setBill(res.data.data));
@@ -111,45 +124,22 @@ export default function Settlements() {
     [settlements]
   );
 
-  const currentAmount = settlements.filter(item => ["draft", "pending_approval", "approved", "processing"].includes(item.status)).reduce((sum, item) => sum + (Number(item.amount?.net) || 0), 0);
-  const heldAmount = settlements.filter(item => item.status === "on_hold").reduce((sum, item) => sum + (Number(item.amount?.net) || 0), 0);
-  const failedAmount = settlements.filter(item => item.status === "failed").reduce((sum, item) => sum + (Number(item.amount?.net) || 0), 0);
-
-  const holdReason = useMemo(() => {
-    if (!meta.availableBalance) return null;
-
-    if (!meta.hasSettlementSetting) {
-      return "On hold — your payment schedule is not set up yet. Contact SpotX support.";
-    }
-
-    const parts = [];
-    if (meta.pendingApprovalAmount) parts.push(`${money(meta.pendingApprovalAmount, meta.currency)} pending admin approval`);
-    if (meta.approvedAwaitingBatchAmount) parts.push(`${money(meta.approvedAwaitingBatchAmount, meta.currency)} approved, waiting to be included in a payment`);
-
-    if (meta.settlementType === "threshold" && meta.minimumSettlementAmount > meta.availableBalance) {
-      const remaining = meta.minimumSettlementAmount - meta.availableBalance;
-      parts.push(`${money(remaining, meta.currency)} more needed to reach the ${money(meta.minimumSettlementAmount, meta.currency)} threshold`);
-    }
-
-    return parts.length ? parts.join(" · ") : null;
-  }, [meta]);
-
   const upcomingAmount = Number(meta.approvedAwaitingBatchAmount) || 0;
 
   const nextSettlementInfo = useMemo(() => {
     if (meta.nextSettlementDate) {
-      return { primary: money(upcomingAmount, meta.currency), secondary: `On ${new Date(meta.nextSettlementDate).toLocaleDateString()}`, footnote: "Approved earnings waiting to be included in a payment. The date is an estimate." };
+      return { primary: new Date(meta.nextSettlementDate).toLocaleDateString(), secondary: "Estimated payment date", footnote: upcomingAmount > 0 ? `${money(upcomingAmount, meta.currency)} approved earnings waiting for payment` : undefined };
     }
     if (!meta.hasSettlementSetting) {
-      return { primary: "Not configured", secondary: "Contact SPOTX support" };
+      return { primary: "Not set yet", secondary: "Contact SpotX for your payment schedule" };
     }
     if (meta.settlementType === "threshold") {
-      return { primary: `Threshold ${money(meta.minimumSettlementAmount, meta.currency)}`, secondary: `${money(meta.availableBalance, meta.currency)} of ${money(meta.minimumSettlementAmount, meta.currency)} so far` };
+      return { primary: "When the minimum is reached", secondary: `Minimum earnings: ${money(meta.minimumSettlementAmount, meta.currency)}` };
     }
     if (meta.settlementType === "manual") {
-      return { primary: "Manual payout", secondary: "Paid out by SPOTX admin on demand" };
+      return { primary: "Set by SpotX", secondary: "SpotX arranges your payment" };
     }
-    return { primary: "No fixed schedule", secondary: "Threshold or manual payout" };
+    return { primary: "No date yet", secondary: "SpotX will update your payment here" };
   }, [meta, upcomingAmount]);
 
   const filtered = useMemo(() => {
@@ -160,7 +150,7 @@ export default function Settlements() {
     const q = search.trim().toLowerCase();
 
     return settlements.filter((s) => {
-      if (statusFilter !== "all" && s.status !== statusFilter) return false;
+      if (statusFilter !== "all" && !STATUS_OPTIONS.find(option => option.key === statusFilter)?.statuses.includes(s.status)) return false;
       if (cutoff && new Date(s.createdAt).getTime() < cutoff) return false;
       if (q && !(s.settlementNumber?.toLowerCase().includes(q) || s.payment?.transactionId?.toLowerCase().includes(q))) return false;
       return true;
@@ -171,38 +161,23 @@ export default function Settlements() {
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <h1 className="text-2xl font-bold text-slate-900">
-          {partnerType === "affiliate"
-            ? "Reward Settlements"
-            : partnerType === "influencer"
-              ? "Content Payouts"
-              : "Commission Settlements"}
+          Payments to You
         </h1>
         {lastFetchedAt && <span className="text-xs text-slate-400">{timeAgo(lastFetchedAt)}</span>}
-        <button onClick={load} disabled={loading} className="text-slate-400 hover:text-slate-600 disabled:opacity-50">
+        <button onClick={load} disabled={loading} aria-label="Refresh payments" className="text-slate-400 hover:text-slate-600 disabled:opacity-50">
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
         </button>
       </div>
 
       {loadError && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{loadError} <button type="button" onClick={load} className="font-semibold underline">Try again</button></div>}
-      {(!lastFetchedAt && (loading || loadError)) ? <p className="text-sm text-slate-500">Settlement overview is unavailable until data loads.</p> : <>
-      <Card className="p-6">
-        <div className="flex flex-col lg:flex-row lg:items-start divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+      {(!lastFetchedAt && (loading || loadError)) ? <p className="text-sm text-slate-500">Loading your payment summary?</p> : <>
+      <Card className="p-5 sm:p-6">
+        <div className="grid gap-6 sm:grid-cols-3">
+          <OverviewItem icon={CalendarClock} iconTone="bg-amber-50 text-amber-600" label="Not paid yet" primary={money(meta.availableBalance, meta.currency)} secondary="Includes earnings waiting for approval" />
           <OverviewItem icon={CheckCircle2} iconTone="bg-emerald-50 text-emerald-600" label="Last payment" primary={previousSettlement ? money(previousSettlement.amount.net, previousSettlement.amount.currency) : "No payment yet"} secondary={previousSettlement?.payment?.paidAt ? new Date(previousSettlement.payment.paidAt).toLocaleDateString() : null} />
-          <OverviewItem icon={History} iconTone="bg-emerald-50 text-emerald-600" label="Payments being prepared" primary={money(currentAmount, meta.currency)} secondary="Waiting for approval or payment" />
-          <OverviewItem icon={CalendarClock} iconTone="bg-slate-100 text-slate-500" label="Next payment" primary={nextSettlementInfo.primary} secondary={nextSettlementInfo.secondary} footnote={nextSettlementInfo.footnote} />
-          <div className="pt-4 lg:pt-0 lg:pl-6 lg:max-w-xs">
-            <p className="text-sm text-slate-500 underline decoration-slate-300 underline-offset-4">Total still to receive</p>
-            <p className="text-3xl font-bold text-slate-900 mt-2">{money(meta.availableBalance, meta.currency)}</p>
-            {holdReason && <p className="text-xs text-amber-700 mt-2 flex items-start gap-1.5"><Clock3 size={13} className="shrink-0 mt-0.5" /><span>{holdReason}</span></p>}
-          </div>
+          <OverviewItem icon={CalendarClock} iconTone="bg-blue-50 text-blue-600" label="Next payment" primary={nextSettlementInfo.primary} secondary={nextSettlementInfo.secondary} footnote={nextSettlementInfo.footnote} />
         </div>
-      </Card>
-      <Card className="p-5">
-        <h2 className="font-semibold text-slate-900">Unpaid earnings breakdown</h2>
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[["Awaiting earnings approval", meta.pendingApprovalAmount || 0, "Not yet approved for a settlement."], ["On hold", heldAmount, "Held batches need the issue or required bill resolved."], ["Ready for next batch", upcomingAmount, "Approved earnings not included in current batches."], ["Failed payments", failedAmount, "Unpaid; SPOTX must review or retry the payment."]].map(([label, amount, note]) => <div key={label}><p className="text-sm text-slate-600">{label}</p><p className="mt-1 text-xl font-semibold">{money(amount, meta.currency)}</p><p className="mt-1 text-xs text-slate-500">{note}</p></div>)}
-        </div>
-        <p className="mt-4 text-xs text-slate-500">Total still to receive includes current batches, held and failed batches, and unbatched earnings awaiting approval or the next batch. These amounts are separate and counted once. Figures exclude any GST added through a verified payout bill.</p>
+        <p className="text-xs text-slate-500 mt-5">Amounts exclude GST added through an approved bill. Open a payment below for its full amount and any action needed.</p>
       </Card>
 
       </>}
@@ -211,19 +186,20 @@ export default function Settlements() {
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex flex-wrap gap-2">
             <FilterPill label="All" active={statusFilter === "all"} onClick={() => setStatusFilter("all")} />
-            {STATUS_OPTIONS.map((s) => (
-              <FilterPill key={s} label={s.replace(/_/g, " ")} active={statusFilter === s} onClick={() => setStatusFilter(s)} />
+            {STATUS_OPTIONS.map((option) => (
+              <FilterPill key={option.key} label={option.label} active={statusFilter === option.key} onClick={() => setStatusFilter(option.key)} />
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
-            <Select value={duration} onChange={(e) => setDuration(e.target.value)} className="w-40">
+          <div className="flex flex-wrap items-center gap-2">
+            <Select aria-label="Payment date range" value={duration} onChange={(e) => setDuration(e.target.value)} className="w-40">
               {DURATIONS.map((d) => <option key={d.key} value={d.key}>{d.label}</option>)}
             </Select>
             <div className="relative">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
-                placeholder="Search settlement ID / UTR"
+                placeholder="Search payment ID or bank reference"
+                aria-label="Search payments"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 pr-4 py-3 w-56 border border-slate-200 rounded-xl outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition text-sm"
@@ -232,6 +208,7 @@ export default function Settlements() {
           </div>
         </div>
 
+        <p className="text-sm text-slate-500 mb-3" role="status">{FILTER_HELP[statusFilter]}</p>
         <Card>
           {loading ? (
             <p className="text-slate-400 text-sm p-6">Loading...</p>
@@ -241,7 +218,7 @@ export default function Settlements() {
               empty={
                 <div className="flex flex-col items-center gap-2 text-slate-400">
                   <CalendarX2 size={28} strokeWidth={1.5} />
-                  <span>No settlements found</span>
+                  <span>No payments found</span>
                 </div>
               }
               rows={filtered}
@@ -264,15 +241,11 @@ export default function Settlements() {
                 },
                 {
                   key: "utr",
-                  header: (
-                    <span className="inline-flex items-center gap-1">
-                      UTR Number <Info size={12} className="text-slate-400" />
-                    </span>
-                  ),
+                  header: "Bank reference",
                   render: (r) => r.payment?.transactionId || "—"
                 },
                 { key: "net", header: "Payment amount", render: (r) => <SettlementAmount settlement={r} /> },
-                { key: "status", header: "Status", render: (r) => <Badge status={r.status} /> }
+                { key: "status", header: "Status", render: (r) => <Badge status={r.status}>{paymentStatus(r.status)}</Badge> }
               ]}
             />
           )}
@@ -408,7 +381,7 @@ function BillSection({ bill, canSubmitBill, billRequired, settlementId, onBillSu
 
 
 function OverviewItem({ icon: Icon, iconTone, label, primary, secondary, footnote }) {
-  return <div className="pb-4 lg:pb-0 lg:pr-6 lg:first:pr-6">
+  return <div className="pb-4 lg:pb-0 ">
     <div className={`w-9 h-9 rounded-lg flex items-center justify-center mb-3 ${iconTone}`}><Icon size={16} /></div>
     <p className="text-sm font-medium text-slate-700">{label}</p>
     {secondary && <p className="text-xs text-slate-400 mt-0.5">{secondary}</p>}
@@ -431,7 +404,7 @@ function FilterPill({ label, active, onClick }) {
 }
 
 const HISTORY_ACTION_LABEL = {
-  created: "Settlement batch created",
+  created: "Payment created",
   approved: "Approved",
   held: "Put on hold",
   released: "Hold released",
@@ -481,7 +454,7 @@ function SettlementDetailPanel({ settlement, earningLabel, billRequired, bill, h
 
       <div className="relative w-full max-w-md h-full bg-white shadow-xl overflow-y-auto">
         <div className="flex items-center justify-between p-5 border-b border-slate-100">
-          <p className="text-base font-semibold text-slate-900">Settlement details</p>
+          <p className="text-base font-semibold text-slate-900">Payment details</p>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
         </div>
 
@@ -494,7 +467,7 @@ function SettlementDetailPanel({ settlement, earningLabel, billRequired, bill, h
                 <p className="text-xs text-slate-500">Payment reference</p>
                 <p className="font-semibold text-slate-900">{settlement.settlementNumber}</p>
               </div>
-              <Badge status={settlement.status} />
+              <Badge status={settlement.status}>{paymentStatus(settlement.status)}</Badge>
             </div>
 
             {/* Amount waterfall: gross -> deductions/TDS -> net, the
@@ -502,7 +475,7 @@ function SettlementDetailPanel({ settlement, earningLabel, billRequired, bill, h
             <div>
               <p className="text-xs font-semibold uppercase text-slate-400 mb-3">Amount breakdown</p>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-slate-500">Gross Amount</span><span className="text-slate-900">{money(settlement.amount.gross, settlement.amount.currency)}</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">Before deductions</span><span className="text-slate-900">{money(settlement.amount.gross, settlement.amount.currency)}</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">Deductions</span><span className="text-red-600">- {money(settlement.amount.deductions, settlement.amount.currency)}</span></div>
                 {settlement.tax?.tdsRate > 0 && (
                   <div className="flex justify-between pl-4"><span className="text-slate-400">TDS ({settlement.tax.tdsRate}%)</span><span className="text-slate-400">- {money(settlement.tax.tdsAmount, settlement.amount.currency)}</span></div>
@@ -522,7 +495,7 @@ function SettlementDetailPanel({ settlement, earningLabel, billRequired, bill, h
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between"><span className="text-slate-500">Method</span><span className="text-slate-900 capitalize">{settlement.payment?.method?.replace(/_/g, " ") || "—"}</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">Reference / UTR</span><span className="text-slate-900">{settlement.payment?.transactionId || "—"}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Settled On</span><span className="text-slate-900">{settlement.payment?.paidAt ? new Date(settlement.payment.paidAt).toLocaleString() : "—"}</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">Paid on</span><span className="text-slate-900">{settlement.payment?.paidAt ? new Date(settlement.payment.paidAt).toLocaleString() : "—"}</span></div>
               </div>
             </div>
 
@@ -541,7 +514,7 @@ function SettlementDetailPanel({ settlement, earningLabel, billRequired, bill, h
             {settlement.commissionIds?.length > 0 && (
               <div>
                 <p className="text-xs font-semibold uppercase text-slate-400 mb-3">
-                  Included transactions ({settlement.commissionIds.length})
+                  Included earnings ({settlement.commissionIds.length})
                 </p>
                 <div className="space-y-2">
                   {settlement.commissionIds.map((c) => (

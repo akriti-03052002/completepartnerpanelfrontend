@@ -29,7 +29,7 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
   } else if (type === "vendor") {
     business = summary.payments?.paid?.amount || 0; completed = summary.customers?.active?.count || 0;
     tiles = [["Your customers", count(summary.customers)], ["Active customers", completed], ["Subscribed screens", summary.customers?.active?.amount || 0], ["Customer bills paid", money(business)]];
-    note = "Customer bills paid include online payment tax. Your commission is calculated on the amount before tax. Subscribed screens are screen slots customers have paid for.";
+    note = "Customer bills paid shows recorded customer payments; online payments include tax. Subscribed screens are the screen allowance on active subscriptions, not the number of screens online.";
   } else {
     business = summary.invoices?.paid?.amount || 0; completed = summary.inventory?.totalPurchasedLicenses || 0;
     tiles = [["Your customers", count(summary.customers)], ["Bought licences", completed], ["Assigned to customers", summary.inventory?.totalAllocatedLicenses || 0], ["Licence bills paid", money(business)], ["Licence bills to pay", money(total(Object.fromEntries(Object.entries(summary.invoices || {}).filter(([s]) => s !== "paid"))))]];
@@ -48,7 +48,8 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
   if (type !== "reseller" && hasPermission("commissions:view")) {
     const earned = total(Object.fromEntries(Object.entries(summary.earnings || {}).filter(([s]) => s !== "cancelled")));
     const paid = summary.earnings?.settled?.amount || 0;
-    tiles.push(["Recorded earnings", money(earned)], ["Paid to you", money(paid)], ["Not paid yet", money(earned - paid)]);
+    tiles.push(["Recorded earnings", money(earned)], ["Earnings marked paid", money(paid)], ["Earnings not yet paid", money(earned - paid)]);
+    note += " Earnings marked paid are before payment deductions such as TDS. Check Payments to You for the final payment amount.";
   }
   if (type === "reseller" && !hasPermission("reseller:billing:view")) tiles = tiles.filter(([label]) => !["Licence bills paid", "Licence bills to pay"].includes(label));
   if (type === "affiliate" && !hasPermission("referrals:view")) tiles = tiles.filter(([label]) => !["Leads you referred", "Won deals", "Deals in progress", "Value of confirmed deals"].includes(label));
@@ -83,10 +84,11 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
     "Cancelled customers": { icon: XCircle, color: "bg-red-50 text-red-600" }
   };
   return <Card className="p-5 space-y-4">
-    <div><h2 className="font-semibold text-lg"><span aria-hidden="true" className="mr-2">{{ vendor: "🖥️", affiliate: "🤝", influencer: "🎬", reseller: "📦" }[type]}</span>Your business overview</h2><p className="text-xs text-slate-500 mt-1">Totals for your partner account since you joined.{type !== "reseller" && hasPermission("commissions:view") ? " Recorded earnings include amounts waiting for approval." : ""}</p></div>
+    <div><h2 className="font-semibold text-lg"><span aria-hidden="true" className="mr-2">{{ vendor: "🖥️", affiliate: "🤝", influencer: "🎬", reseller: "📦" }[type]}</span>Your business overview</h2><p className="text-xs text-slate-500 mt-1">Current customer and screen counts, with all recorded bills and earnings.{type !== "reseller" && hasPermission("commissions:view") ? " Recorded earnings include amounts waiting for approval." : ""}</p></div>
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{tiles.filter(([title]) => !secondary.includes(title)).map(renderTile)}</div>
     {secondary.length > 0 && <section aria-label="Customer and screen breakdown">
       <h3 className="text-sm font-semibold text-slate-700 mb-3">Customers & screens</h3>
+      <p className="text-xs text-slate-500 mb-3">Registered screens have been added. Active screens are enabled; this does not show whether they are online right now.</p>
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">{tiles.filter(([title]) => secondary.includes(title)).map(([title, value]) => {
         const style = breakdownStyle[title];
         const Icon = style.icon;
