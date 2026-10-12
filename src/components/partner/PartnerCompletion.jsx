@@ -29,12 +29,15 @@ export default function PartnerCompletion() {
   useAutoRefresh(() => load());
   if (!data) return null;
   const verification = data.documentsAndBank;
-  return <section aria-label="Partner completion progress" className="grid sm:grid-cols-2 gap-4 mb-6">
-    <Progress label="Profile completion" icon={UserRound} value={data.profile} note={`${data.profile.completed} of ${data.profile.total} details filled`}>
+  const showProfile = data.profile.percent < 100;
+  const showVerification = verification.percent < 100;
+  if (!showProfile && !showVerification) return null;
+  return <section aria-label="Partner completion progress" className={`grid ${showProfile && showVerification ? "sm:grid-cols-2" : ""} gap-4 mb-6`}>
+    {showProfile && <Progress label="Profile completion" icon={UserRound} value={data.profile} note={`${data.profile.completed} of ${data.profile.total} details filled`}>
       <Link to="/partner/profile" title={data.profile.missing.join(", ")} className="inline-flex items-center gap-1">Profile <ArrowUpRight size={13} /></Link>
-    </Progress>
-    <Progress label="Documents & bank details" icon={ShieldCheck} value={verification} note={`${verification.completed} of ${verification.total} submitted · ${verification.verified} approved`}>
+    </Progress>}
+    {showVerification && <Progress label="Documents & bank details" icon={ShieldCheck} value={verification} note={`${verification.completed} of ${verification.total} submitted · ${verification.verified} approved`}>
       <Link to="/partner/documents">KYC</Link><Link to="/partner/bank">Bank</Link>
-    </Progress>
+    </Progress>}
   </section>;
 }
