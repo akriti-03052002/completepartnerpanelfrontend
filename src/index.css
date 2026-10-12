@@ -52,6 +52,12 @@ h1, h2, h3, h4, h5, h6 {
   outline-offset: 3px;
 }
 input[aria-invalid="true"], select[aria-invalid="true"] { border-color: #dc2626; }
+
+/* Password fields already provide a show/hide button; avoid Edge's second eye. */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
