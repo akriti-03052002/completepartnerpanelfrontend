@@ -1,5 +1,5 @@
 import spotxLogo from "../../assets/spotx-logo.png";
-import lightLogo from "../../assets/spotx-logo-light.svg";
+import lightLogo from "../../assets/spotx-logo-light.png";
 
 // The source asset's "Spot" wordmark is drawn white with only a hairline
 // outline — legible on a dark ground, invisible on a light one. On light

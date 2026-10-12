@@ -15,7 +15,7 @@ const FEATURES = [
   {
     icon: Users2,
     title: "Choose your role",
-    description: "Install SPOTX, sell licenses, refer businesses or create content."
+    description: "Install SpotX, sell licenses, refer businesses or create content."
   },
   {
     icon: Wallet,
@@ -25,7 +25,7 @@ const FEATURES = [
   {
     icon: ShieldCheck,
     title: "Get ready to start",
-    description: "Submit your documents and bank details for SPOTX to review."
+    description: "Submit your documents and bank details for SpotX to review."
   }
 ];
 
@@ -40,35 +40,35 @@ const PARTNER_TYPES = [
   {
     name: "Vendor",
     icon: Monitor,
-    direction: "SPOTX pays you",
-    blurb: "Install SPOTX on business screens and earn commission.",
+    direction: "SpotX pays you",
+    blurb: "Install SpotX on business screens and earn commission.",
     details: [
-      "Install SPOTX on your customers' screens.",
-      "Help businesses start using SPOTX.",
-      "Earn commission under your agreement with SPOTX.",
+      "Install SpotX on your customers' screens.",
+      "Help businesses start using SpotX.",
+      "Earn commission under your agreement with SpotX.",
       "Track your earnings and payments in this panel."
     ]
   },
   {
     name: "Reseller",
     icon: ShoppingBag,
-    direction: "You pay SPOTX",
-    blurb: "Buy SPOTX licenses and sell them with your screens.",
+    direction: "You pay SpotX",
+    blurb: "Buy SpotX licenses and sell them with your screens.",
     details: [
-      "Buy SPOTX software licenses in bulk.",
-      "Sell your own screens with SPOTX software at your chosen price.",
+      "Buy SpotX software licenses in bulk.",
+      "Sell your own screens with SpotX software at your chosen price.",
       "Assign licenses to your customers in this panel.",
-      "Pay SPOTX for all purchased licenses, including unused ones, under your agreement."
+      "Pay SpotX for all purchased licenses, including unused ones, under your agreement."
     ]
   },
   {
     name: "Affiliate",
     icon: Share2,
-    direction: "SPOTX pays you",
-    blurb: "Refer businesses to SPOTX and earn for successful deals.",
+    direction: "SpotX pays you",
+    blurb: "Refer businesses to SpotX and earn for successful deals.",
     details: [
-      "Introduce businesses that need SPOTX.",
-      "The SPOTX sales team speaks to them and handles the deal.",
+      "Introduce businesses that need SpotX.",
+      "The SpotX sales team speaks to them and handles the deal.",
       "Earn when your referral becomes a successful deal.",
       "Track referrals and payments in this panel. Payment terms depend on your agreement."
     ]
@@ -76,11 +76,11 @@ const PARTNER_TYPES = [
   {
     name: "Influencer",
     icon: Megaphone,
-    direction: "SPOTX pays you",
-    blurb: "Promote SPOTX through your content and earn for campaigns.",
+    direction: "SpotX pays you",
+    blurb: "Promote SpotX through your content and earn for campaigns.",
     details: [
-      "Create content about SPOTX for your audience.",
-      "Work with SPOTX on agreed campaigns.",
+      "Create content about SpotX for your audience.",
+      "Work with SpotX on agreed campaigns.",
       "Earn campaign payments under your agreement.",
       "Track your content and payments in this panel."
     ]
@@ -94,37 +94,39 @@ export default function Landing() {
     <div className="min-h-screen bg-white">
       <header className="border-b border-slate-100">
         <div className="w-full px-5 sm:px-8 h-20 flex items-center justify-between">
-          <Link to="/" aria-label="SPOTX home"><Logo size="md" plain /></Link>
+          <Link to="/" aria-label="SpotX home"><Logo size="md" plain /></Link>
           <Link to="/partner/login" className="text-sm font-semibold text-slate-700 hover:text-brand-black transition">
             Sign in
           </Link>
         </div>
       </header>
 
-      <section className="landing-hero relative isolate overflow-hidden px-6 pt-20 pb-20 text-center">
+      <section className="landing-hero relative isolate overflow-hidden px-6 py-14 sm:py-20">
         <div className="landing-motion" aria-hidden="true"><span /><span /><span /></div>
-        <div className="relative max-w-4xl mx-auto">
+        <div className="landing-grid" aria-hidden="true" />
+        <div className="relative max-w-6xl mx-auto grid lg:grid-cols-2 items-center gap-14 lg:gap-16">
+        <div>
         <span className="inline-block px-3 py-1 rounded-full bg-brand-red/10 text-brand-red text-xs font-semibold tracking-wide uppercase mb-6">
-          SPOTX Partner Program
+          SpotX Partner Program
         </span>
 
         <h1 className="font-heading text-4xl sm:text-5xl font-extrabold text-brand-black tracking-tight leading-tight">
-          Grow with SPOTX.<br />
-          Choose how you partner with us.
+          Your next opportunity.<br />
+          <span className="text-brand-red">With SpotX.</span>
         </h1>
 
-        <p className="text-slate-500 text-lg mt-6 max-w-2xl mx-auto">
-          SPOTX helps businesses show videos, menus and offers on their screens.
-          Join as a partner to install SPOTX, sell licenses, refer businesses or promote it.
+        <p className="text-slate-600 text-base sm:text-lg leading-relaxed mt-6 max-w-lg">
+          SpotX helps businesses show videos, menus and offers on their screens.
+          Join as a partner to install SpotX, sell licenses, refer businesses or promote it.
           Use this panel to track your work and payments.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
+        <div className="flex flex-col sm:flex-row gap-3 mt-8">
           <Link
-            to="/partner/register"
+            to="#partner-roles"
             className="inline-flex items-center justify-center gap-2 bg-brand-black text-white px-8 py-3.5 rounded-xl font-semibold hover:bg-charcoal transition"
           >
-            Become a Partner
+            Choose your role
             <ArrowRight size={18} />
           </Link>
           <Link
@@ -133,6 +135,27 @@ export default function Landing() {
           >
             Sign In
           </Link>
+        </div>
+        <p className="text-xs text-slate-500 mt-5">Install · Sell · Refer · Promote</p>
+        </div>
+        <div className="landing-scene relative mx-auto w-full max-w-lg" role="img" aria-label="Illustration of business screens showing menus, offers and videos with SpotX">
+          <div className="landing-orbit" aria-hidden="true" />
+          <div className="landing-screen relative rounded-3xl bg-white border border-slate-200 p-4 shadow-2xl shadow-slate-900/10">
+            <div className="flex items-center justify-between px-2 pb-4"><Logo plain size="sm" /><span className="text-xs text-slate-400">On your screens</span></div>
+            <div className="rounded-2xl bg-slate-950 p-6 sm:p-8 overflow-hidden relative min-h-64">
+              <div className="landing-screen-glow" aria-hidden="true" />
+              <div className="relative text-white">
+                <span className="text-[10px] uppercase tracking-[.2em] text-brand-yellow">Make every screen count</span>
+                <p className="font-heading font-bold text-3xl sm:text-4xl mt-4 leading-tight">Your content.<br />Every location.</p>
+                <div className="flex gap-2 mt-7">
+                  {["Menus", "Offers", "Videos"].map((label, index) => <span key={label} className={`landing-content-tag landing-tag-${index} text-xs px-3 py-2 rounded-lg border border-white/15 bg-white/10`}>{label}</span>)}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 pt-4 px-2"><Monitor size={14} className="text-slate-400" /><span className="text-xs text-slate-500">Powered by SpotX</span><div className="ml-auto flex gap-1.5" aria-hidden="true"><i className="w-1.5 h-1.5 rounded-full bg-brand-red" /><i className="w-1.5 h-1.5 rounded-full bg-slate-200" /><i className="w-1.5 h-1.5 rounded-full bg-slate-200" /></div></div>
+          </div>
+          <div className="landing-float-card absolute -top-5 -right-2 sm:-right-6 flex items-center gap-2 bg-white border border-slate-100 rounded-xl px-4 py-3 shadow-lg shadow-slate-900/5 text-sm font-medium"><Monitor size={17} className="text-brand-red" />Install SpotX</div>
+          <div className="landing-float-card landing-float-delayed absolute -bottom-5 -left-2 sm:-left-6 flex items-center gap-2 bg-white border border-slate-100 rounded-xl px-4 py-3 shadow-lg shadow-slate-900/5 text-sm font-medium"><Share2 size={17} className="text-brand-red" />Grow together</div>
         </div>
         </div>
       </section>
@@ -149,9 +172,11 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="text-center max-w-xl mx-auto mb-12">
+      <section id="partner-roles" className="max-w-6xl mx-auto px-6 py-16 sm:py-20 scroll-mt-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+          <div><p className="text-xs uppercase tracking-widest text-brand-red font-semibold mb-3">Four ways to work with us</p>
           <h2 className="font-heading text-2xl font-bold text-brand-black mb-2">Choose your partner role</h2>
+          </div>
           <p className="text-sm text-slate-500">
             Pick the work you want to do. Open a role to learn more.
           </p>
@@ -163,7 +188,7 @@ export default function Landing() {
               key={type.name}
               type="button"
               onClick={() => setActiveType(type)}
-              className="text-left bg-white rounded-2xl border border-slate-200 p-5 flex flex-col hover:border-brand-red hover:shadow-md transition cursor-pointer"
+              className="group text-left bg-white rounded-2xl border border-slate-200 p-6 flex flex-col hover:-translate-y-1 hover:border-brand-red hover:shadow-lg hover:shadow-brand-red/5 transition duration-300 cursor-pointer"
             >
               <div className="w-10 h-10 rounded-xl bg-brand-red/10 text-brand-red flex items-center justify-center mb-3">
                 <type.icon size={18} />
@@ -171,14 +196,14 @@ export default function Landing() {
               <h3 className="font-heading font-bold text-brand-black text-sm mb-1">{type.name}</h3>
               <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 mb-2">{type.direction}</span>
               <p className="text-xs text-slate-500 leading-relaxed">{type.blurb}</p>
-              <span className="text-xs font-semibold text-brand-red mt-3">See how it works →</span>
+              <span className="text-xs font-semibold text-brand-red mt-5 flex items-center gap-2">See how it works <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" /></span>
             </button>
           ))}
         </div>
 
-        <p className="text-center text-xs text-slate-400 mt-8">
-          Choose a role above to get started.
-        </p>
+        <div className="grid sm:grid-cols-3 gap-6 mt-10 pt-8 border-t border-slate-100">
+          {[['01', 'Choose your role', 'Pick the work that suits you.'], ['02', 'Create your account', 'Register and submit your details.'], ['03', 'Start with SpotX', 'Complete approval and start your partner work.']].map(([step, title, description]) => <div key={step} className="flex gap-3"><span className="text-brand-red font-heading text-lg font-bold">{step}</span><div><p className="font-semibold text-sm">{title}</p><p className="text-xs text-slate-500 mt-1">{description}</p></div></div>)}
+        </div>
       </section>
 
       {activeType && (
@@ -241,7 +266,7 @@ export default function Landing() {
 
       <footer className="max-w-6xl mx-auto px-6 py-8 text-center">
         <a href="https://spotx.in" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-brand-black hover:text-brand-red">Visit our main website: spotx.in <span aria-hidden="true">↗</span></a>
-        <p className="text-xs text-slate-400">© {new Date().getFullYear()} SPOTX. Partner Program.</p>
+        <p className="text-xs text-slate-400">© {new Date().getFullYear()} SpotX. Partner Program.</p>
       </footer>
     </div>
   );
