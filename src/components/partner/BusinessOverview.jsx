@@ -60,6 +60,7 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
     const bought = Number(summary.inventory.totalPurchasedLicenses) || 0;
     const assigned = Number(summary.inventory.totalAllocatedLicenses) || 0;
     chart = { title: "Licence allocation", total: bought, totalLabel: "Bought licences", note: "Each bar shows a share of your bought licences. Assigned licences are reserved for customers, not necessarily active screens.", rows: [{ label: "Ready to assign", value: Math.max(0, bought - assigned), color: "bg-emerald-500" }, { label: "Assigned to customers", value: assigned, color: "bg-blue-500" }] };
+    tiles = tiles.filter(([title]) => !["Bought licences", "Assigned to customers", "Ready to assign"].includes(title));
   }
   const secondary = type === "reseller" ? ["Registered screens", "Active screens", "Active customers", "Pending customers", "Suspended customers", "Cancelled customers"] : [];
   const renderTile = ([title, value]) => <div key={title} className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">{title}</p><p className="text-xl font-bold mt-1 break-words">{value}</p></div>;
