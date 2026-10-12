@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import GoogleSignIn from "../components/GoogleSignIn";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -8,6 +9,7 @@ import PasswordInput from "../components/ui/PasswordInput";
 
 export default function CustomerLogin() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { setSession } = useCustomerAuth();
 
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -15,6 +17,7 @@ export default function CustomerLogin() {
   const [error, setError] = useState("");
 
   const finishLogin = data => {
+    queryClient.clear();
     if (data.customerType === "reseller") {
       localStorage.removeItem("customerToken");
       localStorage.removeItem("customer");
