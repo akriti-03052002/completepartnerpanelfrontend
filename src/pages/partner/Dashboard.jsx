@@ -112,7 +112,8 @@ export default function Dashboard() {
         </Card>}
 
         <Card className="p-6">
-          <h2 className="font-semibold text-slate-900 mb-4">Recent Activity</h2>
+          <h2 className="font-semibold text-slate-900">Recent Activity</h2>
+          <p className="text-xs text-slate-500 mt-1 mb-4">History of actions and changes in your partner account.</p>
           <div className="space-y-4">
             {recentActivity.length === 0 && <p className="text-sm text-slate-400">Nothing yet.</p>}
             {recentActivity.map((a) => (

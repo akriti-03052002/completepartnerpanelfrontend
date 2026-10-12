@@ -18,6 +18,7 @@ export default function ResellerDashboard() {
   const [retry, setRetry] = useState(0);
   useAutoRefresh(() => setRetry(value => value + 1));
   const [business, setBusiness] = useState(null);
+  const [checks, setChecks] = useState(null);
   const [loadError, setLoadError] = useState("");
   const [inventory, setInventory] = useState(null);
   const [invoices, setInvoices] = useState([]);
@@ -26,7 +27,7 @@ export default function ResellerDashboard() {
   useEffect(() => {
     let active = true;
     Promise.all([
-      api.get("/partner/dashboard").then((res) => active && setBusiness(res.data.data.businessOverview)),
+      api.get("/partner/dashboard").then((res) => { if (active) { setBusiness(res.data.data.businessOverview); setChecks(res.data.data); } }),
       hasPermission("reseller:inventory:view") ? api.get("/partner/reseller/inventory").then((res) => active && setInventory(res.data.data)) : Promise.resolve(),
       hasPermission("reseller:billing:view") ? api.get("/partner/reseller/invoices").then((res) => active && setInvoices(res.data.data)) : Promise.resolve()
     ]).then(() => { if (active) setLoadError(""); }).catch(() => { if (active) setLoadError("Could not load your dashboard figures. Please try again."); }).finally(() => { if (active) setLoading(false); });
@@ -43,7 +44,7 @@ export default function ResellerDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3"><h1 className="text-2xl font-bold text-slate-900">Reseller Dashboard</h1><div className="flex items-center gap-2"><span className="text-xs text-slate-500">Partner Status</span><Badge status={partner?.status} verification /></div></div>
+      <div className="flex flex-wrap items-center justify-between gap-3"><h1 className="text-2xl font-bold text-slate-900">Reseller Dashboard</h1><div className="flex flex-wrap gap-4"><div className="flex items-center gap-2"><span className="text-xs text-slate-500">Partner Status</span><Badge status={partner?.status} verification /></div>{checks && <><div className="flex items-center gap-2"><span className="text-xs text-slate-500">KYC Verification</span><Badge status={checks.kycStatus} verification /></div><div className="flex items-center gap-2"><span className="text-xs text-slate-500">Bank Status</span><Badge status={checks.bankStatus} verification /></div></>}</div></div>
       {loadError && <p role="alert" className="text-red-600">{loadError}</p>}
       {business && <BusinessOverview type="reseller" summary={business} />}
       <Card className="p-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-semibold">{currentInvoice ? "Review your payment due" : available === 0 ? "Check your screen licences" : "Manage your customers"}</h2><p className="text-sm text-slate-500 mt-1">{currentInvoice ? `Your next unpaid bill is due ${new Date(currentInvoice.dueDate).toLocaleDateString("en-IN")}. Open billing to review or pay it.` : available === 0 ? "Review your licences and request more when you need them." : `${available} licences are available for customer allocation.`}</p></div>{hasPermission(currentInvoice ? "reseller:billing:view" : available === 0 ? "reseller:inventory:view" : "reseller:customers:manage") && <Link to={currentInvoice ? "/partner/reseller/billing" : available === 0 ? "/partner/reseller/inventory" : "/partner/reseller/customers"} className="rounded-lg bg-brand-red text-white px-4 py-2 text-sm font-semibold">{currentInvoice ? "Open billing" : available === 0 ? "View licences" : "Open customers"}</Link>}</Card>

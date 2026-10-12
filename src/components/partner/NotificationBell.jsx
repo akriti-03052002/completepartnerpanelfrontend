@@ -9,6 +9,7 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [markingAll, setMarkingAll] = useState(false);
 
   const load = () => {
     api.get("/partner/notifications")
@@ -47,8 +48,14 @@ export default function NotificationBell() {
   };
 
   const markAllRead = async () => {
-    await api.patch("/partner/notifications/read-all");
-    load();
+    if (loading || markingAll || unreadCount === 0) return;
+    setMarkingAll(true);
+    try {
+      await api.patch("/partner/notifications/read-all", {}, { silentSuccess: true });
+      setNotifications(current => current.map(notification => ({ ...notification, read: true })));
+      load();
+    } catch { /* Leave unread entries visible so the user can retry. */ }
+    finally { setMarkingAll(false); }
   };
 
   return (
@@ -72,8 +79,8 @@ export default function NotificationBell() {
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
               <p className="text-sm font-semibold text-slate-900">Notifications</p>
               {unreadCount > 0 && (
-                <button type="button" onClick={markAllRead} className="text-xs font-semibold text-brand-red hover:underline">
-                  Mark all as read
+                <button type="button" onClick={markAllRead} disabled={loading || markingAll} className="text-xs font-semibold text-brand-red hover:underline disabled:opacity-50">
+                  {markingAll ? "Marking..." : "Mark all as read"}
                 </button>
               )}
             </div>

@@ -13,6 +13,9 @@ import { useListFilter } from "../../hooks/useListFilter";
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [markingAll, setMarkingAll] = useState(false);
+  const [error, setError] = useState("");
+  const unreadCount = notifications.filter(n => !n.read).length;
   const { visible, toolbar } = useListFilter(notifications, [
     { label: "Read", value: (n) => (n.read ? "Read" : "Unread") },
     { label: "About", value: (n) => n.type }
@@ -33,8 +36,14 @@ export default function Notifications() {
   useEffect(() => { load(); }, []);
 
   const markAllRead = async () => {
-    await api.patch("/partner/notifications/read-all");
-    load();
+    if (loading || markingAll || unreadCount === 0) return;
+    setMarkingAll(true);
+    setError("");
+    try {
+      await api.patch("/partner/notifications/read-all", {}, { silentSuccess: true });
+      await load();
+    } catch { setError("Could not mark notifications as read. Please try again."); }
+    finally { setMarkingAll(false); }
   };
 
   const markRead = async (id) => {
@@ -46,8 +55,10 @@ export default function Notifications() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-900">Notifications</h1>
-        <Button variant="outline" onClick={markAllRead}>Mark all as read</Button>
+        <Button variant="outline" onClick={markAllRead} disabled={loading || markingAll || unreadCount === 0}>{markingAll ? "Marking as read..." : "Mark all as read"}</Button>
       </div>
+      <p className="text-sm text-slate-500">Updates from SpotX about approvals, rejections and payments. {unreadCount > 0 ? `${unreadCount} unread.` : "You have no unread notifications."}</p>
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
       <ListToolbar toolbar={toolbar} placeholder="Search notifications" />
 
