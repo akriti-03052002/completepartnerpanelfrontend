@@ -1,6 +1,7 @@
+import { checkOnlinePayment } from "../../utils/checkOnlinePayment.mjs";
 import Pagination from "../../components/ui/Pagination";
 import { useSessionState } from "../../hooks/useSessionState";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, History, Landmark, RefreshCw, Search, Info, CalendarX2, X, Clock3, FileText, Download, FolderOpen } from "lucide-react";
 import adminApi from "../../services/adminApi";
@@ -214,31 +215,39 @@ export default function AdminSettlements() {
     paymentId: "", fetching: false, payment: null, payoutCheck: null,
     payoutDetails: null, loadingDetails: false,
     offlineMethod: "bank_transfer", chequeStatus: settlements.find((item) => item._id === id)?.cheque?.status || "received", referenceNumber: settlements.find((item) => item._id === id)?.cheque?.number || "", note: "",
-    error: "", submitting: false
+    error: "", checkMessage: "", pendingCheck: false, submitting: false
   });
 
+  const paymentCheck = useRef(null);
+  useEffect(() => {
+    return () => paymentCheck.current?.abort();
+  }, [payModal?.settlementId, payModal?.paymentId, payModal?.tab]);
+
   const fetchRazorpayPayment = async () => {
-    if (!payModal.paymentId.trim()) return;
-    setPayModal((m) => ({ ...m, fetching: true, error: "", payment: null, payoutCheck: null }));
-    // A RazorpayX payout ID ("pout_...") is checked against this settlement
-    // (processed, right amount, right bank account) rather than looked up
-    // as a gateway payment.
-    if (isPayoutId(payModal.paymentId)) {
-      try {
-        const res = await adminApi.get(`/admin/settlements/${payModal.settlementId}/online-check`, {
-          params: { transactionId: payModal.paymentId.trim() }
-        });
-        setPayModal((m) => ({ ...m, fetching: false, payoutCheck: res.data.data }));
-      } catch (err) {
-        setPayModal((m) => ({ ...m, fetching: false, error: err.response?.data?.message || "Couldn't check this payout with RazorpayX." }));
-      }
-      return;
-    }
+    if (!payModal?.paymentId.trim()) return;
+    paymentCheck.current?.abort();
+    const controller = new AbortController();
+    paymentCheck.current = controller;
+    const id = payModal.paymentId.trim();
+    const settlementId = payModal.settlementId;
+    setPayModal(m => m && ({ ...m, fetching: true, error: "", checkMessage: "Checking payment. This can take up to 10 minutes. Please do not pay again.", payment: null, payoutCheck: null }));
     try {
-      const res = await adminApi.get(`/admin/settlements/razorpay-payment/${payModal.paymentId.trim()}`);
-      setPayModal((m) => ({ ...m, fetching: false, payment: res.data.data }));
+      const { result, pending } = await checkOnlinePayment(async signal => {
+        const response = isPayoutId(id)
+          ? await adminApi.get(`/admin/settlements/${settlementId}/online-check`, { params: { transactionId: id }, signal, timeout: 10000, silentSuccess: true })
+          : await adminApi.get(`/admin/settlements/razorpay-payment/${id}`, { signal, timeout: 10000, silentSuccess: true });
+        return response.data.data;
+      }, { signal: controller.signal });
+      controller.signal.throwIfAborted();
+      setPayModal(m => m && ({ ...m, fetching: false,
+        payment: isPayoutId(id) ? null : result,
+        payoutCheck: isPayoutId(id) ? result : null,
+        checkMessage: pending ? "Payment is still unconfirmed. Check again later; do not send the payment again." : "",
+        pendingCheck: pending
+      }));
     } catch (err) {
-      setPayModal((m) => ({ ...m, fetching: false, error: err.response?.data?.message || "Couldn't fetch this payment from Razorpay." }));
+      if (controller.signal.aborted) return;
+      setPayModal(m => m && ({ ...m, fetching: false, checkMessage: "", error: err.response?.data?.message || "Could not confirm the payment. This does not mean it failed. Check again later." }));
     }
   };
 
@@ -507,9 +516,7 @@ export default function AdminSettlements() {
                           <button onClick={() => openReasonModal("fail", s._id)} className="text-xs font-semibold text-red-600 hover:underline">Mark Failed</button>
                         </>
                       )}
-                      {s.partnerId && s.status === "failed" && (
-                        <button onClick={() => retrySettlement(s._id)} className="text-xs font-semibold text-amber-600 hover:underline">Retry</button>
-                      )}
+                      {s.partnerId && s.status === "failed" && (<><button onClick={() => openMarkPaid(s._id)} className="text-xs font-semibold text-brand-red hover:underline">Check online payment</button><button onClick={() => retrySettlement(s._id)} className="text-xs font-semibold text-amber-600 hover:underline">Retry</button></>)}
                       {s.partnerId && HOLDABLE_STATUSES.includes(s.status) && (
                         <button onClick={() => openReasonModal("hold", s._id)} className="text-xs font-semibold text-slate-500 hover:underline">Hold</button>
                       )}
@@ -978,19 +985,21 @@ function MarkPaidModal({ state, setState, onFetch, onLoadPayoutDetails, onConfir
               <div className="flex gap-2">
                 <input
                   value={state.paymentId}
+                  disabled={state.fetching}
                   onChange={(e) => setState((m) => ({ ...m, paymentId: e.target.value, payment: null, payoutCheck: null, error: "" }))}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); onFetch(); } }}
                   placeholder="pay_xxxxxxxxxxxxxx or pout_xxxxxxxxxxxxxx"
                   className="flex-1 min-w-0 px-3 py-2 border border-slate-200 rounded-xl outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition text-sm"
                 />
-                <Button type="button" onClick={onFetch} loading={state.fetching} className="shrink-0 !px-3 !py-2">Fetch</Button>
+                <Button type="button" onClick={onFetch} loading={state.fetching} disabled={state.fetching} className="shrink-0 !px-3 !py-2">Check payment</Button>
               </div>
               <p className="text-xs text-slate-400 mt-1">Fetched live from Razorpay — nothing is marked paid until you confirm below.</p>
             </div>
 
+            {state.checkMessage && <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">{state.checkMessage}</p>}
             {state.payment && (
               <div className="border border-slate-100 rounded-xl p-3 space-y-2 text-sm">
-                <div className="flex justify-between items-center"><span className="text-slate-500">Status</span><Badge status={state.payment.status} /></div>
+                <div className="flex justify-between items-center"><span className="text-slate-500">Status</span><Badge status={state.pendingCheck ? "processing" : state.payment.status}>{state.pendingCheck ? "Checking payment" : undefined}</Badge></div>
                 <div className="flex justify-between"><span className="text-slate-500">Amount</span><span className="font-semibold text-slate-900">{money(state.payment.amount, state.payment.currency)}</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">Method</span><span className="text-slate-900 capitalize">{state.payment.method || "—"}</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">Paid On</span><span className="text-slate-900">{state.payment.createdAt ? new Date(state.payment.createdAt).toLocaleString() : "—"}</span></div>
@@ -1002,7 +1011,7 @@ function MarkPaidModal({ state, setState, onFetch, onLoadPayoutDetails, onConfir
 
             {state.payoutCheck && (
               <div className="border border-slate-100 rounded-xl p-3 space-y-2 text-sm">
-                <div className="flex justify-between items-center"><span className="text-slate-500">Payout status</span><Badge status={state.payoutCheck.payout.status} /></div>
+                <div className="flex justify-between items-center"><span className="text-slate-500">Payout status</span><Badge status={state.pendingCheck ? "processing" : state.payoutCheck.payout.status}>{state.pendingCheck ? "Checking payment" : undefined}</Badge></div>
                 <div className="flex justify-between"><span className="text-slate-500">Amount paid</span><span className="font-semibold text-slate-900">{money(state.payoutCheck.payout.amount)}</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">Amount payable</span><span className="text-slate-900">{money(state.payoutCheck.payout.expectedAmount)}</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">Paid to</span><span className="text-slate-900">•••• {state.payoutCheck.payout.paidToAccountLast4 || "?"}{state.payoutCheck.payout.paidToIfsc ? ` · ${state.payoutCheck.payout.paidToIfsc}` : ""}</span></div>
@@ -1019,7 +1028,7 @@ function MarkPaidModal({ state, setState, onFetch, onLoadPayoutDetails, onConfir
 
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-              <Button type="button" onClick={onConfirmRazorpay} loading={state.submitting} disabled={!canConfirmRazorpay}>
+              <Button type="button" onClick={onConfirmRazorpay} loading={state.submitting} disabled={state.fetching || !canConfirmRazorpay}>
                 Confirm &amp; Mark Paid
               </Button>
             </div>
