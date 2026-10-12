@@ -1,10 +1,11 @@
+import IfscField from "../../ui/IfscField";
 import { useState } from "react";
 import adminApi from "../../../services/adminApi";
 import { Input, Select } from "../../ui/Input";
 import Button from "../../ui/Button";
 
 export default function AdminBankEntry({ partnerId, onSaved }) {
-  const [form, setForm] = useState({ accountHolderName: "", bankName: "", accountNumber: "", ifsc: "", accountType: "savings" });
+  const [form, setForm] = useState({ accountHolderName: "", bankName: "", accountNumber: "", ifsc: "", accountType: "savings", accountTypeOther: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const change = e => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -23,10 +24,11 @@ export default function AdminBankEntry({ partnerId, onSaved }) {
       <Input label="Account holder" name="accountHolderName" value={form.accountHolderName} onChange={change} required />
       <Input label="Bank name" name="bankName" value={form.bankName} onChange={change} required />
       <Input label="Account number" name="accountNumber" inputMode="numeric" value={form.accountNumber} onChange={change} required />
-      <Input label="IFSC" name="ifsc" value={form.ifsc} onChange={change} required />
+      <IfscField value={form.ifsc} onChange={change} onBankResolved={(bankName, code) => setForm(previous => previous.ifsc.trim().toUpperCase() === code ? { ...previous, bankName } : previous)} />
       <Select label="Account type" name="accountType" value={form.accountType} onChange={change}>
         <option value="savings">Savings</option><option value="current">Current</option><option value="other">Other</option>
       </Select>
+            {form.accountType === "other" && <Input label="Specify account type" name="accountTypeOther" value={form.accountTypeOther || ""} onChange={change} required maxLength={100} placeholder="For example: NRE account" />}
     </div>
     {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
     <Button type="submit" loading={busy}>Save bank details</Button>

@@ -1,3 +1,4 @@
+import IfscField from "../../components/ui/IfscField";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { AlertCircle } from "lucide-react";
@@ -8,7 +9,7 @@ import Button from "../../components/ui/Button";
 import { Input, Select } from "../../components/ui/Input";
 import { waitForRazorpay } from "../../utils/razorpayCheckout";
 
-const EMPTY_FORM = { accountHolderName: "", bankName: "", accountNumber: "", ifsc: "", accountType: "current" };
+const EMPTY_FORM = { accountHolderName: "", bankName: "", accountNumber: "", ifsc: "", accountType: "current", accountTypeOther: "" };
 
 export default function Bank() {
   const [account, setAccount] = useState(null);
@@ -135,7 +136,8 @@ export default function Bank() {
               {account.pendingChange ? "Change Pending Review" : "Update"}
             </Button>
           </div>
-          <dl className="space-y-3 text-sm">
+          <p className="mb-3 text-sm text-slate-600">Account type: {account.pendingChange?.accountType === "other" ? account.pendingChange.accountTypeOther || "Other (not specified)" : account.pendingChange?.accountType || (account.accountType === "other" ? account.accountTypeOther || "Other (not specified)" : account.accountType)}</p>
+              <dl className="space-y-3 text-sm">
             <div className="flex justify-between"><dt className="text-slate-500">Account Holder</dt><dd className="font-medium">{account.accountHolderName}</dd></div>
             <div className="flex justify-between"><dt className="text-slate-500">Bank</dt><dd className="font-medium">{account.bankName}</dd></div>
             <div className="flex justify-between"><dt className="text-slate-500">Account Number</dt><dd className="font-medium">•••• {account.accountNumberLast4}</dd></div>
@@ -250,12 +252,13 @@ export default function Bank() {
             <Input label="Account Holder Name" name="accountHolderName" value={form.accountHolderName} onChange={handleChange} required />
             <Input label="Bank Name" name="bankName" value={form.bankName} onChange={handleChange} required />
             <Input label="Account Number" name="accountNumber" value={form.accountNumber} onChange={handleChange} required />
-            <Input label="IFSC Code" name="ifsc" value={form.ifsc} onChange={handleChange} required />
+            <IfscField value={form.ifsc} onChange={handleChange} onBankResolved={(bankName, code) => setForm(previous => previous.ifsc.trim().toUpperCase() === code ? { ...previous, bankName } : previous)} />
             <Select label="Account Type" name="accountType" value={form.accountType} onChange={handleChange}>
               <option value="current">Current</option>
               <option value="savings">Savings</option>
               <option value="other">Other</option>
             </Select>
+            {form.accountType === "other" && <Input label="Specify account type" name="accountTypeOther" value={form.accountTypeOther || ""} onChange={handleChange} required maxLength={100} placeholder="For example: NRE account" />}
             <div className="flex justify-end gap-3">
               {account && <Button type="button" variant="outline" onClick={() => setEditing(false)}>Cancel</Button>}
               <Button type="submit" loading={saving}>Save Bank Account</Button>

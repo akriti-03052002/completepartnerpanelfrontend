@@ -1,3 +1,5 @@
+import DesignationField from "../../components/ui/DesignationField";
+import IndustryField from "../../components/ui/IndustryField";
 import { useEffect, useMemo, useState } from "react";
 import { UserCog, Loader2 } from "lucide-react";
 import { Country, State } from "country-state-city";
@@ -177,7 +179,7 @@ export default function Profile() {
 
           {!isInfluencer && (
             <>
-              <Input label="Legal Name" name="legalName" value={form.legalName} onChange={handleChange} disabled={!canEdit} />
+              <Input label="Legal name (optional)" hint="Leave blank if you do not have a separate legal name." name="legalName" value={form.legalName || ""} onChange={handleChange} disabled={!canEdit} />
               <Select label="Entity Type" name="entityType" value={form.entityType} onChange={handleChange} disabled={!canEdit}>
                 <option value="">Select entity type</option>
                 {ENTITY_TYPES.map((t) => <option key={t} value={t}>{t.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</option>)}
@@ -188,12 +190,12 @@ export default function Profile() {
           {!isInfluencer && (
             <>
               <Input label="Website" name="website" value={form.website} onChange={handleChange} disabled={!canEdit} />
-              <Input label="Industry" name="industry" value={form.industry} onChange={handleChange} disabled={!canEdit} />
+              <IndustryField value={form.industry} onChange={handleChange} disabled={!canEdit} />
             </>
           )}
           <Input label={isInfluencer ? "Legal / Contact Name" : "Contact Name"} name="contactName" value={form.contactName} onChange={handleChange} disabled={!canEdit} />
           <PhoneInput label="Phone" name="phone" value={form.phone} onChange={handleChange} disabled={!canEdit} />
-          {!isInfluencer && <Input label="Designation" name="designation" value={form.designation} onChange={handleChange} disabled={!canEdit} />}
+          {!isInfluencer && <DesignationField value={form.designation} onChange={handleChange} disabled={!canEdit} />}
 
           <Select
             label="Country"

@@ -117,6 +117,7 @@ export default function AdminPartnerDetail() {
   const [previewDoc, setPreviewDoc] = useState(null);
   const [previewBank, setPreviewBank] = useState(false);
   const [editingAgreement, setEditingAgreement] = useState(false);
+  const [otherDocumentDescription, setOtherDocumentDescription] = useState("");
   const [pendingFiles, setPendingFiles] = useState({}); // { [documentType]: File }
   const [uploadingType, setUploadingType] = useState(null);
   const [uploadErrors, setUploadErrors] = useState({}); // { [documentType]: message }
@@ -237,8 +238,10 @@ export default function AdminPartnerDetail() {
       return;
     }
 
+    if (type === "other" && !otherDocumentDescription.trim()) { setUploadErrors(prev => ({ ...prev, [type]: "Describe the other document before uploading." })); return; }
     const formData = new FormData();
     formData.append("documentType", type);
+    if (type === "other") formData.append("documentDescription", otherDocumentDescription.trim());
     formData.append("file", file);
 
     try {
@@ -486,6 +489,8 @@ export default function AdminPartnerDetail() {
                   {(!type.systemGenerated || doc) && <Badge status={status} />}
                 </div>
 
+                {type.value === "other" && <label className="mb-3 block text-sm font-medium text-slate-700">What is this document?<input type="text" value={otherDocumentDescription} onChange={event => setOtherDocumentDescription(event.target.value)} maxLength={200} placeholder="For example: business registration certificate" className="mt-2 w-full rounded-xl border border-slate-200 p-3" /></label>}
+                {doc?.documentDescription && <p className="mb-3 text-sm text-slate-600">Document: {doc.documentDescription}</p>}
                 {doc && (
                   <button
                     type="button"

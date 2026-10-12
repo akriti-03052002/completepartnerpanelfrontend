@@ -75,6 +75,7 @@ export default function BankAccountPreviewModal({ account, onClose, onVerify, on
           {!error && !details && <p className="text-sm text-slate-400">Loading...</p>}
           {details && (
             <dl className="space-y-3">
+              <div><dt className="text-xs text-slate-400">Account type</dt><dd className="text-sm font-medium text-slate-900">{details.accountType === "other" ? details.accountTypeOther || "Other (not specified)" : details.accountType || account.accountType}</dd></div>
               <div>
                 <dt className="text-xs text-slate-400">Account Holder</dt>
                 <dd className="text-sm font-medium text-slate-900">{details.accountHolderName}</dd>

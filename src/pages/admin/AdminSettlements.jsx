@@ -273,6 +273,7 @@ export default function AdminSettlements() {
       setPayModal((m) => ({ ...m, error: "A reference number (UTR / cheque no. / etc) is required." }));
       return;
     }
+    if (payModal.offlineMethod === "other" && !payModal.note.trim()) { setPayModal(m => ({ ...m, error: "Specify the payment method in the note." })); return; }
     setPayModal((m) => ({ ...m, submitting: true, error: "" }));
     try {
       await adminApi.patch(`/admin/settlements/${payModal.settlementId}/mark-paid-offline`, {
@@ -942,6 +943,7 @@ function MarkPaidModal({ state, setState, onFetch, onLoadPayoutDetails, onConfir
                 <option value="other">Other</option>
               </select>
             </div>
+            {state.offlineMethod === "other" && <p className="text-sm text-slate-600">Specify the payment method in the note below. This is required for Other.</p>}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Reference number</label>
               <input

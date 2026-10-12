@@ -1,3 +1,5 @@
+import DesignationField from "../../ui/DesignationField";
+import IndustryField from "../../ui/IndustryField";
 import { useState } from "react";
 import adminApi from "../../../services/adminApi";
 import Card from "../../ui/Card";
@@ -85,16 +87,16 @@ export default function PartnerProfileForm({ partner, onSaved }) {
       ) : (
         <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input label={isInfluencer ? "Creator / Influencer Name" : "Business Name"} name="businessName" value={form.businessName} onChange={handleChange} />
-          <Input label="Legal Name" name="legalName" value={form.legalName} onChange={handleChange} />
+          <Input label="Legal name (optional)" hint="Leave blank if you do not have a separate legal name." name="legalName" value={form.legalName || ""} onChange={handleChange} />
           <Select label="Entity Type" name="entityType" value={form.entityType} onChange={handleChange}>
             <option value="">Not specified</option>
             {ENTITY_TYPES.map((t) => <option key={t} value={t}>{t.replace(/_/g, " ")}</option>)}
           </Select>
-          <Input label="Industry" name="industry" value={form.industry} onChange={handleChange} />
+          <IndustryField value={form.industry} onChange={handleChange} />
           <Input label="Website" name="website" value={form.website} onChange={handleChange} />
           <Input label="Contact Name" name="contactName" value={form.contactName} onChange={handleChange} />
           <PhoneInput label="Phone" name="phone" value={form.phone} onChange={handleChange} />
-          <Input label="Designation" name="designation" value={form.designation} onChange={handleChange} />
+          <DesignationField value={form.designation} onChange={handleChange} />
           <AddressFields value={form} onChange={(patch) => setForm((prev) => ({ ...prev, ...patch }))} />
 
           {error && <p role="alert" className="md:col-span-2 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</p>}

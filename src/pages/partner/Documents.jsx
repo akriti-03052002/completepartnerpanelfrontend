@@ -33,6 +33,7 @@ export default function Documents() {
   const [notApplicable, setNotApplicable] = useState([]);
   const DOCUMENT_TYPES = ALL_DOCUMENT_TYPES.filter((type) => !notApplicable.includes(type.value));
   const [loading, setLoading] = useState(true);
+  const [otherDocumentDescription, setOtherDocumentDescription] = useState("");
   const [pendingFiles, setPendingFiles] = useState({}); // { [documentType]: File }
   const [uploadingType, setUploadingType] = useState(null);
   const [downloadingId, setDownloadingId] = useState(null);
@@ -74,8 +75,10 @@ export default function Documents() {
       return;
     }
 
+    if (type === "other" && !otherDocumentDescription.trim()) { setErrors(prev => ({ ...prev, [type]: "Describe the other document before uploading." })); return; }
     const formData = new FormData();
     formData.append("documentType", type);
+    if (type === "other") formData.append("documentDescription", otherDocumentDescription.trim());
     formData.append("file", file);
 
     try {
@@ -166,6 +169,8 @@ export default function Documents() {
                   {(!type.systemGenerated || doc) && <Badge status={status} verification />}
                 </div>
 
+                {type.value === "other" && <label className="mb-3 block text-sm font-medium text-slate-700">What is this document?<input type="text" value={otherDocumentDescription} onChange={event => setOtherDocumentDescription(event.target.value)} maxLength={200} placeholder="For example: business registration certificate" className="mt-2 w-full rounded-xl border border-slate-200 p-3" /></label>}
+                {doc?.documentDescription && <p className="mb-3 text-sm text-slate-600">Document: {doc.documentDescription}</p>}
                 {doc && (
                   <div className="flex items-center justify-between gap-3 mb-3 p-2.5 bg-slate-50 rounded-lg">
                     <div className="flex items-center gap-2 min-w-0">
