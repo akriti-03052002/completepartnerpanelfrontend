@@ -1,3 +1,4 @@
+import Explanation from "../../../components/ui/Explanation";
 import { useEffect, useState } from "react";
 import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
 import { Link } from "react-router-dom";
@@ -53,15 +54,15 @@ export default function ResellerInventory() {
           <Stat label="Ready to assign" value={available} />
           <Stat label="Paused screens" value={inventory?.totalSuspendedScreens || 0} />
         </div>
-        <p className="text-xs text-slate-400 mt-4 pt-4 border-t border-slate-100">
+        <Explanation title="How licence billing works" className="mt-4"><p>
           SPOTX bills you on <strong>bought licences</strong> every billing cycle, regardless of how many are allocated, delivered, or active.
-        </p>
+        </p></Explanation>
       </Card>
 
       <Card>
         <div className="p-4 border-b border-slate-100">
           <p className="text-sm font-semibold text-slate-900">Licence & screen changes</p>
-          <p className="text-xs text-slate-500 mt-1">The count after each change refers to the type shown next to it. It is not a money balance.</p>
+          <Explanation title="How to read these changes"><p>The count after each change refers to the type shown next to it. It is not a money balance.</p></Explanation>
         </div>
         <Table
           searchable

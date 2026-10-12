@@ -1,3 +1,4 @@
+import Explanation from "../components/ui/Explanation";
 import CapacityVisual from "../components/ui/CapacityVisual";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -62,7 +63,7 @@ export default function CustomerPortalDashboard() {
               </div>
             </div>
             <div className="mt-5"><CapacityVisual title="Enabled screen access" used={data.screens.active} capacity={data.screens.allocated} usedLabel="enabled screens" note="Enabled screens are allowed to run. This is account access, not a live device connection indicator." /></div>
-            <p className="mt-4 text-sm text-slate-600">Your allowance is the number of screens your reseller has assigned. Enabled screens can be used; paused screens need your reseller's help.</p>
+            <Explanation title="About your screen allowance"><p className="mt-4 text-sm text-slate-600">Your allowance is the number of screens your reseller has assigned. Enabled screens can be used; paused screens need your reseller's help.</p></Explanation>
             <Link to="/reseller/customer/screens" className="mt-3 inline-flex min-h-11 items-center rounded-xl bg-brand-black px-4 text-sm font-semibold text-white hover:bg-charcoal">Manage your screens</Link>
             <p className="text-xs text-slate-400 mt-4 pt-4 border-t border-slate-100">
               Questions about your screens or billing? Contact {data.resellerName} directly.

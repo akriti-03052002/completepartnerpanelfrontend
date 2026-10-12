@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useEffect, useState } from "react";
 import { Plus, Users, Handshake, Trophy, Wallet } from "lucide-react";
 import api from "../../services/api";
@@ -76,9 +77,9 @@ export default function Leads() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Leads & Deals</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <Explanation title="How referrals work"><p className="text-sm text-slate-500 mt-1">
             Refer a business and track the deal here. SPOTX handles pricing and sales; you earn a referral reward when the deal is won.
-          </p>
+          </p></Explanation>
         </div>
         {hasPermission("referrals:create") && (
           <Button onClick={() => setShowForm((v) => !v)}>

@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import InvoiceDownload from "../../components/ui/InvoiceDownload";
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, CalendarClock, RefreshCw, Search, CalendarX2, X, Landmark, FileText, Upload } from "lucide-react";
@@ -177,7 +178,7 @@ export default function Settlements() {
           <OverviewItem icon={CheckCircle2} iconTone="bg-emerald-50 text-emerald-600" label="Last payment" primary={previousSettlement ? money(previousSettlement.amount.net, previousSettlement.amount.currency) : "No payment yet"} secondary={previousSettlement?.payment?.paidAt ? new Date(previousSettlement.payment.paidAt).toLocaleDateString() : null} />
           <OverviewItem icon={CalendarClock} iconTone="bg-blue-50 text-blue-600" label="Next payment" primary={nextSettlementInfo.primary} secondary={nextSettlementInfo.secondary} footnote={nextSettlementInfo.footnote} />
         </div>
-        <p className="text-xs text-slate-500 mt-5">Amounts exclude GST added through an approved bill. Open a payment below for its full amount and any action needed.</p>
+        <Explanation title="About payment amounts" className="mt-4"><p>Amounts exclude GST added through an approved bill. Open a payment below for its full amount and any action needed.</p></Explanation>
       </Card>
 
       </>}
@@ -208,7 +209,7 @@ export default function Settlements() {
           </div>
         </div>
 
-        <p className="text-sm text-slate-500 mb-3" role="status">{FILTER_HELP[statusFilter]}</p>
+        <Explanation title="What does this status mean?" className="mb-3"><p>{FILTER_HELP[statusFilter]}</p></Explanation>
         <Card>
           {loading ? (
             <p className="text-slate-400 text-sm p-6">Loading...</p>

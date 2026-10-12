@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import InvoiceDownload from "../../components/ui/InvoiceDownload";
@@ -144,7 +145,7 @@ export default function AdminResellerReceivables({ partnerId, status, duration, 
         <div className="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold text-slate-900">Reseller bills</h2>
-            <p className="text-sm text-slate-500 mt-1">Money Resellers owe SPOTX for purchased licenses; this is incoming payment, not a partner payout.</p>
+            <Explanation title="About outstanding reseller bills"><p className="text-sm text-slate-500 mt-1">Money Resellers owe SPOTX for purchased licenses; this is incoming payment, not a partner payout.</p></Explanation>
           </div>
           <div className="flex gap-6 text-sm">
             <div>

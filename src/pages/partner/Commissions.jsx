@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../../services/api";
@@ -51,7 +52,7 @@ export default function Commissions() {
       </h1>
 
       {partnerType === "vendor" && <Card className="p-5 space-y-3">
-        <h2 className="font-semibold text-slate-900">How to read your commission</h2>
+        <Explanation title="How to read your commission">
         <ol className="list-decimal pl-5 space-y-2 text-sm leading-6 text-slate-600">
           <li><strong>Customer payment basis</strong> is the recorded amount used for the calculation. It is separate from your earnings.</li>
           <li><strong>Commission before deductions</strong> comes from your individual agreed rate or fixed amount. Percentage commissions show the payment basis multiplied by your rate.</li>
@@ -59,7 +60,7 @@ export default function Commissions() {
         </ol>
         <p className="text-sm text-slate-600">One-time commission applies to the qualifying first payment. Recurring commission applies to qualifying repeat payments under your agreement.</p>
         {hasPermission("settlements:view") && <Link to="/partner/settlements" className="inline-flex min-h-11 items-center rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Check payments to you</Link>}
-      </Card>}
+      </Explanation></Card>}
       {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error} <button type="button" onClick={fetchCommissions} className="font-semibold underline">Try again</button>{commissions.length > 0 && <p className="mt-1">Showing previously loaded earnings until the refresh succeeds.</p>}</div>}
       <Card>
         {loading ? (

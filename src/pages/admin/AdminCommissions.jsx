@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import Pagination from "../../components/ui/Pagination";
 import { useSessionState } from "../../hooks/useSessionState";
 import { useEffect, useState } from "react";
@@ -111,9 +112,9 @@ export default function AdminCommissions() {
           </Select>
         </div>
       </div>
-      <p className="text-sm text-slate-500">
+      <Explanation title="About reseller payments"><p className="text-sm text-slate-500">
         Reseller financials are license purchases billed by SPOTX, not commission payouts.
-      </p>
+      </p></Explanation>
 
       <Card>
         {loading ? (

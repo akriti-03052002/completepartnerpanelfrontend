@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { Clapperboard } from "lucide-react";
@@ -80,7 +81,7 @@ export default function PostReel() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Post / Reel</h1>
-        <p className="text-sm text-slate-500 mt-1">Submit a public content URL from one of your verified social accounts.</p>
+        <Explanation title="How to submit content"><p className="text-sm text-slate-500 mt-1">Submit a public content URL from one of your verified social accounts.</p></Explanation>
       </div>
 
       <Card className="p-6">

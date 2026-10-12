@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { UploadCloud, Download, FileText, AlertCircle, Eye } from "lucide-react";
@@ -127,10 +128,10 @@ export default function Documents() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">KYC Verification</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <Explanation title="About KYC verification"><p className="text-sm text-slate-500 mt-1">
           KYC means checking your identity. Only the account owner can upload or view these documents. SpotX checks them before approving your account.
           {partnerType && <> Required documents are tailored to your partner type (<span className="font-medium text-slate-600 capitalize">{partnerType}</span>).</>}
-        </p>
+        </p></Explanation>
       </div>
 
       <Card className="p-5 flex items-center justify-between flex-wrap gap-3">

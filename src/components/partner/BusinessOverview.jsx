@@ -1,3 +1,4 @@
+import Explanation from "../ui/Explanation";
 import AllocationChart from "../ui/AllocationChart";
 import { Monitor, Zap, Users, Clock, PauseCircle, XCircle } from "lucide-react";
 import { usePartnerAuth } from "../../context/PartnerAuthContext";
@@ -88,11 +89,11 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
     "Cancelled customers": { icon: XCircle, color: "bg-red-50 text-red-600" }
   };
   return <Card className="p-5 space-y-4">
-    <div><h2 className="font-semibold text-lg"><span aria-hidden="true" className="mr-2">{{ vendor: "🖥️", affiliate: "🤝", influencer: "🎬", reseller: "📦" }[type]}</span>Your business overview</h2><p className="text-xs text-slate-500 mt-1">Current customer and screen counts, with all recorded bills and earnings.{type !== "reseller" && hasPermission("commissions:view") ? " Total earnings include amounts waiting for approval." : ""}</p></div>
+    <div><h2 className="font-semibold text-lg"><span aria-hidden="true" className="mr-2">{{ vendor: "🖥️", affiliate: "🤝", influencer: "🎬", reseller: "📦" }[type]}</span>Your business overview</h2></div>
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{tiles.filter(([title]) => !secondary.includes(title)).map(renderTile)}</div>
     {secondary.length > 0 && <section aria-label="Customer and screen breakdown">
       <h3 className="text-sm font-semibold text-slate-700 mb-3">Customers & screens</h3>
-      <p className="text-xs text-slate-500 mb-3">Registered screens have been added. Active screens are enabled; this does not show whether they are online right now.</p>
+      
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">{tiles.filter(([title]) => secondary.includes(title)).map(([title, value]) => {
         const style = breakdownStyle[title];
         const Icon = style.icon;
@@ -103,6 +104,6 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
       })}</div>
     </section>}
     {chart && <AllocationChart {...chart} />}
-    <p className="text-sm text-slate-500">{note}</p>
+    <Explanation title="About these figures"><p>Current customer and screen counts, with all recorded bills and earnings. Total earnings can include amounts waiting for approval.</p><p>{note}</p>{type === "reseller" && <p>Registered screens have been added. Active screens are enabled; they may not be online right now.</p>}</Explanation>
   </Card>;
 }

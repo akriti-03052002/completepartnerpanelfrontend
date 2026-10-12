@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useEffect, useState } from "react";
 import adminApi from "../../services/adminApi";
 import Card from "../../components/ui/Card";
@@ -44,9 +45,9 @@ export default function AdminResellerCustomers() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Reseller Customers</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <Explanation title="About these customers"><p className="text-sm text-slate-500 mt-1">
           Read-only oversight of customers registered by reseller partners and their license allocations.
-        </p>
+        </p></Explanation>
       </div>
 
       <Card className="flex flex-col gap-3 p-4 sm:flex-row">

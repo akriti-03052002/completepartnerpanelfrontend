@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { Monitor, Trash2 } from "lucide-react";
@@ -54,9 +55,9 @@ export default function Screens() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-900">Screens</h1>
-      <p className="text-sm text-slate-500 -mt-4">
+      <Explanation title="About screen registration"><p className="text-sm text-slate-500 -mt-4">
         Register the screens you're running. The count here is what defaults your Subscription page.
-      </p>
+      </p></Explanation>
 
       <Card className="p-6">
         {error && <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}

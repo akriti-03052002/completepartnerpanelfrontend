@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useSessionState } from "../../hooks/useSessionState";
 import Pagination from "../../components/ui/Pagination";
@@ -201,7 +202,7 @@ export default function AdminSocialMedia({ view = "accounts", partnerId = "", on
           <Share2 size={18} className="text-slate-500" />
           <div>
             <h2 className="font-semibold text-slate-900">Influencer account verification</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Accounts waiting for review or a first price. Once verified and priced, manage rates from the influencer's page.</p>
+            <Explanation title="How social account review works"><p className="text-xs text-slate-500 mt-0.5">Accounts waiting for review or a first price. Once verified and priced, manage rates from the influencer's page.</p></Explanation>
           </div>
         </div>
         {loading ? <p className="p-6 text-sm text-slate-400">Loading accounts...</p> : accounts.length === 0 ? (

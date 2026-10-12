@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useSessionState } from "../../hooks/useSessionState";
 import { useEffect, useState } from "react";
 import { KeyRound } from "lucide-react";
@@ -147,9 +148,7 @@ export default function AdminCustomers() {
           </Select>
         </div>
       </div>
-      <p className="text-sm text-slate-500 -mt-4">
-        Vendor partners' end customers, across all vendors. No live payment gateway yet — "Mark Paid" records the payment manually and generates the vendor's commission for this cycle.
-      </p>
+      <Explanation title="About customer payments"><p>Customer accounts linked to vendor partners. Customers can pay online; Mark Paid records a payment received outside the app and calculates the vendor commission.</p></Explanation>
 
       {successMessage && (
         <Card className="p-5 border-emerald-200 bg-emerald-50">

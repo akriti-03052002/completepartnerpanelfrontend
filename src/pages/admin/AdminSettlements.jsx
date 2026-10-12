@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { checkOnlinePayment } from "../../utils/checkOnlinePayment.mjs";
 import Pagination from "../../components/ui/Pagination";
 import { useSessionState } from "../../hooks/useSessionState";
@@ -341,9 +342,9 @@ export default function AdminSettlements() {
           </button>
         </div>
         {showPayouts && (
-          <p className="text-xs text-slate-500 max-w-xs text-right">
+          <Explanation title="How partner payments work"><p className="text-xs text-slate-500 max-w-xs text-right">
             Settlements are created automatically when a commission is approved — just pay them here.
-          </p>
+          </p></Explanation>
         )}
       </div>
 

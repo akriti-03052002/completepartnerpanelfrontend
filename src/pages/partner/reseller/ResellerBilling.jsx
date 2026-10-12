@@ -1,3 +1,4 @@
+import Explanation from "../../../components/ui/Explanation";
 import InvoiceDownload from "../../../components/ui/InvoiceDownload";
 import { usePartnerAuth } from "../../../context/PartnerAuthContext";
 import PaymentHistory from "../../../components/ui/PaymentHistory";
@@ -204,8 +205,10 @@ export default function ResellerBilling() {
       <Card>
         <div className="p-4 border-b border-slate-100">
           <h2 className="font-semibold text-slate-900">Your licence bills</h2>
+          <Explanation title="How to read your bills">
           <p className="text-sm text-slate-500 mt-1">All purchases in one table. Upcoming bills appear seven days before their bill date.</p>
           <p className="text-xs text-slate-500 mt-2">Pending: an unpaid invoice. Overdue: its due date has passed. Upcoming: a bill expected within seven days; payment becomes available when its invoice is raised and online payment is enabled.</p>
+          </Explanation>
           <label className="mt-3 flex min-h-11 items-center gap-2 text-sm text-slate-600"><input type="checkbox" checked={showAllDetails} onChange={event => setShowAllDetails(event.target.checked)} className="h-4 w-4" />Show tax, billing period and payment references</label>
           <Select label="Show bills" value={billView} onChange={(event) => setBillView(event.target.value)} className="mt-4 sm:w-64">
             <option value="current">Unpaid bills</option>

@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useEffect, useState } from "react";
 import adminApi from "../../services/adminApi";
 import Card from "../../components/ui/Card";
@@ -39,9 +40,9 @@ function ScreenPricingTab() {
 
   return (
     <Card className="p-6 max-w-md">
-      <p className="text-sm text-slate-500 mb-4">
+      <Explanation title="About subscription pricing"><p className="text-sm text-slate-500 mb-4">
         Global monthly price per screen for each plan, used to calculate the total on a customer's Subscription page.
-      </p>
+      </p></Explanation>
       <form onSubmit={submit} className="space-y-4">
         <Input label="Basic — price per screen / month (₹)" type="number" min={0} value={basicPrice} onChange={(e) => setBasicPrice(e.target.value)} required />
         <Input label="Premium — price per screen / month (₹)" type="number" min={0} value={premiumPrice} onChange={(e) => setPremiumPrice(e.target.value)} required />

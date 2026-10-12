@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { loadIdentityChecks } from "../../services/loadIdentityChecks";
@@ -22,7 +23,7 @@ export default function AdminDocuments() {
   useEffect(() => { load(); }, []);
   return <div className="space-y-6">
     <h1 className="text-2xl font-bold text-slate-900">Identity checks incomplete</h1>
-    <p className="text-sm text-slate-500">Each partner appears once. Open their documents to upload missing files or review submitted files.</p>
+    <Explanation title="How document review works"><p className="text-sm text-slate-500">Each partner appears once. Open their documents to upload missing files or review submitted files.</p></Explanation>
     {error && <p role="alert" className="text-sm text-red-700">{error} <button onClick={load} className="underline">Try again</button></p>}
     {loading ? <p className="text-sm text-slate-400">Loading identity checks...</p> : !error && <IncompleteChecks partners={partners.filter(p => !partnerType || p.partnerType === partnerType)} kind="documents" />}
   </div>;

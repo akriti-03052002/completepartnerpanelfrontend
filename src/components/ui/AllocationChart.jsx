@@ -1,3 +1,4 @@
+import Explanation from "./Explanation";
 import { statusLabel } from "../../utils/statusLabel";
 const COLOURS = ["#10b981", "#3b82f6", "#f59e0b", "#f87171", "#8b5cf6", "#64748b"];
 const STATUS_COLOURS = { "bg-emerald-500": "#10b981", "bg-blue-500": "#3b82f6", "bg-amber-400": "#fbbf24", "bg-red-400": "#f87171" };
@@ -24,6 +25,6 @@ export default function AllocationChart({ title, note, rows = [], total = 0, tot
         <dd className="text-right"><span className="block text-lg font-bold tabular-nums text-slate-900">{row.value.toLocaleString("en-IN")}</span><span className="text-xs text-slate-500">{total > 0 ? Math.round(row.value / total * 100) : 0}%</span></dd>
       </div>)}</dl>
     </div>
-    {note && <p className="mt-5 text-xs leading-relaxed text-slate-500">{note}</p>}
+    {note && <Explanation title="About this chart" className="mt-4"><p>{note}</p></Explanation>}
   </section>;
 }

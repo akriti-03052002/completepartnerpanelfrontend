@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import InvoiceDownload from "../../components/ui/InvoiceDownload";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
@@ -31,7 +32,7 @@ export default function Billing() {
           <div className="p-10 text-center">
             <Receipt size={28} className="text-slate-300 mx-auto mb-3" />
             <p className="text-sm text-slate-500">No invoices yet.</p>
-            <p className="text-xs text-slate-400 mt-1">An invoice appears here after each subscription payment.</p>
+            <Explanation title="About your invoices"><p className="text-xs text-slate-400 mt-1">An invoice appears here after each subscription payment.</p></Explanation>
           </div>
         ) : (
           <table className="w-full text-sm">

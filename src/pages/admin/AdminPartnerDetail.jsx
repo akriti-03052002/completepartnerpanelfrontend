@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import PartnerCustomers from "../../components/admin/partner/PartnerCustomers";
 import AdminBankEntry from "../../components/admin/partner/AdminBankEntry";
@@ -342,9 +343,9 @@ export default function AdminPartnerDetail() {
 
         {partner.partnerType === "reseller" && (
           <Card className="p-6 md:col-span-2">
-            <p className="text-sm text-slate-500">
+            <Explanation title="About this reseller account"><p className="text-sm text-slate-500">
               This is a Reseller partner — no commission applies. See the Reseller section below for inventory, pricing, and billing controls.
-            </p>
+            </p></Explanation>
           </Card>
         )}
 

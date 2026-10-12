@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { Share2, CheckCircle2, AlertCircle, X, ChevronDown, PenLine } from "lucide-react";
@@ -112,7 +113,7 @@ export default function SocialMedia() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Social Media Accounts</h1>
-        <p className="text-sm text-slate-500 mt-1">Connect your creator accounts so SPOTX can verify your reach before you submit content.</p>
+        <Explanation title="About social accounts"><p className="text-sm text-slate-500 mt-1">Connect your creator accounts so SPOTX can verify your reach before you submit content.</p></Explanation>
       </div>
 
       {error && (

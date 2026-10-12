@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useEffect, useState } from "react";
 import adminApi from "../../services/adminApi";
 import Card from "../../components/ui/Card";
@@ -35,9 +36,9 @@ export default function AdminLicencePayments() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Reseller bills & payments</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <Explanation title="About reseller licence payments"><p className="text-sm text-slate-500 mt-1">
           What Resellers pay SPOTX for the licences they buy. Record an offline payment or switch an invoice to online payment here.
-        </p>
+        </p></Explanation>
       </div>
 
       <div aria-label="Quick bill filters" className="flex flex-wrap gap-2">{[["all", "All bills"], ["due_week", "Due in next 7 days"], ["overdue", "Overdue"], ["paid", "Paid"]].map(([value, label]) => <button key={value} type="button" aria-pressed={status === value} onClick={() => setStatus(value)} className={`rounded-xl px-4 py-2 text-sm font-semibold border ${status === value ? "bg-brand-black text-white border-brand-black" : "bg-white text-slate-700 border-slate-200"}`}>{label}</button>)}{(partnerId || search || duration !== "all") && <button type="button" onClick={() => { setPartnerId(""); setStatus("all"); setSearch(""); setDuration("all"); }} className="px-3 py-2 text-sm text-brand-red font-semibold">Reset filters</button>}</div>

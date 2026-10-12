@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { Link } from "react-router-dom";
 import PartnerCompletion from "../../components/partner/PartnerCompletion";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
@@ -106,7 +107,7 @@ export default function Dashboard() {
             <h2 className="font-semibold text-slate-900">{earningsTrendLabel}</h2>
           </div>
 
-          <p className="text-xs text-slate-500 mb-4">Monthly recorded earnings in rupees · Last 12 months. Includes pending approval; excludes cancelled earnings.</p>
+
           <div className="flex flex-wrap justify-between gap-2 text-sm mb-4"><p className="text-slate-500">Recorded in this period: <strong className="text-slate-900">{trendMoney(commissionTrend.reduce((sum, row) => sum + Number(row.total || 0), 0))}</strong></p><p className="text-xs text-slate-400">Current month is still in progress</p></div>
           {!commissionTrend.some(row => Number(row.total) !== 0) ? (
             <p className="text-sm text-slate-400 py-12 text-center">No commission history yet.</p>
@@ -121,12 +122,12 @@ export default function Dashboard() {
               </LineChart>
             </ResponsiveContainer>
           )}
-          <p className="text-xs text-slate-500 mt-3">Grouped by when earnings were recorded, not when they were paid. Months without earnings show zero.</p>
+          <Explanation title="How to read this graph" className="mt-3"><p className="text-xs text-slate-500 ">Monthly recorded earnings in rupees · Last 12 months. Includes pending approval; excludes cancelled earnings.</p><p>Grouped by when earnings were recorded, not when they were paid. Months without earnings show zero.</p></Explanation>
         </Card>}
 
         <Card className="p-6">
           <h2 className="font-semibold text-slate-900">Recent Activity</h2>
-          <p className="text-xs text-slate-500 mt-1 mb-4">History of actions and changes in your partner account.</p>
+          <Explanation title="What is recent activity?" className="mb-3"><p>History of actions and changes in your partner account.</p></Explanation>
           <div className="space-y-4">
             {recentActivity.length === 0 && <p className="text-sm text-slate-400">Nothing yet.</p>}
             {recentActivity.map((a) => (

@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useEffect, useMemo, useState } from "react";
 import { CreditCard, Monitor, Tag, Check, X, AlertTriangle, ShieldCheck } from "lucide-react";
 import customerApi from "../../services/customerApi";
@@ -280,9 +281,9 @@ export default function Subscription() {
         <div className="lg:col-span-2 space-y-6">
           <Card className="p-6">
             <h2 className="font-semibold text-slate-900 mb-1">Choose your plan</h2>
-            <p className="text-sm text-slate-500 mb-4">
+            <Explanation title="About plan changes"><p className="text-sm text-slate-500 mb-4">
               You can switch plans or change your screen count any time — even before your trial ends.
-            </p>
+            </p></Explanation>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {PLANS.map((p) => {
@@ -342,9 +343,9 @@ export default function Subscription() {
 
           <Card className="p-6">
             <h2 className="font-semibold text-slate-900 mb-1">Subscription term</h2>
-            <p className="text-sm text-slate-500 mb-4">
+            <Explanation title="About longer subscriptions"><p className="text-sm text-slate-500 mb-4">
               Prepay for longer and you won't need to come back and renew as often.
-            </p>
+            </p></Explanation>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {DURATIONS.map((d) => {
                 const isCurrent = subscription.status === "active" && (subscription.durationMonths || 1) === d.months;

@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useEffect, useState } from "react";
 import { ArrowUp, ArrowDown, Trash2, Plus, Eye, RotateCcw, Save, Copy, Info, Lock } from "lucide-react";
 import adminApi from "../../services/adminApi";
@@ -246,10 +247,10 @@ export default function AdminAgreement() {
                 </div>
 
                 {isRates && (
-                  <p className="text-xs text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
+                  <Explanation title="About influencer rates"><p className="text-xs text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
                     The influencer&apos;s rate for each social account (e.g. &quot;Instagram — @handle: Rs. 8,000 per post&quot;) is listed
                     automatically after this text, from the prices set on their accounts.
-                  </p>
+                  </p></Explanation>
                 )}
 
                 <TextArea label={isRates ? "Text before the rate list" : "Text"} value={section.body} onChange={(v) => setSection(index, "body", v)} disabled={!canEdit} />
@@ -301,7 +302,7 @@ export default function AdminAgreement() {
 
         <Card className="p-5 lg:sticky lg:top-6">
           <h2 className="font-semibold text-slate-900">Auto-filled words</h2>
-          <p className="text-xs text-slate-500 mt-1 mb-3">Type these anywhere in the text — each is replaced for every influencer. Click to copy.</p>
+          <Explanation title="How text replacements work"><p className="text-xs text-slate-500 mt-1 mb-3">Type these anywhere in the text — each is replaced for every influencer. Click to copy.</p></Explanation>
           <div className="space-y-2">
             {Object.entries(placeholders).map(([key, description]) => (
               <button

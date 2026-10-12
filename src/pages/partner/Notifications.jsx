@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -57,7 +58,7 @@ export default function Notifications() {
         <h1 className="text-2xl font-bold text-slate-900">Notifications</h1>
         <Button variant="outline" onClick={markAllRead} disabled={loading || markingAll || unreadCount === 0}>{markingAll ? "Marking as read..." : "Mark all as read"}</Button>
       </div>
-      <p className="text-sm text-slate-500">Updates from SpotX about approvals, rejections and payments. {unreadCount > 0 ? `${unreadCount} unread.` : "You have no unread notifications."}</p>
+      <p className="text-sm text-slate-500">{unreadCount > 0 ? `${unreadCount} unread.` : "You have no unread notifications."}</p><Explanation title="About notifications"><p>Updates from SpotX about approvals, rejections and payments.</p></Explanation>
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
       <ListToolbar toolbar={toolbar} placeholder="Search notifications" />

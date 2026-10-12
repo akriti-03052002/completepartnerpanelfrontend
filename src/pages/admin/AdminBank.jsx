@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { loadBankChecks } from "../../services/loadBankChecks";
 import { useEffect, useState } from "react";
@@ -80,7 +81,7 @@ export default function AdminBank() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-900">Bank checks incomplete</h1>
-      <p className="text-sm text-slate-500 -mt-4">Revealing full account details is restricted to finance admins and is audit-logged on every access.</p>
+      <Explanation title="About bank account access"><p className="text-sm text-slate-500 -mt-4">Revealing full account details is restricted to finance admins and is audit-logged on every access.</p></Explanation>
       {error && <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
       {loading && <p className="text-sm text-slate-400">Loading bank checks...</p>}
       {!loading && !error && <IncompleteChecks partners={incompletePartners.filter(p => !partnerType || p.partnerType === partnerType)} kind="bank" renderAction={p => p.checkStatus === "Bank update awaiting review" && <button onClick={() => setReviewChangeId(p.bankAccountId)} className="text-xs font-semibold text-brand-red hover:underline">Review bank update</button>} />}
@@ -90,7 +91,7 @@ export default function AdminBank() {
           <div>
             <h2 className="font-semibold text-slate-900">Review bank update</h2>
             <button onClick={() => setReviewChangeId(null)} className="text-xs underline">Close review</button>
-            <p className="text-sm text-slate-500">The existing verified bank account stays live until this update is approved.</p>
+            <Explanation title="About bank updates"><p className="text-sm text-slate-500">The existing verified bank account stays live until this update is approved.</p></Explanation>
           </div>
           <Card>
             <Table

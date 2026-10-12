@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import { useSessionState } from "../../hooks/useSessionState";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -114,9 +115,9 @@ export default function AdminPartners() {
       {showForm && !partnerType && (
         <Card className="p-6">
           {error && <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
-          <p className="text-sm text-slate-500 mb-4">
+          <Explanation title="How partner registration works"><p className="text-sm text-slate-500 mb-4">
             The partner receives an email link to set their password. Business details, address and KYC come later from their Profile.
-          </p>
+          </p></Explanation>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Select label="Partner Type" name="partnerType" value={form.partnerType} onChange={handleChange}>

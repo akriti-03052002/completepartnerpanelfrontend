@@ -1,3 +1,4 @@
+import Explanation from "../../components/ui/Explanation";
 import IfscField from "../../components/ui/IfscField";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
@@ -124,9 +125,9 @@ export default function Bank() {
   return (
     <div className="space-y-6 max-w-2xl">
       <h1 className="text-2xl font-bold text-slate-900">Bank Account</h1>
-      <p className="text-sm text-slate-500 -mt-4">
+      <Explanation title="About bank verification"><p className="text-sm text-slate-500 ">
         Only the partner owner can view or manage this. SPOTX verifies your account before settling any payout to it.
-      </p>
+      </p></Explanation>
 
       {!editing && account && (
         <Card className="p-6">
