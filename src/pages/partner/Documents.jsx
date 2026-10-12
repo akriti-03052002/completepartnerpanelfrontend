@@ -128,7 +128,7 @@ export default function Documents() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">KYC Verification</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Only the partner owner can upload or view KYC documents. SPOTX reviews each one before your account is verified.
+          KYC means checking your identity. Only the account owner can upload or view these documents. SpotX checks them before approving your account.
           {partnerType && <> Required documents are tailored to your partner type (<span className="font-medium text-slate-600 capitalize">{partnerType}</span>).</>}
         </p>
       </div>

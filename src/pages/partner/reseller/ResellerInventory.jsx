@@ -7,15 +7,15 @@ import Table from "../../../components/ui/Table";
 import Button from "../../../components/ui/Button";
 
 const TRANSACTION_LABEL = {
-  purchase: "Bulk Purchase",
-  allocation: "Allocation",
-  release: "Release",
-  adjustment: "Adjustment",
-  registration: "Bundle Delivered",
-  activation: "Activation",
-  suspension: "Suspension",
-  reactivation: "Reactivation",
-  cancellation: "Cancellation"
+  purchase: "Licences bought",
+  allocation: "Licences assigned",
+  release: "Licences returned",
+  adjustment: "Balance changed",
+  registration: "Screen registered",
+  activation: "Screen started",
+  suspension: "Screen paused",
+  reactivation: "Screen restarted",
+  cancellation: "Screen cancelled"
 };
 
 export default function ResellerInventory() {

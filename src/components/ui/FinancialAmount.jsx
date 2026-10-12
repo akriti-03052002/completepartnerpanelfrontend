@@ -10,16 +10,16 @@ export function SettlementAmount({ settlement }) {
     <div className="flex flex-col gap-0.5">
       <span className="font-semibold text-slate-900">{money(amount.net, amount.currency)}</span>
       <span className="text-xs text-slate-500">
-        {money(amount.gross, amount.currency)} gross − {money(amount.deductions, amount.currency)} deductions = net
+        {money(amount.gross, amount.currency)} before deductions − {money(amount.deductions, amount.currency)} deducted
       </span>
       {tax.tdsRate > 0 && (
         <span className="text-xs text-slate-500">
-          Includes TDS {tax.tdsRate}% ({money(tax.tdsAmount, amount.currency)})
+          Tax deducted (TDS): {tax.tdsRate}% ({money(tax.tdsAmount, amount.currency)})
         </span>
       )}
       {verifiedGstAmount > 0 && (
         <span className="text-xs text-slate-500">
-          + GST ({settlement.bill.amount.gstRatePercent}%): {money(verifiedGstAmount, amount.currency)} = payable {money(amount.net + verifiedGstAmount, amount.currency)}
+          + GST ({settlement.bill.amount.gstRatePercent}%): {money(verifiedGstAmount, amount.currency)} = amount to pay {money(amount.net + verifiedGstAmount, amount.currency)}
         </span>
       )}
     </div>
@@ -32,7 +32,7 @@ export function CommissionAmount({ commission, currency = "INR" }) {
   let basis = "";
 
   if (["percentage", "recurring_percentage"].includes(type) && calculation.rate > 0) {
-    basis = `${money(commission.transaction?.revenue, currency)} revenue × ${calculation.rate}%`;
+    basis = `${money(commission.transaction?.revenue, currency)} sale amount × ${calculation.rate}%`;
   } else if (["fixed_per_deal", "recurring_fixed"].includes(type) && calculation.fixedAmount > 0) {
     basis = `Fixed amount: ${money(calculation.fixedAmount, currency)}`;
   }
@@ -41,7 +41,7 @@ export function CommissionAmount({ commission, currency = "INR" }) {
     <div className="flex flex-col gap-0.5">
       <span className="font-semibold text-slate-900">{money(calculation.netCommission, currency)}<span className="ml-1 text-xs font-normal text-slate-500">after deductions</span></span>
       <span className="text-xs text-slate-500">
-        {money(calculation.grossCommission, currency)} gross − {money(calculation.deductions, currency)} deductions = net
+        {money(calculation.grossCommission, currency)} before deductions − {money(calculation.deductions, currency)} deducted
       </span>
       {basis && <span className="text-xs text-slate-500">{basis}</span>}
     </div>
@@ -53,7 +53,7 @@ export function InvoiceAmount({ subtotal, taxAmount, taxRatePercent, total, curr
     <div className="flex flex-col gap-0.5">
       <span className="font-semibold text-slate-900">{money(total, currency)}</span>
       <span className="text-xs text-slate-500">
-        {money(subtotal, currency)} subtotal + {money(taxAmount, currency)} GST ({Number(taxRatePercent) || 0}%)
+        {money(subtotal, currency)} before tax + {money(taxAmount, currency)} GST ({Number(taxRatePercent) || 0}%)
       </span>
       {quantity != null && unitPrice != null && (
         <span className="text-xs text-slate-500">{quantity} × {money(unitPrice, currency)}</span>

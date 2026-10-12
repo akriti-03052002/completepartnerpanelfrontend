@@ -7,6 +7,7 @@ import Badge from "../../components/ui/Badge";
 import { CommissionAmount } from "../../components/ui/FinancialAmount";
 import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
+import { statusLabel } from "../../utils/statusLabel";
 
 export default function Commissions() {
   const { partner, hasPermission } = usePartnerAuth();
@@ -30,8 +31,8 @@ export default function Commissions() {
       : partnerType === "affiliate"
         ? [{ key: "deal", header: "Deal", render: (r) => r.referralId?.customer?.companyName || "—" }]
         : []),
-    { key: "type", header: "Type", render: (r) => <Badge tone="neutral">{r.calculation?.commissionType?.replace(/_/g, " ") || "Earning"}</Badge>, filter: (r) => r.calculation?.commissionType },
-    { key: "revenue", header: partnerType === "vendor" ? "Customer payment basis" : "Revenue", render: (r) => `₹${(r.transaction?.revenue || 0).toLocaleString("en-IN")}` },
+    { key: "type", header: "How it is calculated", render: (r) => <Badge tone="neutral">{statusLabel(r.calculation?.commissionType) || "Earning"}</Badge>, filter: (r) => statusLabel(r.calculation?.commissionType) },
+    { key: "revenue", header: partnerType === "vendor" ? "Customer payment before tax" : "Sale amount", render: (r) => `₹${(r.transaction?.revenue || 0).toLocaleString("en-IN")}` },
     { key: "net", header: partnerType === "affiliate" ? "Reward breakdown" : partnerType === "influencer" ? "Content payment breakdown" : "Commission breakdown", render: (r) => <CommissionAmount commission={r} currency={r.transaction?.currency || "INR"} /> },
     { key: "status", header: "Status", render: (r) => <Badge status={r.settlement?.status || "unknown"} />, filter: (r) => r.settlement?.status || "unknown" },
     { key: "date", header: "Earned", render: (r) => new Date(r.createdAt).toLocaleDateString() }

@@ -336,7 +336,7 @@ function BillingBreakdownModal({ data, onClose }) {
         {proratedLineItems.length > 0 && (
           <div className="mb-4 pt-4 border-t border-slate-100">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-              Added mid-cycle ({data.proratedLicenseCount} licenses, billed at the full {cycleLabel} rate — no day proration)
+              Added during this billing period ({data.proratedLicenseCount} licences, charged at the full {cycleLabel} price)
             </p>
             <div className="border border-slate-100 rounded-lg divide-y divide-slate-100 mb-2">
               {proratedLineItems.map((item) => (

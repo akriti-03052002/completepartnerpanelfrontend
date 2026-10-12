@@ -59,7 +59,7 @@ export default function Settlements() {
     setLoading(true);
     return api.get("/partner/settlements")
       .then((res) => { setSettlements(res.data.data); setMeta(res.data.meta || {}); setLastFetchedAt(new Date()); setLoadError(""); })
-      .catch(() => setLoadError("Could not load settlement figures. Please try again."))
+      .catch(() => setLoadError("Could not load your payments. Please try again."))
       .finally(() => setLoading(false));
   };
 
@@ -70,7 +70,7 @@ export default function Settlements() {
         setMeta(res.data.meta || {});
         setLastFetchedAt(new Date()); setLoadError("");
       })
-      .catch(() => setLoadError("Could not load settlement figures. Please try again."))
+      .catch(() => setLoadError("Could not load your payments. Please try again."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -119,12 +119,12 @@ export default function Settlements() {
     if (!meta.availableBalance) return null;
 
     if (!meta.hasSettlementSetting) {
-      return "On hold — your settlement schedule hasn't been set up yet. Contact SPOTX support.";
+      return "On hold — your payment schedule is not set up yet. Contact SpotX support.";
     }
 
     const parts = [];
     if (meta.pendingApprovalAmount) parts.push(`${money(meta.pendingApprovalAmount, meta.currency)} pending admin approval`);
-    if (meta.approvedAwaitingBatchAmount) parts.push(`${money(meta.approvedAwaitingBatchAmount, meta.currency)} approved, awaiting the next settlement batch`);
+    if (meta.approvedAwaitingBatchAmount) parts.push(`${money(meta.approvedAwaitingBatchAmount, meta.currency)} approved, waiting to be included in a payment`);
 
     if (meta.settlementType === "threshold" && meta.minimumSettlementAmount > meta.availableBalance) {
       const remaining = meta.minimumSettlementAmount - meta.availableBalance;
@@ -138,7 +138,7 @@ export default function Settlements() {
 
   const nextSettlementInfo = useMemo(() => {
     if (meta.nextSettlementDate) {
-      return { primary: money(upcomingAmount, meta.currency), secondary: `On ${new Date(meta.nextSettlementDate).toLocaleDateString()}`, footnote: "Approved earnings not yet included in a settlement. Scheduled date is an estimate, not a confirmed payment." };
+      return { primary: money(upcomingAmount, meta.currency), secondary: `On ${new Date(meta.nextSettlementDate).toLocaleDateString()}`, footnote: "Approved earnings waiting to be included in a payment. The date is an estimate." };
     }
     if (!meta.hasSettlementSetting) {
       return { primary: "Not configured", secondary: "Contact SPOTX support" };
@@ -187,9 +187,9 @@ export default function Settlements() {
       {(!lastFetchedAt && (loading || loadError)) ? <p className="text-sm text-slate-500">Settlement overview is unavailable until data loads.</p> : <>
       <Card className="p-6">
         <div className="flex flex-col lg:flex-row lg:items-start divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
-          <OverviewItem icon={CheckCircle2} iconTone="bg-emerald-50 text-emerald-600" label="Previous settlement" primary={previousSettlement ? money(previousSettlement.amount.net, previousSettlement.amount.currency) : "No settlement"} secondary={previousSettlement?.payment?.paidAt ? new Date(previousSettlement.payment.paidAt).toLocaleDateString() : null} />
-          <OverviewItem icon={History} iconTone="bg-emerald-50 text-emerald-600" label="Current settlements" primary={money(currentAmount, meta.currency)} secondary="Created batches awaiting approval or payment" />
-          <OverviewItem icon={CalendarClock} iconTone="bg-slate-100 text-slate-500" label="Next settlement" primary={nextSettlementInfo.primary} secondary={nextSettlementInfo.secondary} footnote={nextSettlementInfo.footnote} />
+          <OverviewItem icon={CheckCircle2} iconTone="bg-emerald-50 text-emerald-600" label="Last payment" primary={previousSettlement ? money(previousSettlement.amount.net, previousSettlement.amount.currency) : "No payment yet"} secondary={previousSettlement?.payment?.paidAt ? new Date(previousSettlement.payment.paidAt).toLocaleDateString() : null} />
+          <OverviewItem icon={History} iconTone="bg-emerald-50 text-emerald-600" label="Payments being prepared" primary={money(currentAmount, meta.currency)} secondary="Waiting for approval or payment" />
+          <OverviewItem icon={CalendarClock} iconTone="bg-slate-100 text-slate-500" label="Next payment" primary={nextSettlementInfo.primary} secondary={nextSettlementInfo.secondary} footnote={nextSettlementInfo.footnote} />
           <div className="pt-4 lg:pt-0 lg:pl-6 lg:max-w-xs">
             <p className="text-sm text-slate-500 underline decoration-slate-300 underline-offset-4">Total still to receive</p>
             <p className="text-3xl font-bold text-slate-900 mt-2">{money(meta.availableBalance, meta.currency)}</p>
@@ -249,7 +249,7 @@ export default function Settlements() {
                 { key: "createdOn", header: "Created On", render: (r) => new Date(r.createdAt).toLocaleDateString() },
                 {
                   key: "number",
-                  header: "Settlement ID",
+                  header: "Payment reference",
                   render: (r) => (
                     <button
                       onClick={() => {
@@ -271,7 +271,7 @@ export default function Settlements() {
                   ),
                   render: (r) => r.payment?.transactionId || "—"
                 },
-                { key: "net", header: "Net Settlement", render: (r) => <SettlementAmount settlement={r} /> },
+                { key: "net", header: "Payment amount", render: (r) => <SettlementAmount settlement={r} /> },
                 { key: "status", header: "Status", render: (r) => <Badge status={r.status} /> }
               ]}
             />
@@ -491,7 +491,7 @@ function SettlementDetailPanel({ settlement, earningLabel, billRequired, bill, h
           <div className="p-5 space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-slate-500">Settlement ID</p>
+                <p className="text-xs text-slate-500">Payment reference</p>
                 <p className="font-semibold text-slate-900">{settlement.settlementNumber}</p>
               </div>
               <Badge status={settlement.status} />

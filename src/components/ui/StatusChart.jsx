@@ -1,4 +1,4 @@
-const label = value => String(value).replace(/_/g, " ");
+import { statusLabel as label } from "../../utils/statusLabel";
 
 // Horizontal bars with readable values, including keyboard/screen-reader users.
 export default function StatusChart({ title, note, rows = [], empty = "No records yet.", total, totalLabel = "Total" }) {
