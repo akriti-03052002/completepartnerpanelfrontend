@@ -42,12 +42,18 @@ export default function ResellerDashboard() {
   const currentInvoice = invoices.filter(i => i.paymentStatus !== "paid").sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0];
   const lastPaid = invoices.find((i) => i.paymentStatus === "paid");
 
+  const action = currentInvoice
+    ? { label: "Open billing", to: "/partner/reseller/billing", permission: "reseller:billing:view" }
+    : available === 0
+      ? { label: "View licences", to: "/partner/reseller/inventory", permission: "reseller:inventory:view" }
+      : { label: "Manage customers", to: "/partner/reseller/customers", permission: "reseller:customers:manage" };
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3"><h1 className="text-2xl font-bold text-slate-900">Reseller Dashboard</h1><div className="flex flex-wrap gap-4"><div className="flex items-center gap-2"><span className="text-xs text-slate-500">Partner Status</span><Badge status={partner?.status} /></div>{checks && <><div className="flex items-center gap-2"><span className="text-xs text-slate-500">KYC Verification</span><Badge status={checks.kycStatus} verification /></div><div className="flex items-center gap-2"><span className="text-xs text-slate-500">Bank Status</span><Badge status={checks.bankStatus} verification /></div></>}</div></div>
+      <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex flex-wrap items-center gap-3"><h1 className="text-2xl font-bold text-slate-900">Reseller Dashboard</h1>{partner?.status === "active" && hasPermission(action.permission) && <Link to={action.to} className="inline-flex min-h-10 items-center rounded-lg bg-brand-red px-4 py-2 text-sm font-semibold text-white hover:opacity-90">{action.label}</Link>}</div><div className="flex flex-wrap gap-4"><div className="flex items-center gap-2"><span className="text-xs text-slate-500">Partner Status</span><Badge status={partner?.status} /></div>{checks && <><div className="flex items-center gap-2"><span className="text-xs text-slate-500">KYC Verification</span><Badge status={checks.kycStatus} verification /></div><div className="flex items-center gap-2"><span className="text-xs text-slate-500">Bank Status</span><Badge status={checks.bankStatus} verification /></div></>}</div></div>
       {loadError && <p role="alert" className="text-red-600">{loadError}</p>}
       {business && <BusinessOverview type="reseller" summary={business} />}
-      <Card className="p-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-semibold">{currentInvoice ? "Review your payment due" : available === 0 ? "Check your screen licences" : "Manage your customers"}</h2><p className="text-sm text-slate-500 mt-1">{currentInvoice ? `Your next unpaid bill is due ${new Date(currentInvoice.dueDate).toLocaleDateString("en-IN")}. Open billing to review or pay it.` : available === 0 ? "Review your licences and request more when you need them." : `${available} licences are available for customer allocation.`}</p></div>{hasPermission(currentInvoice ? "reseller:billing:view" : available === 0 ? "reseller:inventory:view" : "reseller:customers:manage") && <Link to={currentInvoice ? "/partner/reseller/billing" : available === 0 ? "/partner/reseller/inventory" : "/partner/reseller/customers"} className="rounded-lg bg-brand-red text-white px-4 py-2 text-sm font-semibold">{currentInvoice ? "Open billing" : available === 0 ? "View licences" : "Open customers"}</Link>}</Card>
+
 
         {hasPermission("reseller:billing:view") && <Card className="p-6">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Billing</p>
