@@ -77,7 +77,7 @@ export default function CustomerVerifyAndSetPassword() {
         </form>
 
         <p className="text-xs text-slate-400 text-center mt-6">
-          Already verified? <Link to="/reseller/customer/login" className="font-medium text-brand-red hover:underline">Log in</Link>
+          Already verified? <Link to="/customer/login" className="font-medium text-brand-red hover:underline">Log in</Link>
         </p>
       </div>
     </div>

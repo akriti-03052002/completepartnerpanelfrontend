@@ -14,6 +14,19 @@ export default function CustomerLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const finishLogin = data => {
+    if (data.customerType === "reseller") {
+      localStorage.removeItem("customerToken");
+      localStorage.removeItem("customer");
+      localStorage.setItem("customerPortalToken", data.token || "cookie");
+      navigate("/reseller/customer/dashboard", { replace: true });
+    } else {
+      localStorage.removeItem("customerPortalToken");
+      setSession(data);
+      navigate("/customer/dashboard", { replace: true });
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -26,13 +39,12 @@ export default function CustomerLogin() {
     try {
       setLoading(true);
 
-      const response = await customerApi.post("/public/customers/login", {
+      const response = await customerApi.post("/public/customers/unified/login", {
         email: formData.email,
         password: formData.password
       });
 
-      setSession(response.data.data);
-      navigate("/customer/dashboard", { replace: true });
+      finishLogin(response.data.data);
     } catch (err) {
       setError(err.response?.data?.message || "Invalid email or password.");
     } finally {
@@ -51,14 +63,14 @@ export default function CustomerLogin() {
         <div className="bg-white border border-slate-200 rounded-3xl shadow-sm p-8">
           <div className="mb-7">
             <h2 className="text-2xl font-bold text-slate-900">Welcome Back</h2>
-            <p className="text-sm text-slate-500 mt-2">Sign in to your customer account</p>
+            <p className="text-sm text-slate-500 mt-2">Sign in once. We will open the account linked to your vendor or reseller.</p>
           </div>
 
           {error && (
             <div className="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}<Link to="/customer/forgot-password" className="block mt-2 font-semibold underline">Resend verification or reset password</Link></div>
           )}
 
-          <GoogleSignIn api={customerApi} endpoint="/public/customers" disabled={loading} onError={setError} onSuccess={(data) => { setSession(data.data); navigate("/customer/dashboard", { replace: true }); }} />
+          <GoogleSignIn api={customerApi} endpoint="/public/customers/unified" disabled={loading} onError={setError} onSuccess={(data) => finishLogin(data.data)} />
           <form onSubmit={handleSubmit}>
             <div className="mb-5">
               <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
@@ -103,7 +115,7 @@ export default function CustomerLogin() {
             <p className="text-sm text-slate-500">
               Don't have an account?{" "}
               <Link to="/customer/register" className="font-semibold text-slate-900 hover:underline">
-                Start free trial
+                Register
               </Link>
             </p>
           </div>

@@ -16,7 +16,7 @@ export default function CustomerForgotPassword() {
 
     try {
       setLoading(true);
-      const response = await customerApi.post("/public/customers/forgot-password", { email });
+      const response = await customerApi.post("/public/customers/unified/forgot-password", { email });
       setMessage(response.data.message);
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong. Please try again.");

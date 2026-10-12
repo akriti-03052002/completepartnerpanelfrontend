@@ -16,7 +16,7 @@ import VerifiedGate from "./components/partner/VerifiedGate";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 const Landing = lazy(() => import("./pages/Landing"));
-const CustomerRegister = lazy(() => import("./pages/CustomerRegister"));
+const CustomerRegister = lazy(() => import("./pages/UnifiedCustomerRegister"));
 const CustomerLogin = lazy(() => import("./pages/CustomerLogin"));
 
 // Customer app pages
@@ -71,9 +71,9 @@ const AdminResellerCustomers = lazy(() => import("./pages/admin/AdminResellerCus
 const AdminSocialMedia = lazy(() => import("./pages/admin/AdminSocialMedia"));
 const AdminLeads = lazy(() => import("./pages/admin/AdminLeads"));
 const AdminAgreement = lazy(() => import("./pages/admin/AdminAgreement"));
-const ResellerCustomerPortalLogin = lazy(() => import("./pages/ResellerCustomerPortalLogin"));
+
 const ResellerCustomerPortalDashboard = lazy(() => import("./pages/ResellerCustomerPortalDashboard"));
-const ResellerCustomerReferralRegister = lazy(() => import("./pages/ResellerCustomerReferralRegister"));
+
 const ResellerCustomerVerifyAndSetPassword = lazy(() => import("./pages/ResellerCustomerVerifyAndSetPassword"));
 const ResellerCustomerScreens = lazy(() => import("./pages/ResellerCustomerScreens"));
 import { Toaster } from "react-hot-toast";
@@ -157,12 +157,18 @@ function CustomerProtectedRoute({ children }) {
 function CustomerPublicRoute({ children }) {
   const token = localStorage.getItem("customerToken");
   if (token) return <Navigate to="/customer/dashboard" replace />;
+  if (localStorage.getItem("customerPortalToken")) return <Navigate to="/reseller/customer/dashboard" replace />;
   return children;
+}
+
+function CustomerRegistrationRedirect() {
+  const location = useLocation();
+  return <Navigate to={`/customer/register${location.search}`} replace />;
 }
 
 function ResellerCustomerProtectedRoute({ children }) {
   const token = localStorage.getItem("customerPortalToken");
-  if (!token) return <Navigate to="/reseller/customer/login" replace />;
+  if (!token) return <Navigate to="/customer/login" replace />;
   return children;
 }
 
@@ -171,7 +177,7 @@ function ResellerCustomerPortalLayout() {
     try { await endSession("portal"); } catch (error) { window.alert(error.message); return; }
     localStorage.removeItem("customerPortalToken");
     queryClient.clear();
-    window.location.assign("/reseller/customer/login");
+    window.location.assign("/customer/login");
   };
 
   return (
@@ -205,9 +211,9 @@ function App() {
           <Suspense fallback={<div className="p-6 text-sm text-slate-500">Loading...</div>}>
           <Routes>
             <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
-            <Route path="/reseller/customer/register" element={<ResellerCustomerReferralRegister />} />
+            <Route path="/reseller/customer/register" element={<CustomerRegistrationRedirect />} />
             <Route path="/reseller/customer/verify/:token" element={<ResellerCustomerVerifyAndSetPassword />} />
-            <Route path="/reseller/customer/login" element={<ResellerCustomerPortalLogin />} />
+            <Route path="/reseller/customer/login" element={<Navigate to="/customer/login" replace />} />
             <Route path="/reseller/customer" element={<ResellerCustomerProtectedRoute><ResellerCustomerPortalLayout /></ResellerCustomerProtectedRoute>}>
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<ResellerCustomerPortalDashboard />} />

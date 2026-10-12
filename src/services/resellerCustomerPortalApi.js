@@ -28,8 +28,8 @@ customerPortalApi.interceptors.response.use(
     if (error.response?.status === 401 && localStorage.getItem("customerPortalToken")) {
       localStorage.removeItem("customerPortalToken");
 
-      if (!window.location.pathname.startsWith("/reseller/customer/login")) {
-        window.location.href = "/reseller/customer/login";
+      if (!window.location.pathname.startsWith("/customer/login")) {
+        window.location.href = "/customer/login";
       }
     }
 

@@ -1,4 +1,3 @@
-import StatusChart from "../ui/StatusChart";
 import AllocationChart from "../ui/AllocationChart";
 import { Monitor, Zap, Users, Clock, PauseCircle, XCircle } from "lucide-react";
 import { usePartnerAuth } from "../../context/PartnerAuthContext";
@@ -92,7 +91,7 @@ export default function BusinessOverview({ type, summary = {}, socialAccounts })
         </div>;
       })}</div>
     </section>}
-    {chart && (type === "reseller" ? <AllocationChart {...chart} /> : <StatusChart {...chart} />)}
+    {chart && <AllocationChart {...chart} />}
     <p className="text-sm text-slate-500">{note}</p>
   </Card>;
 }
