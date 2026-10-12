@@ -70,7 +70,7 @@ export default function Landing() {
               <p className="mt-6 max-w-md text-base sm:text-lg leading-relaxed text-slate-600">Join SpotX as a partner and earn through your work. Manage your partnership and track payments in the SpotX Partner Panel.</p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <a href="#partner-roles" className="inline-flex items-center gap-3 rounded-full bg-brand-red px-6 py-3.5 text-sm font-semibold text-white hover:bg-red-700 transition-colors">Find your partner role <ArrowRight size={17} /></a>
-                <Link to="/partner/login" className="inline-flex items-center rounded-full border border-slate-300 bg-white px-6 py-3.5 text-sm font-semibold hover:border-slate-900 transition-colors">Open your panel</Link>
+                <Link to="/partner/login" className="inline-flex items-center rounded-full border border-slate-300 bg-white px-6 py-3.5 text-sm font-semibold hover:border-slate-900 transition-colors">Sign in</Link>
               </div>
               <p className="mt-5 text-xs text-slate-500">Vendors, resellers, affiliates and influencers.</p>
             </div>
