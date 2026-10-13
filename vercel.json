@@ -20,7 +20,7 @@
       "destination": "https://completepartnerpanelbackend.vercel.app/api/:path*"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/|api/).*)",
       "destination": "/index.html"
     }
   ]
