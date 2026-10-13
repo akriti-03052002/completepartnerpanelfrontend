@@ -11,7 +11,7 @@ import { Input, Select } from "../../components/ui/Input";
 import PhoneInput from "../../components/ui/PhoneInput";
 
 const EMPTY_FORM = { name: "", email: "", phone: "", role: "sales" };
-const ROLES = ["admin", "sales", "finance", "viewer"];
+const ROLES = ["admin", "sales", "operations", "finance", "viewer"];
 
 export default function Team() {
   const { hasPermission } = usePartnerAuth();

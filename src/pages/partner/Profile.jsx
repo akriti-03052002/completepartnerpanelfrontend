@@ -27,7 +27,7 @@ const ALL_COUNTRIES = (() => {
 })();
 
 export default function Profile() {
-  const { partner, user } = usePartnerAuth();
+  const { partner, user, syncSession } = usePartnerAuth();
   const isInfluencer = partner?.partnerType?.trim().toLowerCase() === "influencer";
   const [form, setForm] = useState(null);
   const [profileComplete, setProfileComplete] = useState(true);
@@ -146,6 +146,8 @@ export default function Profile() {
 
     try {
       await api.patch("/partner/profile", form);
+      const refreshed = await api.get("/partner/profile");
+      syncSession(refreshed.data.data);
       // Mirrors isProfileComplete in backend/utils/partnerVerification.js.
       setProfileComplete(Boolean(form.businessName) && (!isInfluencer || Boolean(form.state && form.city)));
       setMessage("Profile updated.");

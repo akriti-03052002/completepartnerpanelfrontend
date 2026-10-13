@@ -158,7 +158,7 @@ export default function PartnerLayout() {
               >
                 <div className="text-right">
                   <p className="text-sm font-medium text-slate-900">{user?.name}</p>
-                  <p className="text-xs text-slate-400 capitalize">{user?.role}</p>
+                  <p className="text-xs text-slate-400 capitalize" title={user?.role === "owner" && partner?.primaryContact?.designation ? "Role in the business" : "Account access role"}>{user?.role === "owner" && partner?.primaryContact?.designation ? partner.primaryContact.designation : user?.role}</p>
                 </div>
                 <ChevronDown size={16} className={`text-slate-400 transition-transform ${profileMenuOpen ? "rotate-180" : ""}`} />
               </button>
@@ -167,6 +167,7 @@ export default function PartnerLayout() {
                 <>
                   <div className="fixed inset-0 z-30" onClick={() => setProfileMenuOpen(false)} />
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg z-40 py-1.5">
+                    <p className="px-4 py-2 text-xs text-slate-500 border-b border-slate-100">Account access: <span className="capitalize font-medium">{user?.role}</span></p>
                     <Link
                       to="/partner/profile"
                       onClick={() => setProfileMenuOpen(false)}
