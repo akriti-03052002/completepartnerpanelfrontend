@@ -67,7 +67,9 @@ export default function PartnerLayout() {
   };
 
   const page = NAV_ITEMS.find(item => item.to === location.pathname && item.partnerTypes.includes(partner?.partnerType?.toLowerCase()));
-  const allowed = !page || (hasPermission(page.permission) && page.partnerTypes.includes(partner?.partnerType?.toLowerCase()));
+  const liveUser = profile.data?.user || user;
+  const canOpenPage = permission => liveUser?.role === "owner" || (liveUser?.permissions || []).includes(permission);
+  const allowed = !page || (canOpenPage(page.permission) && page.partnerTypes.includes(partner?.partnerType?.toLowerCase()));
 
   return (
     <div className="panel-shell h-dvh min-h-0 overflow-hidden flex bg-light-grey">
@@ -182,7 +184,7 @@ export default function PartnerLayout() {
         <main id="partner-main" tabIndex={-1} className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6 outline-none">
           <PageLocation />
           {allowed && partner?.partnerType?.toLowerCase() === "reseller" && hasPermission("profile:view") && location.pathname.replace(/\/$/, "") === "/partner/dashboard" && <PartnerCompletion />}
-          {allowed ? <Outlet /> : <div role="alert" className="rounded-xl bg-white p-6"><h1 className="font-semibold">Access restricted</h1><p className="text-sm text-slate-500 mt-2">Your role cannot open this page. Choose an available page from the menu.</p></div>}
+          {page?.locked && profile.isPending ? <p className="text-sm text-slate-500">Checking account access…</p> : allowed ? <Outlet /> : <div role="alert" className="rounded-xl bg-white p-6"><h1 className="font-semibold">Access restricted</h1><p className="text-sm text-slate-500 mt-2">Your role cannot open this page. Choose an available page from the menu.</p></div>}
         </main>
       </div>
     </div>

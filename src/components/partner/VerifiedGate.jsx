@@ -15,7 +15,7 @@ export default function VerifiedGate({ children }) {
   const error = profile.isError && !profile.data;
   // Render an active account's page while refreshing; backend middleware
   // still validates current verification/permissions for every request.
-  const status = profile.isPending && accountStatus !== "active" ? "checking"
+  const status = profile.isPending ? "checking"
     : error || accountStatus !== "active" ? "locked" : "unlocked";
 
   if (status === "checking") {

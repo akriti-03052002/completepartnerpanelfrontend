@@ -1,5 +1,6 @@
 import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
 import { usePartnerAuth } from "../../../context/PartnerAuthContext";
+import { usePartnerProfile } from "../../../hooks/usePartnerProfile";
 import BusinessOverview from "../../../components/partner/BusinessOverview";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -15,6 +16,10 @@ import Button from "../../../components/ui/Button";
 //.
 export default function ResellerDashboard() {
   const { partner, hasPermission } = usePartnerAuth();
+  const profile = usePartnerProfile();
+  const liveStatus = profile.data?.partner.status;
+  const liveRole = profile.data?.user.role;
+  const livePermissions = profile.data?.user.permissions;
   const [retry, setRetry] = useState(0);
   useAutoRefresh(() => setRetry(value => value + 1));
   const [business, setBusiness] = useState(null);
@@ -25,14 +30,16 @@ export default function ResellerDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (profile.isPending) return;
     let active = true;
+    const canRead = permission => liveStatus === "active" && (liveRole === "owner" || (livePermissions || []).includes(permission));
     Promise.all([
       api.get("/partner/dashboard").then((res) => { if (active) { setBusiness(res.data.data.businessOverview); setChecks(res.data.data); } }),
-      hasPermission("reseller:inventory:view") ? api.get("/partner/reseller/inventory").then((res) => active && setInventory(res.data.data)) : Promise.resolve(),
-      hasPermission("reseller:billing:view") ? api.get("/partner/reseller/invoices").then((res) => active && setInvoices(res.data.data)) : Promise.resolve()
+      canRead("reseller:inventory:view") ? api.get("/partner/reseller/inventory").then((res) => active && setInventory(res.data.data)) : Promise.resolve(),
+      canRead("reseller:billing:view") ? api.get("/partner/reseller/invoices").then((res) => active && setInvoices(res.data.data)) : Promise.resolve()
     ]).then(() => { if (active) setLoadError(""); }).catch(() => { if (active) setLoadError("Could not load your dashboard figures. Please try again."); }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [hasPermission, retry]);
+  }, [profile.isPending, liveStatus, liveRole, livePermissions, retry]);
 
   if (loading) return <p className="text-slate-400 text-sm p-6">Loading...</p>;
 

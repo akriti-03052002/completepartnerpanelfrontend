@@ -26,6 +26,12 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   mutationFeedback,
   (error) => {
+    // A role or verification may change while a page is already open.
+    // Refresh the shared account check after an authoritative access denial.
+    if (error.response?.status === 403 && error.config?.url !== "/partner/profile"
+        && (error.response.data?.locked || error.response.data?.message === "You don't have permission to do that.")) {
+      window.dispatchEvent(new Event("spotx:data-changed"));
+    }
     if (error.response?.status === 401) {
       localStorage.removeItem("partnerToken");
       localStorage.removeItem("partner");
