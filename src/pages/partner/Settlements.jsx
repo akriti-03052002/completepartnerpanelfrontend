@@ -133,23 +133,16 @@ export default function Settlements() {
       .reduce((sum, item) => sum + (Number(item.amount?.net) || 0), 0);
   }, [settlements, lastFetchedAt]);
 
-  const upcomingAmount = Number(meta.approvedAwaitingBatchAmount) || 0;
-
   const nextSettlementInfo = useMemo(() => {
-    if (meta.nextSettlementDate) {
-      return { primary: new Date(meta.nextSettlementDate).toLocaleDateString(), secondary: "Estimated payment date", footnote: upcomingAmount > 0 ? `${money(upcomingAmount, meta.currency)} approved earnings waiting for payment` : undefined };
-    }
-    if (!meta.hasSettlementSetting) {
-      return { primary: "Not set yet", secondary: "Contact SpotX for your payment schedule" };
-    }
-    if (meta.settlementType === "threshold") {
-      return { primary: "When the minimum is reached", secondary: `Minimum earnings: ${money(meta.minimumSettlementAmount, meta.currency)}` };
-    }
-    if (meta.settlementType === "manual") {
-      return { primary: "Set by SpotX", secondary: "SpotX arranges your payment" };
-    }
-    return { primary: "No date yet", secondary: "SpotX will update your payment here" };
-  }, [meta, upcomingAmount]);
+    const ready = settlements.filter(item => ["approved", "processing"].includes(item.status));
+    const amount = ready.reduce((sum, item) => sum + (Number(item.amount?.net) || 0), 0);
+    return {
+      primary: ready.length ? money(amount, meta.currency) : "No payment ready",
+      secondary: ready.some(item => item.status === "processing")
+        ? "Waiting for payment confirmation"
+        : ready.length ? "Approved and waiting for SpotX to pay" : "Appears after earnings are approved"
+    };
+  }, [settlements, meta.currency]);
 
   const filtered = useMemo(() => {
     const durationDef = DURATIONS.find((d) => d.key === duration);
