@@ -1,3 +1,4 @@
+import { useCustomerRead } from "../../hooks/useCustomerRead";
 import CapacityVisual from "../../components/ui/CapacityVisual";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
@@ -6,7 +7,6 @@ import {
   CalendarClock, Monitor, Tag, CreditCard, Receipt, UserCircle,
   AlertCircle, AlertTriangle, Info, ArrowRight, Plus
 } from "lucide-react";
-import customerApi from "../../services/customerApi";
 import Card from "../../components/ui/Card";
 import StatCard from "../../components/ui/StatCard";
 import Badge from "../../components/ui/Badge";
@@ -29,6 +29,7 @@ const QUICK_LINKS = [
 ];
 
 export default function Dashboard() {
+  const readCustomer = useCustomerRead();
   const [customer, setCustomer] = useState(null);
   const [subscriptionData, setSubscriptionData] = useState(null);
   const [screens, setScreens] = useState([]);
@@ -40,9 +41,9 @@ export default function Dashboard() {
   useEffect(() => {
     let active = true;
     Promise.all([
-      customerApi.get("/customer/profile"),
-      customerApi.get("/customer/subscription"),
-      customerApi.get("/customer/screens")
+      readCustomer("/customer/profile"),
+      readCustomer("/customer/subscription"),
+      readCustomer("/customer/screens")
     ])
       .then(([profileRes, subscriptionRes, screensRes]) => {
         if (!active) return;
@@ -54,7 +55,7 @@ export default function Dashboard() {
       .catch(() => { if (active) setError("Could not load your dashboard. Please try again."); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [retry]);
+  }, [retry, readCustomer]);
 
   if (loading) return <p className="text-slate-400 text-sm">Loading dashboard...</p>;
   if (error) return <div role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error} <button type="button" onClick={() => { setLoading(true); setRetry(value => value + 1); }} className="font-semibold underline">Try again</button></div>;

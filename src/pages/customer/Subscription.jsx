@@ -1,5 +1,6 @@
+import { useCustomerRead } from "../../hooks/useCustomerRead";
 import Explanation from "../../components/ui/Explanation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreditCard, Monitor, Tag, Check, X, AlertTriangle, ShieldCheck } from "lucide-react";
 import customerApi from "../../services/customerApi";
 import Card from "../../components/ui/Card";
@@ -102,6 +103,7 @@ function computeChangePreview(subscription, plans, gstRatePercent, plan, screenC
 }
 
 export default function Subscription() {
+  const readCustomer = useCustomerRead();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [screenCount, setScreenCount] = useState("");
@@ -112,8 +114,8 @@ export default function Subscription() {
   const [successMessage, setSuccessMessage] = useState("");
   const [confirming, setConfirming] = useState(false);
 
-  const load = () => {
-    return customerApi.get("/customer/subscription").then((res) => {
+  const load = useCallback(() => {
+    return readCustomer("/customer/subscription").then((res) => {
       const { subscription, registeredScreenCount } = res.data.data;
       setData(res.data.data);
       // Once subscribed, default to the current subscribed count (not the
@@ -126,10 +128,10 @@ export default function Subscription() {
       setPlan((prev) => subscription.plan || prev);
       setDurationMonths((prev) => (prev === 1 && subscription.durationMonths) ? subscription.durationMonths : prev);
     });
-  };
+  }, [readCustomer]);
 
-  useEffect(() => { load().finally(() => setLoading(false)); }, []);
-  useAutoRefresh(() => customerApi.get("/customer/subscription").then(res => setData(res.data.data)));
+  useEffect(() => { load().finally(() => setLoading(false)); }, [load]);
+  useAutoRefresh(() => readCustomer("/customer/subscription").then(res => setData(res.data.data)));
 
   const count = Number(screenCount) || 0;
 

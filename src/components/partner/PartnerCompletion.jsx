@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { usePartnerProfile } from "../../hooks/usePartnerProfile";
 import { Link } from "react-router-dom";
 import { UserRound, ShieldCheck, ArrowUpRight } from "lucide-react";
-import api from "../../services/api";
-import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 
 function Progress({ label, value, note, icon: Icon, children, nextStep }) {
   return <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
@@ -18,20 +16,8 @@ function NextStep({ step }) {
 }
 
 export default function PartnerCompletion({ nextStep }) {
-  const [data, setData] = useState(null);
-  const load = useCallback(async (signal) => {
-    if (!localStorage.getItem("partnerToken")) return;
-    const response = await api.get("/partner/profile", { signal });
-    if (!signal?.aborted) setData(response.data.data.completion);
-  }, []);
-  useEffect(() => {
-    const controller = new AbortController();
-    api.get("/partner/profile", { signal: controller.signal }).then(response => {
-      if (!controller.signal.aborted) setData(response.data.data.completion);
-    }).catch(() => {});
-    return () => controller.abort();
-  }, []);
-  useAutoRefresh(() => load());
+  const { data: profile } = usePartnerProfile();
+  const data = profile?.completion;
   if (!data) return nextStep ? <div className="rounded-2xl border border-slate-200 bg-white p-5"><NextStep step={nextStep} /></div> : null;
   const verification = data.documentsAndBank;
   const showProfile = data.profile.percent < 100;

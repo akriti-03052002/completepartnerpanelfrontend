@@ -1,7 +1,7 @@
 import Explanation from "../../components/ui/Explanation";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { loadBankChecks } from "../../services/loadBankChecks";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import adminApi from "../../services/adminApi";
 import Card from "../../components/ui/Card";
 import Table from "../../components/ui/Table";
@@ -19,20 +19,13 @@ export default function AdminBank() {
   const [error, setError] = useState("");
   const [reviewChangeId, setReviewChangeId] = useState(null);
 
-  const load = async () => {
-
-    try {
-      const result = await loadBankChecks();
-      setAccounts(result.accounts);
-      setIncompletePartners(result.incompletePartners);
-      setError("");
-    } catch (err) {
-      setError(err.response?.data?.message || "Could not load all bank checks. Please try again.");
-    } finally { setLoading(false); }
-  };
+  const load = useCallback(() => loadBankChecks()
+    .then(result => { setAccounts(result.accounts); setIncompletePartners(result.incompletePartners); setError(""); })
+    .catch(err => setError(err.response?.data?.message || "Could not load all bank checks. Please try again."))
+    .finally(() => setLoading(false)), []);
 
   useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   // A Reseller's staged replacement for an already-verified account — the
   // live account is untouched until this is approved.

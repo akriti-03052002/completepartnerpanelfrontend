@@ -1,3 +1,4 @@
+import { useCustomerRead } from "../../hooks/useCustomerRead";
 import { useEffect, useState } from "react";
 import customerApi from "../../services/customerApi";
 import Card from "../../components/ui/Card";
@@ -7,6 +8,7 @@ import PasswordInput from "../../components/ui/PasswordInput";
 import PhoneInput from "../../components/ui/PhoneInput";
 
 export default function Profile() {
+  const readCustomer = useCustomerRead();
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -17,11 +19,11 @@ export default function Profile() {
   const [passwordError, setPasswordError] = useState("");
 
   useEffect(() => {
-    customerApi.get("/customer/profile").then((res) => {
+    readCustomer("/customer/profile").then((res) => {
       const { customer } = res.data.data;
       setForm({ contactName: customer.contactName || "", phone: customer.phone || "" });
     });
-  }, []);
+  }, [readCustomer]);
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 

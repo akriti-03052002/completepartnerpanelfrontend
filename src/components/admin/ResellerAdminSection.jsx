@@ -1,5 +1,5 @@
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import adminApi from "../../services/adminApi";
 import Card from "../ui/Card";
 import Badge from "../ui/Badge";
@@ -42,17 +42,16 @@ export default function ResellerAdminSection({ partnerId }) {
   const [verifyingInvoiceId, setVerifyingInvoiceId] = useState(null);
   const [invoiceOfflineError, setInvoiceOfflineError] = useState("");
 
-  const load = () => {
-    Promise.all([
+  const load = useCallback(() => {
+    return Promise.all([
       adminApi.get(`/admin/reseller/partners/${partnerId}`).then((res) => setDetail(res.data.data)),
       adminApi.get(`/admin/reseller/partners/${partnerId}/pricing-plan`).then((res) => setPricing(res.data.data)),
       adminApi.get(`/admin/reseller/partners/${partnerId}/billing-config`).then((res) => setBilling(res.data.data))
     ]).finally(() => setLoading(false));
-  };
+  }, [partnerId]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
-  useEffect(() => { load(); }, [partnerId]);
+  useEffect(() => { load(); }, [load]);
 
   const savePricing = async () => {
     setSavingPricing(true);

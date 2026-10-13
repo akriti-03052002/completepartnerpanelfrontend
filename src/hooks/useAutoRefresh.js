@@ -21,17 +21,22 @@ export function useAutoRefresh(refresh, intervalMs = 10000) {
     };
 
     const timer = setInterval(run, intervalMs);
-    window.addEventListener("focus", run);
-    window.addEventListener("online", run);
-    window.addEventListener("spotx:data-changed", run);
-    document.addEventListener("visibilitychange", run);
+    let eventTimer;
+    // Returning to a tab emits both focus and visibilitychange. Batch them
+    // into one refresh, including pages whose callback just updates state.
+    const schedule = () => { clearTimeout(eventTimer); eventTimer = setTimeout(run, 150); };
+    window.addEventListener("focus", schedule);
+    window.addEventListener("online", schedule);
+    window.addEventListener("spotx:data-changed", schedule);
+    document.addEventListener("visibilitychange", schedule);
 
     return () => {
       clearInterval(timer);
-      window.removeEventListener("focus", run);
-      window.removeEventListener("online", run);
-      window.removeEventListener("spotx:data-changed", run);
-      document.removeEventListener("visibilitychange", run);
+      clearTimeout(eventTimer);
+      window.removeEventListener("focus", schedule);
+      window.removeEventListener("online", schedule);
+      window.removeEventListener("spotx:data-changed", schedule);
+      document.removeEventListener("visibilitychange", schedule);
     };
   }, [intervalMs]);
 }

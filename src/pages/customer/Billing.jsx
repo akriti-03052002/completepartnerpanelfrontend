@@ -1,23 +1,25 @@
+import customerApi from "../../services/customerApi";
+import { useCustomerRead } from "../../hooks/useCustomerRead";
 import Explanation from "../../components/ui/Explanation";
 import InvoiceDownload from "../../components/ui/InvoiceDownload";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useEffect, useState } from "react";
 import { Receipt } from "lucide-react";
-import customerApi from "../../services/customerApi";
 import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
 import ListToolbar from "../../components/ui/ListToolbar";
 import { useListFilter } from "../../hooks/useListFilter";
 
 export default function Billing() {
+  const readCustomer = useCustomerRead();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const { visible, toolbar } = useListFilter(invoices, [{ label: "Status", value: (invoice) => invoice.status }]);
-  useAutoRefresh(() => customerApi.get("/customer/invoices").then(res => setInvoices(res.data.data)));
+  useAutoRefresh(() => readCustomer("/customer/invoices").then(res => setInvoices(res.data.data)));
 
   useEffect(() => {
-    customerApi.get("/customer/invoices").then((res) => setInvoices(res.data.data)).finally(() => setLoading(false));
-  }, []);
+    readCustomer("/customer/invoices").then((res) => setInvoices(res.data.data)).finally(() => setLoading(false));
+  }, [readCustomer]);
 
   if (loading) return <p className="text-slate-400 text-sm">Loading...</p>;
 

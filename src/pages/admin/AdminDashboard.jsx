@@ -1,10 +1,8 @@
 import { useAdminAuth } from "../../context/AdminAuthContext";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowDownLeft, ArrowUpRight, RefreshCw, Users, ShieldCheck, Landmark, Wallet, Receipt, ArrowRight, Activity, Clock, CircleX, PauseCircle, Megaphone, Store, Handshake, Monitor } from "lucide-react";
 import adminApi from "../../services/adminApi";
-import { loadBankChecks } from "../../services/loadBankChecks";
-import { loadIdentityChecks } from "../../services/loadIdentityChecks";
 import Card from "../../components/ui/Card";
 import PartnerTypeBarChart from "../../components/admin/PartnerTypeBarChart";
 import { PartnerMix, PaymentProgress } from "../../components/admin/DashboardVisuals";
@@ -102,25 +100,16 @@ export default function AdminDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [updatedAt, setUpdatedAt] = useState(null);
 
-  const fetchDashboard = () => Promise.all([
-    adminApi.get("/admin/stats/dashboard"),
-    canReview || canFinance ? loadBankChecks() : Promise.resolve(null),
-    canReview ? loadIdentityChecks() : Promise.resolve(null)
-  ])
-    .then(([res, bankChecks, identityChecks]) => {
-      const dashboard = res.data.data;
-      if (bankChecks) dashboard.partners.bankPending = bankChecks.incompletePartners.length;
-      if (identityChecks) dashboard.partners.kycPending = identityChecks.length;
-      setData(dashboard); setUpdatedAt(new Date()); setError("");
-    })
-    .catch((err) => setError(err.response?.data?.message || "Couldn't load the dashboard."));
+  const fetchDashboard = useCallback(() => adminApi.get("/admin/stats/dashboard")
+    .then(res => { setData(res.data.data); setUpdatedAt(new Date()); setError(""); })
+    .catch(err => setError(err.response?.data?.message || "Couldn't load the dashboard.")), []);
 
   const load = () => {
     setRefreshing(true);
     return fetchDashboard().finally(() => setRefreshing(false));
   };
 
-  useEffect(() => { fetchDashboard(); }, []);
+  useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
   useAutoRefresh(fetchDashboard, 30000);
 
   if (!data && !error) return <p className="text-slate-400 text-sm">Loading...</p>;

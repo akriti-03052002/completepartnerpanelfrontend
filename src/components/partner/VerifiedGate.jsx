@@ -1,28 +1,22 @@
-import { useEffect, useState } from "react";
+import { usePartnerProfile } from "../../hooks/usePartnerProfile";
 import { Link } from "react-router-dom";
 import { Lock } from "lucide-react";
-import api from "../../services/api";
 import Card from "../ui/Card";
 import { usePartnerAuth } from "../../context/PartnerAuthContext";
 
 // Wraps any route that presumes a fully-verified partner (referrals,
 // opportunities, commissions, settlements, team, customers). Always
-// re-checks against the server instead of trusting the partner snapshot
-// cached at login, since verification can complete mid-session.
+// shares the layout's live profile check; API middleware independently
+// enforces verification so navigation need not wait for another round trip.
 export default function VerifiedGate({ children }) {
   const { partner } = usePartnerAuth();
-  const [accountStatus, setAccountStatus] = useState("");
-  const [error, setError] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-  const [status, setStatus] = useState("checking"); // checking | locked | unlocked
-
-  useEffect(() => {
-    const controller = new AbortController();
-    api.get("/partner/profile", { signal: controller.signal })
-      .then((res) => { if (controller.signal.aborted) return; setAccountStatus(res.data.data.partner.status); setError(false); setStatus(res.data.data.partner.status === "active" ? "unlocked" : "locked"); })
-      .catch(() => { if (!controller.signal.aborted) { setError(true); setStatus("locked"); } });
-    return () => controller.abort();
-  }, [attempt, partner?.status]);
+  const profile = usePartnerProfile();
+  const accountStatus = profile.data?.partner.status || partner?.status;
+  const error = profile.isError && !profile.data;
+  // Render an active account's page while refreshing; backend middleware
+  // still validates current verification/permissions for every request.
+  const status = profile.isPending && accountStatus !== "active" ? "checking"
+    : error || accountStatus !== "active" ? "locked" : "unlocked";
 
   if (status === "checking") {
     return <p className="text-slate-400 text-sm">Loading...</p>;
@@ -40,7 +34,7 @@ export default function VerifiedGate({ children }) {
             {error ? "We could not load your verification status. Try again in a moment." : ["suspended", "inactive", "rejected"].includes(accountStatus) ? `Your account is ${accountStatus}. Open your profile to review its status and contact SPOTX for help.` : "Your account must be active before you can use this feature. Check your KYC documents and bank details for missing information or pending approval."}
           </p>
           <div className="flex flex-wrap gap-3 mt-4 text-sm font-semibold">
-            {error ? <button onClick={() => { setStatus("checking"); setAttempt((value) => value + 1); }} className="text-brand-red">Try again</button> : <>
+            {error ? <button onClick={() => profile.refetch()} className="text-brand-red">Try again</button> : <>
               <Link to="/partner/documents" className="text-brand-red">Check documents</Link>
               <Link to="/partner/bank" className="text-brand-red">Check bank details</Link>
               <Link to="/partner/profile" className="text-brand-red">View profile</Link>

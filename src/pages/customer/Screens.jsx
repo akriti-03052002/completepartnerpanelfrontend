@@ -1,6 +1,7 @@
+import { useCustomerRead } from "../../hooks/useCustomerRead";
 import Explanation from "../../components/ui/Explanation";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Monitor, Trash2 } from "lucide-react";
 import customerApi from "../../services/customerApi";
 import Card from "../../components/ui/Card";
@@ -10,6 +11,7 @@ import ListToolbar from "../../components/ui/ListToolbar";
 import { useListFilter } from "../../hooks/useListFilter";
 
 export default function Screens() {
+  const readCustomer = useCustomerRead();
   const [screens, setScreens] = useState([]);
   const [loading, setLoading] = useState(true);
   const { visible, toolbar } = useListFilter(screens, [{ label: "Location", value: (screen) => screen.location }]);
@@ -19,12 +21,12 @@ export default function Screens() {
   const [deletingId, setDeletingId] = useState(null);
   const [error, setError] = useState("");
 
-  const load = () => {
-    customerApi.get("/customer/screens").then((res) => setScreens(res.data.data)).finally(() => setLoading(false));
-  };
+  const load = useCallback(() => {
+    return readCustomer("/customer/screens").then((res) => setScreens(res.data.data)).finally(() => setLoading(false));
+  }, [readCustomer]);
 
   useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   const submit = async (e) => {
     e.preventDefault();

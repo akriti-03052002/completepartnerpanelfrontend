@@ -1,3 +1,4 @@
+import { preloadNavigation } from "./utils/preloadNavigation";
 import ResellerCustomerLayout from "./layouts/ResellerCustomerLayout";
 import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
@@ -99,7 +100,9 @@ function LiveQueryUpdates() {
   useEffect(() => {
     const refresh = () => queryClient.invalidateQueries({ refetchType: "active" });
     window.addEventListener("spotx:data-changed", refresh);
-    return () => window.removeEventListener("spotx:data-changed", refresh);
+    document.addEventListener("pointerover", preloadNavigation);
+    document.addEventListener("focusin", preloadNavigation);
+    return () => { window.removeEventListener("spotx:data-changed", refresh); document.removeEventListener("pointerover", preloadNavigation); document.removeEventListener("focusin", preloadNavigation); };
   }, []);
   return null;
 }

@@ -1,3 +1,4 @@
+import { usePartnerProfile } from "../hooks/usePartnerProfile";
 import PageLocation from "../components/ui/PageLocation";
 import PartnerCompletion from "../components/partner/PartnerCompletion";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
@@ -12,7 +13,6 @@ import {
 import Logo from "../components/ui/Logo";
 import NotificationBell from "../components/partner/NotificationBell";
 import { usePartnerAuth } from "../context/PartnerAuthContext";
-import api from "../services/api";
 
 // `locked: true` items require full KYC + bank verification — mirrors the
 // requireVerifiedPartner backend gate on these route groups.
@@ -53,23 +53,12 @@ export default function PartnerLayout() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const isVerified = partner?.status === "active";
 
-  // This layout stays mounted across every /partner/* navigation, so a
-  // one-time fetch on mount would go stale the moment an admin verifies the
-  // partner mid-session — the lock icons would never clear without a full
-  // page reload. Re-checking on every navigation and whenever the tab
-  // regains focus keeps it honest without needing a hard refresh.
+  const profile = usePartnerProfile();
   useEffect(() => {
-    const controller = new AbortController();
-    api.get("/partner/profile", { signal: controller.signal })
-      .then((res) => { if (!controller.signal.aborted) syncSession(res.data.data); })
-      .catch(() => {});
-    return () => controller.abort();
-  }, [location.pathname, syncSession]);
-
-  useAutoRefresh(async () => {
-    if (!localStorage.getItem("partnerToken")) return;
-    const response = await api.get("/partner/profile");
-    syncSession(response.data.data);
+    if (profile.data) syncSession(profile.data);
+  }, [profile.data, syncSession]);
+  useAutoRefresh(() => {
+    if (localStorage.getItem("partnerToken")) return profile.refetch({ cancelRefetch: false });
   });
 
   const handleLogout = async () => {
