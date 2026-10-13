@@ -4,7 +4,7 @@ import Card from "../../ui/Card";
 import Table from "../../ui/Table";
 import Badge from "../../ui/Badge";
 
-const ROLES = ["admin", "sales", "operations", "finance", "viewer"];
+const ROLES = ["admin", "sales", "finance", "viewer"];
 
 // The partner's team logins. Admin can change a member's role or block /
 // unblock their login; the owner account is fixed.
