@@ -23,6 +23,7 @@ export default function Team() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [resendingId, setResendingId] = useState(null);
 
   const load = () => api.get("/partner/team").then((res) => setTeam(res.data.data)).finally(() => setLoading(false));
 
@@ -56,6 +57,18 @@ export default function Team() {
     load();
   };
 
+  const resendActivation = async (member) => {
+    setResendingId(member._id);
+    setError("");
+    setSuccessMessage("");
+    try {
+      const response = await api.post(`/partner/team/${member._id}/resend-activation`, {}, { silentSuccess: true });
+      setSuccessMessage(response.data.message);
+    } catch (err) {
+      setError(err.response?.data?.message || "Could not resend the activation link.");
+    } finally { setResendingId(null); }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -65,6 +78,7 @@ export default function Team() {
         </Button>}
       </div>
 
+      {error && <div role="alert" className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
       {successMessage && (
         <Card className="p-5 border-emerald-200 bg-emerald-50">
           <p className="text-sm text-emerald-800">{successMessage}</p>
@@ -76,7 +90,6 @@ export default function Team() {
 
       {canManage && showForm && (
         <Card className="p-6">
-          {error && <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
           <p className="text-sm text-slate-500 mb-4">
             An invite email is sent to this address so they can set their own password and log in.
           </p>
@@ -113,9 +126,12 @@ export default function Team() {
                 header: "",
                 render: (m) =>
                   !canManage || m.role === "owner" ? null : (
+                    <div className="flex flex-wrap items-center gap-3">
+                    {m.status === "invited" && <button type="button" disabled={resendingId !== null} onClick={() => resendActivation(m)} className="text-xs font-semibold text-brand-red hover:underline disabled:opacity-50">{resendingId === m._id ? "Sending…" : "Resend activation link"}</button>}
                     <button onClick={() => toggleStatus(m)} className="text-xs font-semibold text-brand-red hover:underline">
                       {m.status === "blocked" ? "Unblock" : "Block"}
                     </button>
+                    </div>
                   )
               }
             ]}
