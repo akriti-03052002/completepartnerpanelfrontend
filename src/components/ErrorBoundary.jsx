@@ -1,4 +1,5 @@
 import { Component } from "react";
+import { recoverPageUpdate } from "../utils/recoverPageUpdate.mjs";
 
 // Catches a render error anywhere below it so one broken page shows a
 // recoverable message instead of a blank white screen.
@@ -14,6 +15,7 @@ class ErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     console.error("ErrorBoundary caught an error:", error, errorInfo);
+    recoverPageUpdate(error);
   }
 
   handleReload = () => {
