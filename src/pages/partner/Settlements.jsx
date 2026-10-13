@@ -125,6 +125,14 @@ export default function Settlements() {
     [settlements]
   );
 
+  const todaysPayments = useMemo(() => {
+    if (!lastFetchedAt) return 0;
+    const day = date => new Date(date).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+    const today = day(lastFetchedAt);
+    return settlements.filter(item => item.status === "paid" && item.payment?.paidAt && day(item.payment.paidAt) === today)
+      .reduce((sum, item) => sum + (Number(item.amount?.net) || 0), 0);
+  }, [settlements, lastFetchedAt]);
+
   const upcomingAmount = Number(meta.approvedAwaitingBatchAmount) || 0;
 
   const nextSettlementInfo = useMemo(() => {
@@ -173,10 +181,11 @@ export default function Settlements() {
       {loadError && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{loadError} <button type="button" onClick={load} className="font-semibold underline">Try again</button></div>}
       {(!lastFetchedAt && (loading || loadError)) ? <p className="text-sm text-slate-500">Loading your payment summary?</p> : <>
       <Card className="p-5 sm:p-6">
-        <div className="grid gap-6 sm:grid-cols-3">
-          <OverviewItem icon={CalendarClock} iconTone="bg-amber-50 text-amber-600" label="Earnings yet to receive" primary={money(meta.availableBalance, meta.currency)} secondary="Includes earnings waiting for approval" />
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
           <OverviewItem icon={CheckCircle2} iconTone="bg-emerald-50 text-emerald-600" label="Last payment" primary={previousSettlement ? money(previousSettlement.amount.net, previousSettlement.amount.currency) : "No payment yet"} secondary={previousSettlement?.payment?.paidAt ? new Date(previousSettlement.payment.paidAt).toLocaleDateString() : null} />
+          <OverviewItem icon={CheckCircle2} iconTone="bg-emerald-50 text-emerald-600" label="Today's payments" primary={money(todaysPayments, meta.currency)} secondary="Payments completed today (India time)" />
           <OverviewItem icon={CalendarClock} iconTone="bg-blue-50 text-blue-600" label="Next payment" primary={nextSettlementInfo.primary} secondary={nextSettlementInfo.secondary} footnote={nextSettlementInfo.footnote} />
+          <OverviewItem icon={CalendarClock} iconTone="bg-amber-50 text-amber-600" label="Earnings yet to receive" primary={money(meta.availableBalance, meta.currency)} secondary="Includes earnings waiting for approval" />
         </div>
         <Explanation title="About payment amounts" className="mt-4"><p>Amounts exclude GST added through an approved bill. Open a payment below for its full amount and any action needed.</p></Explanation>
       </Card>

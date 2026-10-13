@@ -19,7 +19,7 @@ export default function CustomerPortalDashboard() {
   const error = isError ? "Something went wrong loading your account." : "";
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-6">
       {error && <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm" role="alert">{error} <button type="button" disabled={isFetching} onClick={() => refetch()} className="font-semibold underline">Try again</button></div>}
 
       {!data && !error && <p className="text-slate-400 text-sm">Loading...</p>}

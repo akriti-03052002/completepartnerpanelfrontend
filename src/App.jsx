@@ -1,8 +1,6 @@
-import PageLocation from "./components/ui/PageLocation";
-import { endSession } from "./services/session";
-import PageGuide from "./components/ui/PageGuide";
+import ResellerCustomerLayout from "./layouts/ResellerCustomerLayout";
 import { lazy, Suspense, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate, Outlet, NavLink, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { PartnerAuthProvider, usePartnerAuth } from "./context/PartnerAuthContext";
@@ -172,30 +170,6 @@ function ResellerCustomerProtectedRoute({ children }) {
   return children;
 }
 
-function ResellerCustomerPortalLayout() {
-  const logout = async () => {
-    try { await endSession("portal"); } catch (error) { window.alert(error.message); return; }
-    localStorage.removeItem("customerPortalToken");
-    queryClient.clear();
-    window.location.assign("/customer/login");
-  };
-
-  return (
-    <div className="min-h-screen bg-light-grey">
-      <header className="bg-white border-b border-slate-200">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <nav aria-label="Customer account navigation" className="flex items-center gap-5 text-sm font-medium">
-            <NavLink to="/reseller/customer/dashboard" className={({ isActive }) => isActive ? "text-brand-red font-semibold underline underline-offset-4" : "text-slate-700 hover:text-brand-red"}>Account</NavLink>
-            <NavLink to="/reseller/customer/screens" className={({ isActive }) => isActive ? "text-brand-red font-semibold underline underline-offset-4" : "text-slate-700 hover:text-brand-red"}>Screens</NavLink>
-          </nav>
-          <div className="flex items-center gap-3"><PageGuide /><button type="button" onClick={logout} className="text-sm text-slate-500 hover:text-slate-900">Log out</button></div>
-        </div>
-      </header>
-      <main className="max-w-5xl mx-auto p-4 sm:p-6"><PageLocation /><Outlet /></main>
-    </div>
-  );
-}
-
 // ======================================================
 // APP
 // ======================================================
@@ -214,7 +188,7 @@ function App() {
             <Route path="/reseller/customer/register" element={<CustomerRegistrationRedirect />} />
             <Route path="/reseller/customer/verify/:token" element={<ResellerCustomerVerifyAndSetPassword />} />
             <Route path="/reseller/customer/login" element={<Navigate to="/customer/login" replace />} />
-            <Route path="/reseller/customer" element={<ResellerCustomerProtectedRoute><ResellerCustomerPortalLayout /></ResellerCustomerProtectedRoute>}>
+            <Route path="/reseller/customer" element={<ResellerCustomerProtectedRoute><ResellerCustomerLayout /></ResellerCustomerProtectedRoute>}>
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<ResellerCustomerPortalDashboard />} />
               <Route path="screens" element={<ResellerCustomerScreens />} />
