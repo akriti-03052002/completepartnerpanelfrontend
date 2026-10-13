@@ -127,7 +127,7 @@ export default function Team() {
                 render: (m) =>
                   !canManage || m.role === "owner" ? null : (
                     <div className="flex flex-wrap items-center gap-3">
-                    {m.status === "invited" && <button type="button" disabled={resendingId !== null} onClick={() => resendActivation(m)} className="text-xs font-semibold text-brand-red hover:underline disabled:opacity-50">{resendingId === m._id ? "Sending…" : "Resend activation link"}</button>}
+                    {["invited", "active"].includes(m.status) && <button type="button" disabled={resendingId !== null} onClick={() => resendActivation(m)} className="text-xs font-semibold text-brand-red hover:underline disabled:opacity-50">{resendingId === m._id ? "Sending…" : m.status === "invited" ? "Resend activation link" : "Send password reset link"}</button>}
                     <button onClick={() => toggleStatus(m)} className="text-xs font-semibold text-brand-red hover:underline">
                       {m.status === "blocked" ? "Unblock" : "Block"}
                     </button>
