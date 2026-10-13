@@ -68,7 +68,7 @@ export default function PartnerLayout() {
 
   const page = NAV_ITEMS.find(item => item.to === location.pathname && item.partnerTypes.includes(partner?.partnerType?.toLowerCase()));
   const liveUser = profile.data?.user || user;
-  const canOpenPage = permission => liveUser?.role === "owner" || (liveUser?.permissions || []).includes(permission);
+  const canOpenPage = permission => liveUser?.role === "owner" || (!['documents:view', 'documents:upload', 'bank:view', 'bank:manage'].includes(permission) && (liveUser?.permissions || []).includes(permission));
   const allowed = !page || (canOpenPage(page.permission) && page.partnerTypes.includes(partner?.partnerType?.toLowerCase()));
 
   return (

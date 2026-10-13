@@ -52,6 +52,7 @@ export function PartnerAuthProvider({ children }) {
     (permission) => {
       if (!user) return false;
       if (user.role === "owner") return true;
+      if (["documents:view", "documents:upload", "bank:view", "bank:manage"].includes(permission)) return false;
       return (user.permissions || []).includes(permission);
     },
     [user]

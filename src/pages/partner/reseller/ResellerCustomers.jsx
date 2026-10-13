@@ -21,7 +21,7 @@ const EMPTY_CUSTOMER_FORM = { companyName: "", name: "", email: "", phone: "", s
 
 export default function ResellerCustomers() {
   const [page, setPage] = useState(1);
-  const { partner } = usePartnerAuth();
+  const { partner, hasPermission } = usePartnerAuth();
   const queryClient = useQueryClient();
 
   const { data: customerResponse, isLoading: customersLoading } = useQuery({
@@ -32,16 +32,18 @@ export default function ResellerCustomers() {
   const customerList = useListFilter(customers, [{ label: "Status", value: (c) => c.status }]);
   const visibleCustomers = customerList.visible;
   const { data: allocations = [], isLoading: allocationsLoading } = useQuery({
-    queryKey: ["reseller", "allocations"],
+    queryKey: ["reseller", "allocations", partner?._id || partner?.id],
+    enabled: hasPermission("reseller:allocation:manage"),
     queryFn: () => api.get("/partner/reseller/allocations").then((res) => res.data.data)
   });
   const { data: inventory = null, isLoading: inventoryLoading } = useQuery({
-    queryKey: ["reseller", "inventory"],
+    queryKey: ["reseller", "inventory", partner?._id || partner?.id],
+    enabled: hasPermission("reseller:inventory:view"),
     queryFn: () => api.get("/partner/reseller/inventory").then((res) => res.data.data)
   });
   const { data: prepayment = null, isLoading: prepaymentLoading } = useQuery({
-    queryKey: ["reseller", "prepayment"],
-    queryFn: () => api.get("/partner/reseller/prepayment").then((res) => res.data.data)
+    queryKey: ["reseller", "prepayment", partner?._id || partner?.id],
+    queryFn: () => api.get("/partner/reseller/readiness").then((res) => res.data.data)
   });
   const { data: referral = null } = useQuery({
     queryKey: ["reseller", "referral"],
@@ -108,7 +110,7 @@ export default function ResellerCustomers() {
       // fails (e.g. not enough available inventory), the customer is
       // still created; the reseller just needs to allocate afterward from
       // the customer's own row instead of it silently vanishing.
-      if (quantity > 0) {
+      if (quantity > 0 && hasPermission("reseller:allocation:manage")) {
         try {
           await api.post("/partner/reseller/allocations", { customerId: res.data.data._id, screens: quantity });
         } catch (allocErr) {
@@ -213,6 +215,7 @@ export default function ResellerCustomers() {
             </div>
             <Input
               label="Screens to Allocate"
+              disabled={!hasPermission("reseller:allocation:manage")}
               type="number"
               min="0"
               name="screens"
@@ -269,6 +272,7 @@ export default function ResellerCustomers() {
 }
 
 function InsufficientLicensesModal({ max, onReduce, onClose }) {
+  const { hasPermission } = usePartnerAuth();
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-2xl max-w-md w-full p-5" onClick={(e) => e.stopPropagation()}>
@@ -284,9 +288,9 @@ function InsufficientLicensesModal({ max, onReduce, onClose }) {
         </p>
         <div className="flex items-center justify-end gap-3">
           <Button variant="outline" onClick={onReduce}>Reduce to {max}</Button>
-          <Link to="/partner/reseller/buy">
+          {hasPermission("reseller:license:purchase") && <Link to="/partner/reseller/buy">
             <Button>Request More Licences</Button>
-          </Link>
+          </Link>}
         </div>
       </div>
     </div>
@@ -294,6 +298,8 @@ function InsufficientLicensesModal({ max, onReduce, onClose }) {
 }
 
 function CustomerRow({ customer, allocation, available, expanded, onToggle, onChanged, onInsufficient }) {
+  const { hasPermission } = usePartnerAuth();
+  const canAllocate = hasPermission("reseller:allocation:manage");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [allocationMessage, setAllocationMessage] = useState("");
@@ -418,7 +424,7 @@ function CustomerRow({ customer, allocation, available, expanded, onToggle, onCh
             </div>
           )}
 
-          <div className="flex flex-wrap items-end gap-3">
+          {canAllocate && <div className="flex flex-wrap items-end gap-3">
             <QtyAction
               label="Allocate screens"
               placeholder={`Up to ${available}`}
@@ -429,9 +435,9 @@ function CustomerRow({ customer, allocation, available, expanded, onToggle, onCh
               busy={busy}
               buttonLabel="Allocate"
             />
-          </div>
+          </div>}
 
-          {allocation && allocation.status !== "cancelled" && (
+          {canAllocate && allocation && allocation.status !== "cancelled" && (
             <div className="flex flex-wrap gap-2 pt-2">
               {allocation.status === "suspended" ? (
                 <Button variant="outline" className="!text-xs !py-1.5" loading={busy} onClick={reactivate}>Reactivate</Button>

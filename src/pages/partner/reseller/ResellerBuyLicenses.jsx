@@ -1,5 +1,6 @@
+import { usePartnerAuth } from "../../../context/PartnerAuthContext";
 import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import api from "../../../services/api";
 import Card from "../../../components/ui/Card";
 import Table from "../../../components/ui/Table";
@@ -25,6 +26,11 @@ const ORDER_STATUS_COPY = {
    figure shown here is echoed back from the server's own computation.
 ============================================================ */
 export default function ResellerBuyLicenses() {
+  const { hasPermission } = usePartnerAuth();
+  const canViewBilling = hasPermission("reseller:billing:view");
+  const canPay = hasPermission("reseller:billing:pay");
+  const pollTimer = useRef(null);
+  useEffect(() => () => clearInterval(pollTimer.current), [canViewBilling]);
   const [orders, setOrders] = useState([]);
   const [prepayment, setPrepayment] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,22 +40,24 @@ export default function ResellerBuyLicenses() {
   const [info, setInfo] = useState("");
   const [payingPrepayment, setPayingPrepayment] = useState(false);
 
-  const load = () => {
-    Promise.all([
+  const load = useCallback(() => {
+    return Promise.all([
       api.get("/partner/reseller/license-orders").then((res) => setOrders(res.data.data)),
-      api.get("/partner/reseller/prepayment").then((res) => setPrepayment(res.data.data))
-    ]).finally(() => setLoading(false));
-  };
+      api.get(canViewBilling ? "/partner/reseller/prepayment" : "/partner/reseller/readiness").then((res) => setPrepayment(res.data.data))
+    ]).catch(err => setError(err.response?.data?.message || "Could not load licence requests.")).finally(() => setLoading(false));
+  }, [canViewBilling]);
 
   useAutoRefresh(() => { if (!document.querySelector('input:focus, textarea:focus, select:focus, dialog[open]')) return load(); });
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   // Razorpay's own payment-lookup can lag a signature that already proved
   // success by a few minutes (see verifyPrepaymentPayment) — poll in the
   // background instead of leaving the partner stuck on a scary error.
   const pollUntilDone = () => {
+    if (!canViewBilling) return;
+    clearInterval(pollTimer.current);
     const startedAt = Date.now();
-    const interval = setInterval(async () => {
+    const interval = pollTimer.current = setInterval(async () => {
       if (Date.now() - startedAt > 10 * 60 * 1000) {
         clearInterval(interval);
         return;
@@ -64,6 +72,7 @@ export default function ResellerBuyLicenses() {
   };
 
   const payPrepayment = async () => {
+    if (!canPay) return;
     setError("");
     setPayingPrepayment(true);
 
@@ -163,17 +172,18 @@ export default function ResellerBuyLicenses() {
       {!loading && !prepaymentDone && (
         <Card className="p-6 max-w-lg">
           <p className="text-sm font-semibold text-slate-900 mb-1">One-time advance payment required</p>
-          {prepayment?.status === "awaiting_payment" ? (
+          {prepayment?.status === "awaiting_payment" && canViewBilling ? (
             <>
               <p className="text-sm text-slate-500 mb-4">
                 Pay your one-time advance payment of <strong className="text-slate-900">₹{prepayment.amount?.toLocaleString("en-IN")}</strong> to
                 unlock buying licenses. This is a single one-time payment — not a recurring charge.
               </p>
-              <Button onClick={payPrepayment} loading={payingPrepayment}>Pay ₹{prepayment.amount?.toLocaleString("en-IN")}</Button>
+              {canPay && <Button onClick={payPrepayment} loading={payingPrepayment}>Pay ₹{prepayment.amount?.toLocaleString("en-IN")}</Button>}
+              {!canPay && <p className="text-sm text-slate-500">Ask your account owner or finance teammate to complete the advance payment.</p>}
             </>
           ) : (
             <p className="text-sm text-slate-500">
-              SPOTX needs to set up your advance payment before you can request licences. Contact SPOTX to get started.
+              Ask your account owner or finance teammate to check the advance payment before you request licences.
             </p>
           )}
         </Card>
