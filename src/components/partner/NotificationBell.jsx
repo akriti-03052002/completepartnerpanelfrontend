@@ -12,7 +12,7 @@ export default function NotificationBell() {
   const [markingAll, setMarkingAll] = useState(false);
 
   const load = () => {
-    api.get("/partner/notifications")
+    return api.get("/partner/notifications")
       .then((res) => setNotifications(res.data.data))
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -28,7 +28,8 @@ export default function NotificationBell() {
   useEffect(() => { load(); }, [location.pathname]);
   useEffect(() => {
     const timer = setInterval(load, 60 * 1000);
-    return () => clearInterval(timer);
+    window.addEventListener("spotx:data-changed", load);
+    return () => { clearInterval(timer); window.removeEventListener("spotx:data-changed", load); };
   }, []);
 
   // Opening one marks it read and goes to the page for what it is about.
@@ -43,7 +44,7 @@ export default function NotificationBell() {
   const recent = notifications.slice(0, 8);
 
   const markRead = async (id) => {
-    await api.patch(`/partner/notifications/${id}/read`);
+    await api.patch(`/partner/notifications/${id}/read`, {}, { silentSuccess: true });
     load();
   };
 
@@ -96,7 +97,7 @@ export default function NotificationBell() {
                     <button type="button" onClick={() => openNotification(n)} className="flex-1 min-w-0 text-left group">
                       <p className="text-sm font-medium text-slate-900 group-hover:underline">{n.title}</p>
                       <p className="text-xs text-slate-500 mt-0.5">{n.message}</p>
-                      <p className="text-xs text-slate-400 mt-1">{new Date(n.createdAt).toLocaleString()}</p>
+                      <div className="flex flex-wrap items-center gap-2 mt-1"><p className="text-xs text-slate-400">{new Date(n.createdAt).toLocaleString()}</p><span className={`rounded-full px-2 py-0.5 text-xs ${n.read ? "bg-slate-100 text-slate-500" : "bg-red-50 text-brand-red"}`}>{n.read ? "Read" : "Unread"}</span></div>
                     </button>
                     {!n.read && (
                       <button type="button" onClick={() => markRead(n._id)} className="shrink-0 text-slate-400 hover:text-brand-red" aria-label="Mark as read">

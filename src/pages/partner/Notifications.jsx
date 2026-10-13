@@ -48,8 +48,10 @@ export default function Notifications() {
   };
 
   const markRead = async (id) => {
-    await api.patch(`/partner/notifications/${id}/read`);
-    load();
+    try {
+      await api.patch(`/partner/notifications/${id}/read`, {}, { silentSuccess: true });
+      setNotifications(current => current.map(notification => notification._id === id ? { ...notification, read: true } : notification));
+    } catch { setError("Could not mark this notification as read. Please try again."); }
   };
 
   return (
@@ -77,7 +79,7 @@ export default function Notifications() {
               <button type="button" onClick={() => open(n)} className="flex-1 min-w-0 text-left group">
                 <p className="text-sm font-medium text-slate-900 group-hover:underline">{n.title}</p>
                 <p className="text-sm text-slate-500">{n.message}</p>
-                <p className="text-xs text-slate-400 mt-1">{new Date(n.createdAt).toLocaleString()}</p>
+                <div className="flex flex-wrap items-center gap-2 mt-1"><p className="text-xs text-slate-400">{new Date(n.createdAt).toLocaleString()}</p><span className={`rounded-full px-2 py-0.5 text-xs ${n.read ? "bg-slate-100 text-slate-500" : "bg-red-50 text-brand-red"}`}>{n.read ? "Read" : "Unread"}</span></div>
               </button>
               {!n.read && (
                 <button type="button" onClick={() => markRead(n._id)} className="text-slate-400 hover:text-brand-red" aria-label="Mark as read">
