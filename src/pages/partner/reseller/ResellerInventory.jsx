@@ -1,4 +1,6 @@
 import Explanation from "../../../components/ui/Explanation";
+import { licenceMovement } from "../../../utils/licenceMovement.mjs";
+import { usePartnerAuth } from "../../../context/PartnerAuthContext";
 import { useEffect, useState } from "react";
 import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
 import { Link } from "react-router-dom";
@@ -20,6 +22,7 @@ const TRANSACTION_LABEL = {
 };
 
 export default function ResellerInventory() {
+  const { hasPermission } = usePartnerAuth();
   const [inventory, setInventory] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +46,7 @@ export default function ResellerInventory() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-900">Screen Licences</h1>
-        <Link to="/partner/reseller/buy"><Button>Request More Licences</Button></Link>
+        {hasPermission("reseller:license:purchase") && <Link to="/partner/reseller/buy"><Button>Request More Licences</Button></Link>}
       </div>
 
       <Card className="p-6">
@@ -62,7 +65,7 @@ export default function ResellerInventory() {
       <Card>
         <div className="p-4 border-b border-slate-100">
           <p className="text-sm font-semibold text-slate-900">Licence & screen changes</p>
-          <Explanation title="How to read these changes"><p>The count after each change refers to the type shown next to it. It is not a money balance.</p></Explanation>
+          <Explanation title="How to read these changes"><p>For licences, + means added by SpotX or returned from a customer; − means assigned to a customer or removed by admin. Screen rows show registration, enabling or pausing instead. The movement column explains each change. The count after the change is not a money balance.</p></Explanation>
         </div>
         <Table
           searchable
@@ -72,7 +75,8 @@ export default function ResellerInventory() {
           columns={[
             { key: "date", header: "Date", render: (t) => new Date(t.createdAt).toLocaleDateString() },
             { key: "type", header: "Transaction", render: (t) => TRANSACTION_LABEL[t.type] || t.type, filter: (t) => TRANSACTION_LABEL[t.type] || t.type },
-            { key: "quantity", header: "Quantity", render: (t) => <span className={t.quantity >= 0 ? "text-emerald-600" : "text-red-600"}>{t.quantity >= 0 ? "+" : ""}{t.quantity}</span> },
+            { key: "quantity", header: "Change", render: (t) => { const movement = licenceMovement(t); return <span className={movement.quantity >= 0 ? "text-emerald-600" : "text-red-600"}>{movement.quantity > 0 ? "+" : ""}{movement.quantity}</span>; } },
+            { key: "movement", header: "From / To", render: (t) => licenceMovement(t).description, filter: (t) => licenceMovement(t).description },
             { key: "balance", header: "Count after change", render: (t) => <span>{t.newBalance} <span className="text-xs text-slate-500">{["purchase", "adjustment"].includes(t.type) ? "bought licences" : ["allocation", "release", "cancellation"].includes(t.type) ? "assigned licences" : t.type === "registration" ? "registered screens" : t.type === "reactivation" ? "paused screens" : "active screens"}</span></span> },
             { key: "reason", header: "Reason", render: (t) => <span className="text-slate-500">{t.reason || "—"}</span> }
           ]}
